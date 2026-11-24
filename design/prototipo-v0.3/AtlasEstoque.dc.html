@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="display:flex;flex-direction:column;gap:18px;animation:a1in .2s ease">
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap">
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <div style="font-family:'Geist Mono',monospace;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--a1-text-3,#7A7D85)">Atlas Postos · Estoque</div>
+      <div style="font-size:28px;font-weight:600;letter-spacing:-.025em">Estoque</div>
+      <div style="font-size:13.5px;color:var(--a1-text-2,#62656D)">{{ estab }} · tanques, loja de conveniência e depósito</div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button onClick="{{ inventory }}" style="height:40px;padding:0 14px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:9px;background:var(--a1-surface,#fff);font-size:13px;font-weight:550;cursor:pointer;display:flex;align-items:center;gap:8px"><x-import component="Icon" from="./Icon.js" i="clipboard-list" size="16" hint-size="16px,16px"></x-import>Iniciar inventário</button>
+      <button onClick="{{ openAdj }}" style="height:40px;padding:0 16px;border:0;border-radius:9px;background:#2D5BD8;color:#fff;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px" style-hover="background:#2450C4"><x-import component="Icon" from="./Icon.js" i="arrow-up-down" size="16" hint-size="16px,16px"></x-import>Ajuste de estoque</button>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px">
+    <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
+      <div style="background:var(--a1-surface,#fff);border:1px solid var(--a1-border,#E6E5E0);border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;justify-content:space-between;color:var(--a1-text-2,#62656D);font-size:13px"><span>{{ k.label }}</span><x-import component="Icon" from="./Icon.js" i="{{ k.icon }}" size="16" color="{{ k.ic }}" hint-size="16px,16px"></x-import></div>
+        <div style="font-size:26px;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums;color:{{ k.color }}">{{ k.value }}</div>
+        <div style="font-size:12.5px;color:var(--a1-text-2,#62656D)">{{ k.foot }}</div>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="background:var(--a1-surface,#fff);border:1px solid var(--a1-border,#E6E5E0);border-radius:12px;overflow:hidden">
+    <div style="padding:0 16px;display:flex;gap:4px;border-bottom:1px solid var(--a1-divider,#EFEEEA);align-items:flex-end;flex-wrap:wrap">
+      <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="2">
+        <button onClick="{{ t.pick }}" style="height:46px;padding:0 12px;border:0;border-bottom:2px solid {{ t.line }};background:transparent;color:{{ t.fg }};font-size:13.5px;font-weight:600;cursor:pointer;margin-bottom:-1px">{{ t.label }}</button>
+      </sc-for>
+      <div style="flex:1"></div>
+      <div style="display:flex;gap:8px;padding:8px 0;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:8px;height:34px;width:240px;padding:0 10px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:8px;color:var(--a1-text-4,#8A8D95)"><x-import component="Icon" from="./Icon.js" i="search" size="15" hint-size="15px,15px"></x-import><input value="{{ q }}" onChange="{{ setQ }}" placeholder="Filtrar produto" style="flex:1;min-width:0;border:0;outline:0;font-size:13px;background:transparent"></input></div>
+        <select value="{{ loc }}" onChange="{{ setLoc }}" style="height:34px;padding:0 10px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:8px;background:var(--a1-surface,#fff);font-size:13px"><option>Todos os locais</option><option>Tanques</option><option>Loja</option><option>Depósito</option></select>
+      </div>
+    </div>
+
+    <sc-if value="{{ tabPos }}" hint-placeholder-val="{{ true }}">
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:13px;min-width:860px">
+          <thead><tr style="background:var(--a1-surface-2,#FAFAF8);color:var(--a1-text-2,#62656D);text-align:left;font-size:12px">
+            <th style="padding:10px 16px;font-weight:550">Produto</th><th style="padding:10px 14px;font-weight:550">Local</th><th style="padding:10px 14px;font-weight:550;text-align:right">Saldo</th><th style="padding:10px 14px;font-weight:550;text-align:right">Mínimo</th><th style="padding:10px 14px;font-weight:550;width:180px">Cobertura</th><th style="padding:10px 14px;font-weight:550;text-align:right">Custo médio</th><th style="padding:10px 14px;font-weight:550;text-align:right">Valor</th><th style="padding:10px 16px;font-weight:550">Situação</th>
+          </tr></thead>
+          <tbody>
+            <sc-for list="{{ rows }}" as="r" hint-placeholder-count="10">
+              <tr style="border-top:1px solid var(--a1-divider-2,#F2F1ED)" style-hover="background:var(--a1-surface-2,#FAFAF8)">
+                <td style="padding:11px 16px;font-weight:550">{{ r.name }}</td>
+                <td style="padding:11px 14px;color:var(--a1-text-2,#62656D)"><span style="display:inline-flex;align-items:center;gap:6px"><x-import component="Icon" from="./Icon.js" i="{{ r.locIcon }}" size="14" hint-size="14px,14px"></x-import>{{ r.loc }}</span></td>
+                <td style="padding:11px 14px;text-align:right;font-variant-numeric:tabular-nums;font-weight:600">{{ r.qty }}</td>
+                <td style="padding:11px 14px;text-align:right;font-variant-numeric:tabular-nums;color:var(--a1-text-3,#7A7D85)">{{ r.min }}</td>
+                <td style="padding:11px 14px"><div style="display:flex;align-items:center;gap:8px"><div style="flex:1;height:6px;border-radius:6px;background:var(--a1-muted,#F1F0EC);position:relative"><div style="position:absolute;left:0;top:0;bottom:0;width:{{ r.cov }};background:{{ r.covColor }};border-radius:6px"></div><div style="position:absolute;left:33%;top:-3px;bottom:-3px;width:1px;background:var(--a1-border-strong,#C9C8C1)"></div></div><span style="font-size:11.5px;color:var(--a1-text-2,#62656D);width:52px;text-align:right;font-variant-numeric:tabular-nums">{{ r.days }}</span></div></td>
+                <td style="padding:11px 14px;text-align:right;font-variant-numeric:tabular-nums;color:var(--a1-text-2,#62656D)">{{ r.cost }}</td>
+                <td style="padding:11px 14px;text-align:right;font-variant-numeric:tabular-nums">{{ r.value }}</td>
+                <td style="padding:11px 16px"><span style="font-size:11.5px;font-weight:600;padding:3px 8px;border-radius:999px;background:{{ r.stBg }};color:{{ r.stFg }};white-space:nowrap">{{ r.st }}</span></td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ tabMov }}" hint-placeholder-val="{{ false }}">
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:13px;min-width:820px">
+          <thead><tr style="background:var(--a1-surface-2,#FAFAF8);color:var(--a1-text-2,#62656D);text-align:left;font-size:12px">
+            <th style="padding:10px 16px;font-weight:550">Data/hora</th><th style="padding:10px 14px;font-weight:550">Tipo</th><th style="padding:10px 14px;font-weight:550">Produto</th><th style="padding:10px 14px;font-weight:550;text-align:right">Quantidade</th><th style="padding:10px 14px;font-weight:550">Documento</th><th style="padding:10px 16px;font-weight:550">Responsável</th>
+          </tr></thead>
+          <tbody>
+            <sc-for list="{{ movs }}" as="m" hint-placeholder-count="10">
+              <tr style="border-top:1px solid var(--a1-divider-2,#F2F1ED)">
+                <td style="padding:11px 16px;font-family:'Geist Mono',monospace;font-size:12px;color:var(--a1-text-2,#62656D)">{{ m.when }}</td>
+                <td style="padding:11px 14px"><span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:3px 8px;border-radius:7px;background:{{ m.bg }};color:{{ m.fg }}"><x-import component="Icon" from="./Icon.js" i="{{ m.icon }}" size="13" hint-size="13px,13px"></x-import>{{ m.type }}</span></td>
+                <td style="padding:11px 14px;font-weight:550">{{ m.prod }}</td>
+                <td style="padding:11px 14px;text-align:right;font-variant-numeric:tabular-nums;font-weight:600;color:{{ m.qColor }}">{{ m.qty }}</td>
+                <td style="padding:11px 14px;font-family:'Geist Mono',monospace;font-size:12px;color:var(--a1-text-2s,#4A4D55)">{{ m.doc }}</td>
+                <td style="padding:11px 16px;color:var(--a1-text-2,#62656D)">{{ m.user }}</td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+    </sc-if>
+  </div>
+
+  <sc-if value="{{ adj }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;background:rgba(15,17,21,.45);z-index:90;display:flex;align-items:center;justify-content:center;padding:16px">
+      <div style="width:100%;max-width:460px;background:var(--a1-surface,#fff);border-radius:14px;box-shadow:0 24px 60px rgba(15,17,21,.25);animation:a1in .2s ease;display:flex;flex-direction:column">
+        <div style="padding:20px 22px 0;display:flex;flex-direction:column;gap:4px"><div style="font-size:17px;font-weight:600">Ajuste de estoque</div><div style="font-size:12.5px;color:var(--a1-text-3,#7A7D85)">Ajustes ficam registrados no histórico com o responsável e o motivo.</div></div>
+        <div style="padding:18px 22px;display:flex;flex-direction:column;gap:12px">
+          <label style="display:flex;flex-direction:column;gap:6px;font-size:12.5px;font-weight:550">Produto<select value="{{ aProd }}" onChange="{{ setAProd }}" style="height:40px;padding:0 10px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:8px;background:var(--a1-surface,#fff);font-size:13.5px"><sc-for list="{{ prodNames }}" as="pn" hint-placeholder-count="6"><option>{{ pn }}</option></sc-for></select></label>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div style="display:flex;flex-direction:column;gap:6px;font-size:12.5px;font-weight:550">Tipo
+              <div style="display:flex;padding:3px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:8px;gap:2px;height:40px">
+                <button onClick="{{ setIn }}" style="flex:1;border:0;border-radius:6px;background:{{ inBg }};color:{{ inFg }};font-size:12.5px;font-weight:600;cursor:pointer">Entrada</button>
+                <button onClick="{{ setOut }}" style="flex:1;border:0;border-radius:6px;background:{{ outBg }};color:{{ outFg }};font-size:12.5px;font-weight:600;cursor:pointer">Saída</button>
+              </div>
+            </div>
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:12.5px;font-weight:550">Quantidade<input value="{{ aQty }}" onChange="{{ setAQty }}" style="height:40px;padding:0 12px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:8px;font-size:13.5px"></input></label>
+          </div>
+          <label style="display:flex;flex-direction:column;gap:6px;font-size:12.5px;font-weight:550">Motivo<select style="height:40px;padding:0 10px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:8px;background:var(--a1-surface,#fff);font-size:13.5px"><option>Avaria / perda</option><option>Diferença de contagem</option><option>Consumo interno</option><option>Vencimento</option></select></label>
+        </div>
+        <div style="padding:14px 22px;border-top:1px solid var(--a1-divider,#EFEEEA);display:flex;gap:8px;justify-content:flex-end">
+          <button onClick="{{ closeAdj }}" style="height:38px;padding:0 14px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:9px;background:var(--a1-surface,#fff);font-size:13px;font-weight:550;cursor:pointer">Cancelar</button>
+          <button onClick="{{ saveAdj }}" style="height:38px;padding:0 16px;border:0;border-radius:9px;background:#2D5BD8;color:#fff;font-size:13px;font-weight:600;cursor:pointer">Registrar ajuste</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const ITEMS = [
+  ['Gasolina comum', 'Tanque T1', 18600, 6000, 5.62, 3.2, 'L'], ['Gasolina aditivada', 'Tanque T2', 8100, 3000, 5.78, 4.1, 'L'], ['Etanol hidratado', 'Tanque T3', 10650, 3000, 3.86, 4.0, 'L'],
+  ['Diesel S10', 'Tanque T4', 5400, 6000, 5.51, 1.4, 'L'], ['Diesel S500', 'Tanque T5', 6600, 3000, 5.38, 6.8, 'L'],
+  ['Água mineral 500 ml', 'Loja', 412, 120, .98, 9, 'UN'], ['Refrigerante cola lata 350 ml', 'Loja', 288, 96, 2.45, 7, 'UN'], ['Energético 473 ml', 'Loja', 96, 48, 5.2, 8, 'UN'],
+  ['Salgadinho 96 g', 'Loja', 18, 40, 3.6, 2, 'UN'], ['Biscoito recheado 130 g', 'Loja', 9, 30, 1.9, 1, 'UN'], ['Chocolate ao leite 90 g', 'Loja', 74, 36, 3.1, 10, 'UN'],
+  ['Óleo 5W30 sintético 1 L', 'Depósito', 48, 24, 28.5, 22, 'UN'], ['Fluido de freio DOT4 500 ml', 'Depósito', 15, 12, 12.4, 18, 'UN'], ['Aditivo para radiador 1 L', 'Depósito', 4, 12, 9.8, 3, 'UN'],
+  ['Palheta limpador 20"', 'Depósito', 12, 8, 18, 30, 'UN'], ['Gelo 5 kg', 'Loja', 36, 20, 4.1, 3, 'UN']
+];
+const brl = (v) => 'R$ ' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const MOVS = [
+  ['20/11 09:31', 'Venda', 'Gasolina comum', -42.18, 'NFC-e 118.402', 'PDV · Caixa 01'],
+  ['20/11 09:12', 'Entrada NF', 'Etanol hidratado', 15000, 'NF-e 48.211', 'Juliana Alves'],
+  ['20/11 08:47', 'Venda', 'Energético 473 ml', -2, 'NFC-e 118.377', 'PDV · Caixa 02'],
+  ['20/11 08:05', 'Ajuste', 'Biscoito recheado 130 g', -3, 'AJ-0291 · avaria', 'Carlos Mendes'],
+  ['19/11 22:10', 'Medição', 'Diesel S10', -38, 'LMC · perda/sobra', 'Sistema'],
+  ['19/11 18:40', 'Transferência', 'Óleo 5W30 sintético 1 L', -12, 'TR-0087 → Posto Avenida', 'Juliana Alves'],
+  ['19/11 16:22', 'Entrada NF', 'Água mineral 500 ml', 240, 'NF-e 9.882', 'Juliana Alves'],
+  ['19/11 14:03', 'Venda', 'Diesel S10', -310.5, 'NFC-e 117.990', 'PDV · Caixa 01'],
+  ['19/11 11:30', 'Perda', 'Sanduíche natural', -4, 'AJ-0288 · vencimento', 'Carlos Mendes'],
+  ['19/11 07:55', 'Entrada NF', 'Gasolina comum', 20000, 'NF-e 48.190', 'Juliana Alves']
+];
+const MT = { 'Venda': ['shopping-cart', 'var(--a1-info-bg,#EAF0FD)', 'var(--a1-accent-text,#2D5BD8)'], 'Entrada NF': ['file-input', 'var(--a1-ok-bg,#E6F4EC)', 'var(--a1-ok-fg,#1B6E4A)'], 'Ajuste': ['sliders-horizontal', 'var(--a1-warn-bg,#FBF1DF)', 'var(--a1-warn-fg,#8A5A12)'], 'Medição': ['gauge', 'var(--a1-muted,#F1F0EC)', 'var(--a1-text-2s,#4A4D55)'], 'Transferência': ['arrow-left-right', 'var(--a1-purple-bg,#F1EEFB)', 'var(--a1-purple-fg,#5B45A8)'], 'Perda': ['circle-minus', 'var(--a1-err-bg,#FBEAE8)', 'var(--a1-err-fg,#9E2F27)'] };
+class Component extends DCLogic {
+  state = { tab: 'pos', q: '', loc: 'Todos os locais', adj: false, aProd: ITEMS[8][0], aDir: 'out', aQty: '1', movs: MOVS };
+  renderVals() {
+    const s = this.state; const ctx = this.props.ctx || {}; const notify = this.props.notify || (() => {});
+    const q = s.q.toLowerCase();
+    const locMatch = (l) => s.loc === 'Todos os locais' || (s.loc === 'Tanques' ? l.startsWith('Tanque') : l === s.loc);
+    const rows = ITEMS.filter(([n, l]) => locMatch(l) && (!q || n.toLowerCase().includes(q))).map(([name, loc, qty, min, cost, days, un]) => {
+      const ratio = qty / min; const low = ratio < 1; const warn = ratio < 1.5;
+      return { name, loc, locIcon: loc.startsWith('Tanque') ? 'cylinder' : loc === 'Loja' ? 'store' : 'warehouse', qty: qty.toLocaleString('pt-BR') + ' ' + un, min: min.toLocaleString('pt-BR'),
+        cov: Math.min(100, ratio / 3 * 100) + '%', covColor: low ? '#C8433A' : warn ? '#C98A1E' : 'var(--a1-ok-fg2,#1F8A5B)', days: String(days).replace('.', ',') + ' d',
+        cost: brl(cost), value: brl(qty * cost), st: low ? 'Repor agora' : warn ? 'Atenção' : 'Adequado', stBg: low ? 'var(--a1-err-bg,#FBEAE8)' : warn ? 'var(--a1-warn-bg,#FBF1DF)' : 'var(--a1-ok-bg,#E6F4EC)', stFg: low ? 'var(--a1-err-fg,#9E2F27)' : warn ? 'var(--a1-warn-fg,#8A5A12)' : 'var(--a1-ok-fg,#1B6E4A)' };
+    });
+    const total = ITEMS.reduce((a, i) => a + i[2] * i[4], 0);
+    const lowN = ITEMS.filter((i) => i[2] < i[3]).length;
+    return {
+      estab: ctx.firstPosto || (!ctx.estab || ctx.estab.startsWith('Todos') ? 'Posto Central' : ctx.estab),
+      kpis: [
+        { label: 'Valor em estoque', icon: 'wallet', ic: 'var(--a1-text-5,#9A9DA4)', value: brl(total).replace(/,\d\d$/, ''), color: '#15171C', foot: 'Custo médio ponderado' },
+        { label: 'Itens abaixo do mínimo', icon: 'triangle-alert', ic: '#C8433A', value: String(lowN), color: 'var(--a1-err-fg2,#B23A31)', foot: 'Inclui Diesel S10 (T4)' },
+        { label: 'Giro médio', icon: 'refresh-cw', ic: 'var(--a1-text-5,#9A9DA4)', value: '9,4 dias', color: '#15171C', foot: 'Conveniência · últimos 30 dias' },
+        { label: 'Último inventário', icon: 'clipboard-check', ic: 'var(--a1-text-5,#9A9DA4)', value: '15/11', color: '#15171C', foot: 'Acuracidade de 98,7%' }
+      ],
+      tabs: [['pos', 'Posição atual'], ['mov', 'Movimentações']].map(([id, label]) => ({ label, line: s.tab === id ? 'var(--a1-text,#15171C)' : 'transparent', fg: s.tab === id ? 'var(--a1-text,#15171C)' : 'var(--a1-text-3,#7A7D85)', pick: () => this.setState({ tab: id }) })),
+      tabPos: s.tab === 'pos', tabMov: s.tab === 'mov', q: s.q, loc: s.loc, rows,
+      setQ: (e) => this.setState({ q: e.target.value }), setLoc: (e) => this.setState({ loc: e.target.value }),
+      movs: s.movs.filter(([, , p]) => !q || p.toLowerCase().includes(q)).map(([when, type, prod, qty, doc, user]) => ({ when, type, prod, doc, user, icon: MT[type][0], bg: MT[type][1], fg: MT[type][2], qty: (qty > 0 ? '+' : '') + qty.toLocaleString('pt-BR'), qColor: qty > 0 ? 'var(--a1-ok-fg,#1B6E4A)' : '#15171C' })),
+      inventory: () => notify('Inventário iniciado · contagem cega habilitada para a equipe.', 'info'),
+      adj: s.adj, openAdj: () => this.setState({ adj: true }), closeAdj: () => this.setState({ adj: false }),
+      prodNames: ITEMS.map((i) => i[0]), aProd: s.aProd, setAProd: (e) => this.setState({ aProd: e.target.value }),
+      aQty: s.aQty, setAQty: (e) => this.setState({ aQty: e.target.value }),
+      setIn: () => this.setState({ aDir: 'in' }), setOut: () => this.setState({ aDir: 'out' }),
+      inBg: s.aDir === 'in' ? 'var(--a1-strong,#15171C)' : 'transparent', inFg: s.aDir === 'in' ? '#fff' : 'var(--a1-text-2s,#4A4D55)', outBg: s.aDir === 'out' ? 'var(--a1-strong,#15171C)' : 'transparent', outFg: s.aDir === 'out' ? '#fff' : 'var(--a1-text-2s,#4A4D55)',
+      saveAdj: () => {
+        const n = parseFloat(String(s.aQty).replace(',', '.'));
+        if (!(n > 0)) return notify('Informe uma quantidade válida.', 'danger');
+        this.setState({ adj: false, tab: 'mov', movs: [['20/11 09:44', 'Ajuste', s.aProd, s.aDir === 'in' ? n : -n, 'AJ-0292', 'Mariana Lopes']].concat(s.movs) });
+        notify('Ajuste registrado: ' + s.aProd, 'success');
+      }
+    };
+  }
+}
+
+</script>
+</body>
+</html>

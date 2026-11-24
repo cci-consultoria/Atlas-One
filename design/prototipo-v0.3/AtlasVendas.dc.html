@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="display:flex;flex-direction:column;gap:18px;animation:a1in .2s ease">
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap">
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <div style="font-family:'Geist Mono',monospace;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--a1-text-3,#7A7D85)">Atlas Postos · Vendas</div>
+      <div style="font-size:28px;font-weight:600;letter-spacing:-.025em">Vendas</div>
+      <div style="font-size:13.5px;color:var(--a1-text-2,#62656D)">{{ estab }} · novembro de 2026</div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button onClick="{{ exportX }}" style="height:40px;padding:0 14px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:9px;background:var(--a1-surface,#fff);font-size:13px;font-weight:550;cursor:pointer;display:flex;align-items:center;gap:8px"><x-import component="Icon" from="./Icon.js" i="download" size="16" hint-size="16px,16px"></x-import>Exportar</button>
+      <button onClick="{{ goPDV }}" style="height:40px;padding:0 16px;border:0;border-radius:9px;background:var(--a1-strong,#15171C);color:#fff;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px"><x-import component="Icon" from="./Icon.js" i="scan-barcode" size="16" color="#E8A23A" hint-size="16px,16px"></x-import>Nova venda no PDV</button>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px">
+    <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
+      <div style="background:var(--a1-surface,#fff);border:1px solid var(--a1-border,#E6E5E0);border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;gap:8px">
+        <div style="color:var(--a1-text-2,#62656D);font-size:13px">{{ k.label }}</div>
+        <div style="font-size:26px;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums">{{ k.value }}</div>
+        <div style="font-size:12.5px;color:var(--a1-text-2,#62656D)">{{ k.foot }}</div>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;gap:14px">
+    <div style="flex:2 1 520px;min-width:0;background:var(--a1-surface,#fff);border:1px solid var(--a1-border,#E6E5E0);border-radius:12px;padding:18px 20px;display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start">
+        <div style="display:flex;flex-direction:column;gap:3px"><div style="font-size:15px;font-weight:600">Faturamento diário</div><div style="font-size:12.5px;color:var(--a1-text-3,#7A7D85)">Novembro vs. outubro</div></div>
+        <div style="display:flex;gap:14px;font-size:12px;color:var(--a1-text-2,#62656D)"><span style="display:flex;align-items:center;gap:6px"><span style="width:14px;height:2px;background:#2D5BD8"></span>Nov/26</span><span style="display:flex;align-items:center;gap:6px"><span style="width:14px;height:0;border-top:2px dashed var(--a1-text-6,#B4B6BC)"></span>Out/26</span></div>
+      </div>
+      <div style="position:relative;height:220px">
+        <div style="position:absolute;inset:0 0 20px 0;display:flex;flex-direction:column;justify-content:space-between"><div style="border-top:1px dashed var(--a1-grid,#EDECE7)"></div><div style="border-top:1px dashed var(--a1-grid,#EDECE7)"></div><div style="border-top:1px dashed var(--a1-grid,#EDECE7)"></div><div style="border-top:1px solid var(--a1-border-2,#E1E0DA)"></div></div>
+        <svg viewBox="0 0 600 200" preserveAspectRatio="none" style="position:absolute;left:0;top:0;width:100%;height:200px;overflow:visible">
+          <path d="{{ area }}" fill="rgba(45,91,216,.08)"></path>
+          <path d="{{ prevLine }}" fill="none" stroke="#B4B6BC" style="stroke:var(--a1-text-6,#B4B6BC)" stroke-width="1.5" stroke-dasharray="4 4" vector-effect="non-scaling-stroke"></path>
+          <path d="{{ line }}" fill="none" stroke="#2D5BD8" style="stroke:var(--a1-accent-text,#2D5BD8)" stroke-width="2" vector-effect="non-scaling-stroke"></path>
+        </svg>
+        <div style="position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:space-between;font-family:'Geist Mono',monospace;font-size:10px;color:var(--a1-text-5,#9A9DA4)"><span>01</span><span>05</span><span>10</span><span>15</span><span>20</span></div>
+      </div>
+    </div>
+    <div style="flex:1 1 300px;min-width:0;background:var(--a1-surface,#fff);border:1px solid var(--a1-border,#E6E5E0);border-radius:12px;padding:18px 20px;display:flex;flex-direction:column;gap:14px">
+      <div style="font-size:15px;font-weight:600">Formas de pagamento</div>
+      <div style="display:flex;height:12px;border-radius:6px;overflow:hidden;gap:2px">
+        <sc-for list="{{ pays }}" as="p" hint-placeholder-count="5"><div style="width:{{ p.pct }};background:{{ p.color }}"></div></sc-for>
+      </div>
+      <sc-for list="{{ pays }}" as="p" hint-placeholder-count="5">
+        <div style="display:flex;align-items:center;gap:10px;font-size:13px">
+          <span style="width:9px;height:9px;border-radius:3px;background:{{ p.color }}"></span><span style="flex:1">{{ p.name }}</span><span style="font-variant-numeric:tabular-nums;color:var(--a1-text-2,#62656D)">{{ p.val }}</span><span style="font-variant-numeric:tabular-nums;font-weight:600;width:44px;text-align:right">{{ p.pct }}</span>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="background:var(--a1-surface,#fff);border:1px solid var(--a1-border,#E6E5E0);border-radius:12px;overflow:hidden">
+    <div style="padding:14px 16px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--a1-divider,#EFEEEA)">
+      <div style="font-size:15px;font-weight:600;margin-right:8px">Cupons emitidos</div>
+      <div style="display:flex;align-items:center;gap:8px;height:36px;flex:1 1 220px;max-width:320px;padding:0 10px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:8px;color:var(--a1-text-4,#8A8D95)"><x-import component="Icon" from="./Icon.js" i="search" size="15" hint-size="15px,15px"></x-import><input value="{{ q }}" onChange="{{ setQ }}" placeholder="Cupom, cliente ou operador" style="flex:1;min-width:0;border:0;outline:0;font-size:13px;background:transparent"></input></div>
+      <select value="{{ pay }}" onChange="{{ setPay }}" style="height:36px;padding:0 10px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:8px;background:var(--a1-surface,#fff);font-size:13px"><option>Todas as formas</option><option>Dinheiro</option><option>PIX</option><option>Crédito</option><option>Débito</option><option>Dividido</option></select>
+      <select value="{{ st }}" onChange="{{ setSt }}" style="height:36px;padding:0 10px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:8px;background:var(--a1-surface,#fff);font-size:13px"><option>Todos os status</option><option>Concluída</option><option>Cancelada</option></select>
+    </div>
+    <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:13px;min-width:880px">
+        <thead><tr style="background:var(--a1-surface-2,#FAFAF8);color:var(--a1-text-2,#62656D);text-align:left;font-size:12px">
+          <th style="padding:10px 16px;font-weight:550">Cupom</th><th style="padding:10px 14px;font-weight:550">Data/hora</th><th style="padding:10px 14px;font-weight:550">Caixa · operador</th><th style="padding:10px 14px;font-weight:550">Cliente</th><th style="padding:10px 14px;font-weight:550;text-align:right">Itens</th><th style="padding:10px 14px;font-weight:550">Pagamento</th><th style="padding:10px 14px;font-weight:550;text-align:right">Total</th><th style="padding:10px 16px;font-weight:550">Status</th>
+        </tr></thead>
+        <tbody>
+          <sc-for list="{{ rows }}" as="r" hint-placeholder-count="10">
+            <tr onClick="{{ r.open }}" style="border-top:1px solid var(--a1-divider-2,#F2F1ED);cursor:pointer" style-hover="background:var(--a1-surface-2,#FAFAF8)">
+              <td style="padding:11px 16px;font-family:'Geist Mono',monospace;font-size:12px;font-weight:500">{{ r.id }}</td>
+              <td style="padding:11px 14px;color:var(--a1-text-2,#62656D);font-variant-numeric:tabular-nums">{{ r.when }}</td>
+              <td style="padding:11px 14px">{{ r.cx }} · <span style="color:var(--a1-text-2,#62656D)">{{ r.op }}</span></td>
+              <td style="padding:11px 14px;color:var(--a1-text-2s,#4A4D55)">{{ r.cli }}</td>
+              <td style="padding:11px 14px;text-align:right;font-variant-numeric:tabular-nums">{{ r.items }}</td>
+              <td style="padding:11px 14px"><span style="display:inline-flex;align-items:center;gap:6px"><x-import component="Icon" from="./Icon.js" i="{{ r.payIcon }}" size="14" color="var(--a1-text-2,#62656D)" hint-size="14px,14px"></x-import>{{ r.pay }}</span></td>
+              <td style="padding:11px 14px;text-align:right;font-variant-numeric:tabular-nums;font-weight:600;text-decoration:{{ r.strike }}">{{ r.total }}</td>
+              <td style="padding:11px 16px"><span style="font-size:11.5px;font-weight:600;padding:3px 8px;border-radius:999px;background:{{ r.stBg }};color:{{ r.stFg }}">{{ r.st }}</span></td>
+            </tr>
+          </sc-for>
+        </tbody>
+      </table>
+    </div>
+    <div style="padding:12px 16px;border-top:1px solid var(--a1-divider,#EFEEEA);font-size:12.5px;color:var(--a1-text-2,#62656D);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px"><span>{{ count }} cupons no filtro · exibindo os mais recentes</span><span style="font-variant-numeric:tabular-nums">Total filtrado: <b style="color:var(--a1-text,#15171C)">{{ sum }}</b></span></div>
+  </div>
+
+  <sc-if value="{{ sel }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ close }}" style="position:fixed;inset:0;background:rgba(15,17,21,.4);z-index:90"></div>
+    <div style="position:fixed;top:0;right:0;bottom:0;width:min(460px,100vw);background:var(--a1-surface,#fff);z-index:91;display:flex;flex-direction:column;box-shadow:-20px 0 50px rgba(15,17,21,.18);animation:a1in .2s ease">
+      <div style="padding:20px 24px;border-bottom:1px solid var(--a1-divider,#EFEEEA);display:flex;justify-content:space-between;gap:12px">
+        <div style="display:flex;flex-direction:column;gap:4px"><div style="font-family:'Geist Mono',monospace;font-size:12px;color:var(--a1-text-3,#7A7D85)">{{ d.id }}</div><div style="font-size:24px;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums">{{ d.total }}</div><div style="font-size:12.5px;color:var(--a1-text-2,#62656D)">{{ d.when }} · {{ d.cx }} · {{ d.op }}</div></div>
+        <button onClick="{{ close }}" style="width:34px;height:34px;border:0;border-radius:8px;background:var(--a1-bg,#F5F5F2);cursor:pointer;display:flex;align-items:center;justify-content:center;flex:none"><x-import component="Icon" from="./Icon.js" i="x" size="16" hint-size="16px,16px"></x-import></button>
+      </div>
+      <div style="flex:1;overflow:auto;padding:18px 24px;display:flex;flex-direction:column;gap:18px">
+        <div style="display:flex;flex-direction:column">
+          <div style="font-size:12px;font-weight:600;color:var(--a1-text-3,#7A7D85);letter-spacing:.06em;text-transform:uppercase;padding-bottom:8px">Itens</div>
+          <sc-for list="{{ d.lines }}" as="l" hint-placeholder-count="3">
+            <div style="display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--a1-divider-2,#F2F1ED);font-size:13px"><div style="display:flex;flex-direction:column;gap:2px"><span style="font-weight:550">{{ l.name }}</span><span style="font-size:12px;color:var(--a1-text-3,#7A7D85);font-variant-numeric:tabular-nums">{{ l.qty }}</span></div><span style="font-variant-numeric:tabular-nums;font-weight:600">{{ l.total }}</span></div>
+          </sc-for>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;padding:14px;border-radius:10px;background:var(--a1-surface-2,#FAFAF8);border:1px solid var(--a1-divider,#EFEEEA);font-size:13px">
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--a1-text-2,#62656D)">Forma de pagamento</span><span style="font-weight:600">{{ d.pay }}</span></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--a1-text-2,#62656D)">NSU</span><span style="font-family:'Geist Mono',monospace">{{ d.nsu }}</span></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--a1-text-2,#62656D)">Autorização</span><span style="font-family:'Geist Mono',monospace">{{ d.auth }}</span></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--a1-text-2,#62656D)">Cliente</span><span>{{ d.cli }}</span></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--a1-text-2,#62656D)">Status</span><span style="font-weight:600;color:{{ d.stFg }}">{{ d.st }}</span></div>
+        </div>
+      </div>
+      <div style="padding:14px 24px;border-top:1px solid var(--a1-divider,#EFEEEA);display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">
+        <button onClick="{{ reprint }}" style="height:40px;padding:0 14px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:9px;background:var(--a1-surface,#fff);font-size:13px;font-weight:550;cursor:pointer;display:flex;align-items:center;gap:8px"><x-import component="Icon" from="./Icon.js" i="printer" size="15" hint-size="15px,15px"></x-import>Reimprimir</button>
+        <sc-if value="{{ d.canCancel }}" hint-placeholder-val="{{ true }}"><button onClick="{{ cancelSale }}" style="height:40px;padding:0 14px;border:1px solid var(--a1-err-border,#F0C4BF);border-radius:9px;background:var(--a1-err-bg,#FBEAE8);color:var(--a1-err-fg,#9E2F27);font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px"><x-import component="Icon" from="./Icon.js" i="lock" size="15" hint-size="15px,15px"></x-import>Cancelar venda</button></sc-if>
+      </div>
+    </div>
+  </sc-if>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const brl = (v) => 'R$ ' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+function rnd(seed) { let x = seed; return () => { x = (x * 9301 + 49297) % 233280; return x / 233280; }; }
+const OPS = ['Rafael Souza', 'Ana Ribeiro', 'Lucas Prado', 'Bianca Torres'];
+const CLIS = ['Consumidor final', 'Consumidor final', 'Transportadora Veloz Ltda', 'Consumidor final', 'CPF ***.482.917-**', 'Frota Agro Sertão', 'Consumidor final'];
+const PAYS = ['PIX', 'Crédito', 'Débito', 'Dinheiro', 'Crédito', 'PIX', 'Dividido', 'Débito'];
+const PICON = { PIX: 'qr-code', 'Crédito': 'credit-card', 'Débito': 'credit-card', Dinheiro: 'banknote', Dividido: 'split' };
+const LINES = [[['Gasolina comum', 32.31, 6.19, 'L']], [['Diesel S10', 210.4, 6.09, 'L']], [['Etanol hidratado', 28.1, 4.29, 'L'], ['Água mineral 500 ml', 2, 3.5, 'UN']], [['Energético 473 ml', 1, 11.9, 'UN'], ['Pão de queijo unidade', 3, 4.9, 'UN']], [['Gasolina aditivada', 40.2, 6.39, 'L'], ['Óleo 5W30 sintético 1 L', 1, 54.9, 'UN']]];
+const r = rnd(11);
+const SALES = Array.from({ length: 28 }, (_, i) => {
+  const lines = LINES[Math.floor(r() * LINES.length)];
+  const total = lines.reduce((a, [, q, p]) => a + q * p, 0);
+  const pay = PAYS[i % PAYS.length];
+  const h = 9 - Math.floor(i / 3), m = (59 - (i * 17) % 60);
+  return { id: 'NFC-e ' + (118402 - i * 3), when: '20/11 ' + String(Math.max(h, 6)).padStart(2, '0') + ':' + String(m).padStart(2, '0'), cx: 'Caixa 0' + ((i % 2) + 1), op: OPS[i % 4], cli: CLIS[i % CLIS.length], pay, lines, total, items: lines.length, st: i === 4 || i === 17 ? 'Cancelada' : 'Concluída', nsu: pay === 'Dinheiro' ? '—' : String(400118 + i * 37), auth: pay === 'Dinheiro' || pay === 'PIX' ? '—' : String(Math.floor(100000 + r() * 899999)) };
+});
+function path(vals, max, w, h) { return vals.map((v, i) => (i ? 'L' : 'M') + (i / (vals.length - 1) * w).toFixed(1) + ' ' + (h - v / max * h).toFixed(1)).join(' '); }
+class Component extends DCLogic {
+  state = { q: '', pay: 'Todas as formas', st: 'Todos os status', sel: null, sales: SALES };
+  renderVals() {
+    const s = this.state; const ctx = this.props.ctx || {}; const nav = this.props.navigate || (() => {}); const notify = this.props.notify || (() => {});
+    const rr = rnd(5);
+    const cur = Array.from({ length: 20 }, (_, i) => 72 + rr() * 22 + (i % 7 >= 5 ? 14 : 0));
+    const prev = Array.from({ length: 30 }, (_, i) => 68 + rr() * 20 + (i % 7 >= 5 ? 12 : 0));
+    const W = 600, H = 200, max = 120;
+    const curPts = cur.map((v, i) => [(i / 29) * W, H - v / max * H]);
+    const line = curPts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
+    const area = line + ' L' + curPts[curPts.length - 1][0].toFixed(1) + ' ' + H + ' L0 ' + H + ' Z';
+    const q = s.q.toLowerCase();
+    const list = s.sales.filter((x) => (s.pay === 'Todas as formas' || x.pay === s.pay) && (s.st === 'Todos os status' || x.st === s.st) && (!q || (x.id + x.cli + x.op).toLowerCase().includes(q)));
+    const d = s.sel ? s.sales.find((x) => x.id === s.sel) : null;
+    return {
+      estab: ctx.firstPosto || (!ctx.estab || ctx.estab.startsWith('Todos') ? 'Posto Central' : ctx.estab),
+      kpis: [
+        { label: 'Faturamento no mês', value: 'R$ 1,68 mi', foot: '+5,2% vs. outubro no mesmo período' },
+        { label: 'Cupons emitidos', value: '11.842', foot: '592 por dia em média' },
+        { label: 'Ticket médio', value: 'R$ 141,90', foot: 'Combustível R$ 168 · Loja R$ 32' },
+        { label: 'Cancelamentos', value: '0,4%', foot: '47 cupons · todos com autorização' }
+      ],
+      line, area, prevLine: path(prev, max, W, H),
+      pays: [['PIX', 34, '#2D5BD8'], ['Crédito', 29, '#15171C'], ['Débito', 21, '#9DB4EE'], ['Dinheiro', 11, '#E8A23A'], ['Frota / faturado', 5, 'var(--a1-text-6,#B4B6BC)']].map(([name, p, color]) => ({ name, color, pct: p + '%', val: brl(1680000 * p / 100).replace(/,\d\d$/, '') })),
+      q: s.q, pay: s.pay, st: s.st,
+      setQ: (e) => this.setState({ q: e.target.value }), setPay: (e) => this.setState({ pay: e.target.value }), setSt: (e) => this.setState({ st: e.target.value }),
+      rows: list.slice(0, 14).map((x) => { const c = x.st === 'Cancelada'; return { ...x, total: brl(x.total), payIcon: PICON[x.pay], strike: c ? 'line-through' : 'none', stBg: c ? 'var(--a1-err-bg,#FBEAE8)' : 'var(--a1-ok-bg,#E6F4EC)', stFg: c ? 'var(--a1-err-fg,#9E2F27)' : 'var(--a1-ok-fg,#1B6E4A)', open: () => this.setState({ sel: x.id }) }; }),
+      count: list.length, sum: brl(list.filter((x) => x.st !== 'Cancelada').reduce((a, x) => a + x.total, 0)),
+      sel: !!d, close: () => this.setState({ sel: null }),
+      d: d ? { ...d, total: brl(d.total), lines: d.lines.map(([name, qt, p, un]) => ({ name, qty: qt.toLocaleString('pt-BR') + ' ' + un + ' × ' + brl(p), total: brl(qt * p) })), stFg: d.st === 'Cancelada' ? 'var(--a1-err-fg,#9E2F27)' : 'var(--a1-ok-fg,#1B6E4A)', canCancel: d.st !== 'Cancelada' } : { lines: [] },
+      reprint: () => notify('Segunda via enviada para a impressora do Caixa 01.', 'info'),
+      cancelSale: () => { this.setState({ sales: s.sales.map((x) => x.id === s.sel ? { ...x, st: 'Cancelada' } : x) }); notify('Cancelamento autorizado por Carlos Mendes (supervisor).', 'success'); },
+      exportX: () => notify('Relatório de vendas exportado (XLSX).', 'info'), goPDV: () => nav('pdv')
+    };
+  }
+}
+
+</script>
+</body>
+</html>

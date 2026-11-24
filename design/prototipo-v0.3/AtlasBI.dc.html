@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="display:flex;flex-direction:column;gap:18px;animation:a1in .2s ease">
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap">
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <div style="font-family:'Geist Mono',monospace;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--a1-text-3,#7A7D85)">Atlas BI · Dashboard executivo</div>
+      <div style="font-size:28px;font-weight:600;letter-spacing:-.025em">Indicadores da rede</div>
+      <div style="font-size:13.5px;color:var(--a1-text-2,#62656D)">{{ ctx.org }} · novembro/2026 comparado a outubro/2026</div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <div style="display:flex;padding:3px;border:1px solid var(--a1-border-2,#E1E0DA);border-radius:9px;background:var(--a1-surface,#fff);gap:2px">
+        <sc-for list="{{ estabs }}" as="e" hint-placeholder-count="4"><button onClick="{{ e.pick }}" style="height:30px;padding:0 12px;border:0;border-radius:6px;background:{{ e.bg }};color:{{ e.fg }};font-size:12.5px;font-weight:550;cursor:pointer;white-space:nowrap">{{ e.label }}</button></sc-for>
+      </div>
+      <button onClick="{{ exportPdf }}" style="height:38px;padding:0 14px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:9px;background:var(--a1-surface,#fff);font-size:13px;font-weight:550;cursor:pointer;display:flex;align-items:center;gap:8px"><x-import component="Icon" from="./Icon.js" i="file-down" size="16" hint-size="16px,16px"></x-import>Relatório gerencial</button>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px">
+    <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="6">
+      <div style="background:var(--a1-surface,#fff);border:1px solid var(--a1-border,#E6E5E0);border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--a1-text-2,#62656D)"><span>{{ k.label }}</span><span style="display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:6px;background:{{ k.dBg }};color:{{ k.dFg }};font-size:12px;font-weight:600"><x-import component="Icon" from="./Icon.js" i="{{ k.dIcon }}" size="12" hint-size="12px,12px"></x-import>{{ k.delta }}</span></div>
+        <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:10px">
+          <span style="font-size:25px;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums">{{ k.value }}</span>
+          <svg viewBox="0 0 100 32" preserveAspectRatio="none" style="width:96px;height:32px;flex:none"><path d="{{ k.spark }}" fill="none" stroke="{{ k.sc }}" stroke-width="1.75" vector-effect="non-scaling-stroke"></path></svg>
+        </div>
+        <div style="font-size:12px;color:var(--a1-text-3,#7A7D85)">{{ k.foot }}</div>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;gap:14px">
+    <div style="flex:1.6 1 520px;min-width:0;background:var(--a1-surface,#fff);border:1px solid var(--a1-border,#E6E5E0);border-radius:12px;padding:18px 20px;display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start">
+        <div style="display:flex;flex-direction:column;gap:3px"><div style="font-size:15px;font-weight:600">Receita acumulada no mês</div><div style="font-size:12.5px;color:var(--a1-text-3,#7A7D85)">Atual vs. mês anterior vs. meta</div></div>
+        <div style="display:flex;gap:14px;font-size:12px;color:var(--a1-text-2,#62656D);flex-wrap:wrap"><span style="display:flex;align-items:center;gap:6px"><span style="width:14px;height:2px;background:#2D5BD8"></span>Nov/26</span><span style="display:flex;align-items:center;gap:6px"><span style="width:14px;height:2px;background:var(--a1-text-6,#B4B6BC)"></span>Out/26</span><span style="display:flex;align-items:center;gap:6px"><span style="width:14px;border-top:2px dashed #E8A23A"></span>Meta R$ 7,2 mi</span></div>
+      </div>
+      <div style="position:relative;height:230px">
+        <div style="position:absolute;inset:0 0 18px 48px;display:flex;flex-direction:column;justify-content:space-between"><div style="border-top:1px dashed var(--a1-grid,#EDECE7)"></div><div style="border-top:1px dashed var(--a1-grid,#EDECE7)"></div><div style="border-top:1px dashed var(--a1-grid,#EDECE7)"></div><div style="border-top:1px dashed var(--a1-grid,#EDECE7)"></div><div style="border-top:1px solid var(--a1-border-2,#E1E0DA)"></div></div>
+        <div style="position:absolute;left:0;top:0;bottom:18px;width:42px;display:flex;flex-direction:column;justify-content:space-between;font-family:'Geist Mono',monospace;font-size:10px;color:var(--a1-text-5,#9A9DA4);text-align:right"><span>8 mi</span><span>6 mi</span><span>4 mi</span><span>2 mi</span><span>0</span></div>
+        <svg viewBox="0 0 600 212" preserveAspectRatio="none" style="position:absolute;left:48px;right:0;top:0;width:calc(100% - 48px);height:212px;overflow:visible">
+          <path d="{{ goalLine }}" fill="none" stroke="#E8A23A" stroke-width="1.5" stroke-dasharray="5 5" vector-effect="non-scaling-stroke"></path>
+          <path d="{{ prevCum }}" fill="none" stroke="#B4B6BC" style="stroke:var(--a1-text-6,#B4B6BC)" stroke-width="2" vector-effect="non-scaling-stroke"></path>
+          <path d="{{ curArea }}" fill="rgba(45,91,216,.08)"></path>
+          <path d="{{ curCum }}" fill="none" stroke="#2D5BD8" style="stroke:var(--a1-accent-text,#2D5BD8)" stroke-width="2.5" vector-effect="non-scaling-stroke"></path>
+        </svg>
+        <div style="position:absolute;left:48px;right:0;bottom:0;display:flex;justify-content:space-between;font-family:'Geist Mono',monospace;font-size:10px;color:var(--a1-text-5,#9A9DA4)"><span>01</span><span>08</span><span>15</span><span>22</span><span>30</span></div>
+      </div>
+    </div>
+    <div style="flex:1 1 340px;min-width:0;background:var(--a1-surface,#fff);border:1px solid var(--a1-border,#E6E5E0);border-radius:12px;padding:18px 20px;display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;flex-direction:column;gap:3px"><div style="font-size:15px;font-weight:600">Ranking por estabelecimento</div><div style="font-size:12.5px;color:var(--a1-text-3,#7A7D85)">Receita no mês · variação vs. outubro</div></div>
+      <sc-for list="{{ rank }}" as="r" hint-placeholder-count="4">
+        <div style="display:flex;flex-direction:column;gap:7px">
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px"><span style="font-family:'Geist Mono',monospace;font-size:12px;color:var(--a1-text-5,#9A9DA4);width:18px">{{ r.pos }}</span><span style="flex:1;font-weight:550">{{ r.name }}</span><span style="font-variant-numeric:tabular-nums;font-weight:600">{{ r.val }}</span><span style="font-size:12px;font-weight:600;color:{{ r.dFg }};width:52px;text-align:right">{{ r.delta }}</span></div>
+          <div style="margin-left:28px;height:8px;border-radius:5px;background:var(--a1-muted,#F1F0EC)"><div style="height:100%;width:{{ r.w }};background:{{ r.color }};border-radius:5px"></div></div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;gap:14px">
+    <div style="flex:1.6 1 520px;min-width:0;background:var(--a1-surface,#fff);border:1px solid var(--a1-border,#E6E5E0);border-radius:12px;padding:18px 20px;display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start">
+        <div style="display:flex;flex-direction:column;gap:3px"><div style="font-size:15px;font-weight:600">Intensidade de vendas</div><div style="font-size:12.5px;color:var(--a1-text-3,#7A7D85)">Dia da semana × hora · cupons médios</div></div>
+        <div style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--a1-text-3,#7A7D85)">Menos<span style="width:12px;height:12px;border-radius:3px;background:var(--a1-info-bg2,#EEF2FC)"></span><span style="width:12px;height:12px;border-radius:3px;background:var(--a1-sel-border,#B9C9F2)"></span><span style="width:12px;height:12px;border-radius:3px;background:#6F8FE2"></span><span style="width:12px;height:12px;border-radius:3px;background:#2D5BD8"></span><span style="width:12px;height:12px;border-radius:3px;background:var(--a1-info-fg2,#1B3B94)"></span>Mais</div>
+      </div>
+      <div style="overflow-x:auto">
+        <div style="display:flex;flex-direction:column;gap:3px;min-width:560px">
+          <sc-for list="{{ heat }}" as="row" hint-placeholder-count="7">
+            <div style="display:flex;gap:3px;align-items:center">
+              <span style="width:34px;font-size:11.5px;color:var(--a1-text-2,#62656D)">{{ row.d }}</span>
+              <sc-for list="{{ row.cells }}" as="c" hint-placeholder-count="17"><div title="{{ c.tip }}" style="flex:1;height:22px;border-radius:4px;background:{{ c.bg }}"></div></sc-for>
+            </div>
+          </sc-for>
+          <div style="display:flex;gap:3px;padding-left:37px">
+            <sc-for list="{{ hoursL }}" as="h" hint-placeholder-count="17"><span style="flex:1;text-align:center;font-family:'Geist Mono',monospace;font-size:9.5px;color:var(--a1-text-5,#9A9DA4)">{{ h }}</span></sc-for>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="flex:1 1 340px;min-width:0;background:var(--a1-surface,#fff);border:1px solid var(--a1-border,#E6E5E0);border-radius:12px;display:flex;flex-direction:column">
+      <div style="padding:16px 20px;border-bottom:1px solid var(--a1-divider,#EFEEEA);display:flex;flex-direction:column;gap:3px"><span style="font-size:15px;font-weight:600">Margem por categoria</span><span style="font-size:12.5px;color:var(--a1-text-3,#7A7D85)">Margem bruta · participação na receita</span></div>
+      <sc-for list="{{ cats }}" as="c" hint-placeholder-count="5">
+        <div style="display:grid;grid-template-columns:minmax(0,1fr) 70px 64px;gap:10px;align-items:center;padding:12px 20px;border-bottom:1px solid var(--a1-divider-2,#F2F1ED);font-size:13px">
+          <div style="display:flex;flex-direction:column;gap:5px"><span style="font-weight:550">{{ c.name }}</span><div style="height:5px;border-radius:4px;background:var(--a1-muted,#F1F0EC)"><div style="height:100%;width:{{ c.share }};background:var(--a1-strong,#15171C);border-radius:4px"></div></div></div>
+          <span style="text-align:right;color:var(--a1-text-2,#62656D);font-variant-numeric:tabular-nums">{{ c.share }}</span>
+          <span style="text-align:right;font-weight:650;font-variant-numeric:tabular-nums;color:{{ c.mc }}">{{ c.margin }}</span>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+function rnd(seed) { let x = seed; return () => { x = (x * 9301 + 49297) % 233280; return x / 233280; }; }
+const spark = (vals) => { const mx = Math.max(...vals), mn = Math.min(...vals); return vals.map((v, i) => (i ? 'L' : 'M') + (i / (vals.length - 1) * 100).toFixed(1) + ' ' + (30 - (v - mn) / (mx - mn || 1) * 28).toFixed(1)).join(' '); };
+const ESTABS = [['all', 'Rede'], ['central', 'Central'], ['avenida', 'Avenida'], ['saopedro', 'São Pedro']];
+const FACT = { all: 1, central: 0.46, avenida: 0.33, saopedro: 0.21 };
+class Component extends DCLogic {
+  state = { estab: 'all' };
+  renderVals() {
+    const s = this.state; const ctx = this.props.ctx || { org: '' }; const notify = this.props.notify || (() => {});
+    const f = FACT[s.estab]; const r = rnd(s.estab.length * 7 + 3);
+    const series = (base, n) => Array.from({ length: n }, (_, i) => base * (0.9 + r() * 0.2 + i * 0.006));
+    const mi = (v) => 'R$ ' + (v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' mi';
+    const kp = [
+      ['Receita bruta', mi(4.82 * f), '+6,4%', true, 'vs. R$ ' + (4.53 * f).toFixed(2).replace('.', ',') + ' mi em outubro'],
+      ['Margem bruta', s.estab === 'saopedro' ? '13,1%' : '14,8%', '+0,6 p.p.', true, 'Combustíveis 11,2% · Loja 38,4%'],
+      ['EBITDA estimado', mi(0.41 * f), '+9,1%', true, 'Margem EBITDA de 8,5%'],
+      ['Litros vendidos', Math.round(712400 * f).toLocaleString('pt-BR') + ' L', '+2,9%', true, 'Diesel S10 lidera com 38%'],
+      ['Ticket médio', 'R$ 141,90', '−1,2%', false, 'Pressionado pelo mix de etanol'],
+      ['Inadimplência frotas', '2,3%', '+0,4 p.p.', false, 'R$ 38,7 mil vencidos há +15 dias']
+    ].map(([label, value, delta, up, foot]) => ({ label, value, delta, foot, dIcon: up ? 'trending-up' : 'trending-down', dBg: up ? 'var(--a1-ok-bg,#E6F4EC)' : 'var(--a1-err-bg,#FBEAE8)', dFg: up ? 'var(--a1-ok-fg,#1B6E4A)' : 'var(--a1-err-fg,#9E2F27)', sc: up ? '#2D5BD8' : '#C8433A', spark: spark(series(10, 14)) }));
+    const W = 600, H = 212, max = 8;
+    const cum = (n, daily) => { let a = 0; return Array.from({ length: n }, (_, i) => (a += daily * (0.85 + r() * 0.3) * (i % 7 >= 5 ? 1.15 : 1))); };
+    const cur = cum(20, 0.241 * f), prev = cum(30, 0.151 * f);
+    const P = (arr) => arr.map((v, i) => (i ? 'L' : 'M') + (i / 29 * W).toFixed(1) + ' ' + (H - Math.min(v, max) / max * H).toFixed(1)).join(' ');
+    const curCum = P(cur);
+    const lastX = (19 / 29 * W).toFixed(1);
+    const rankRaw = [['Posto Central', 2.21, '+7,8%', true], ['Posto Avenida', 1.6, '+5,1%', true], ['Posto São Pedro', 1.01, '+4,9%', true], ['Posto Rodovia 330', 0, 'Implantação', null]];
+    const days = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+    const scale = ['var(--a1-info-bg2,#EEF2FC)', 'var(--a1-sel-border,#B9C9F2)', '#6F8FE2', '#2D5BD8', 'var(--a1-info-fg2,#1B3B94)'];
+    const heat = days.map((d, di) => ({ d, cells: Array.from({ length: 17 }, (_, hi) => {
+      const h = 6 + hi; const peak = Math.exp(-Math.pow(h - 8, 2) / 6) + Math.exp(-Math.pow(h - 18, 2) / 5) * 1.1 + (di >= 4 ? 0.3 : 0) + r() * 0.25;
+      const lvl = Math.min(4, Math.floor(peak * 2.4)); return { bg: scale[lvl], tip: d + ' ' + h + 'h · ~' + Math.round(peak * 40 * f) + ' cupons' };
+    }) }));
+    return {
+      ctx,
+      estabs: ESTABS.map(([id, label]) => ({ label, bg: s.estab === id ? 'var(--a1-strong,#15171C)' : 'transparent', fg: s.estab === id ? '#fff' : 'var(--a1-text-2s,#4A4D55)', pick: () => this.setState({ estab: id }) })),
+      kpis: kp,
+      curCum, curArea: curCum + ' L' + lastX + ' ' + H + ' L0 ' + H + ' Z', prevCum: P(prev),
+      goalLine: 'M0 ' + (H - 7.2 * f / max * H).toFixed(1) + ' L' + W + ' ' + (H - 7.2 * f / max * H).toFixed(1),
+      rank: rankRaw.map(([name, v, delta, up], i) => ({ pos: String(i + 1).padStart(2, '0'), name, val: v ? 'R$ ' + v.toFixed(2).replace('.', ',') + ' mi' : '—', delta, dFg: up === null ? 'var(--a1-warn-fg,#8A5A12)' : up ? 'var(--a1-ok-fg,#1B6E4A)' : 'var(--a1-err-fg,#9E2F27)', w: (v / 2.21 * 100) + '%', color: i === 0 ? '#2D5BD8' : '#9DB4EE' })),
+      heat, hoursL: Array.from({ length: 17 }, (_, i) => String(6 + i).padStart(2, '0')),
+      cats: [['Gasolina', '41%', '10,4%'], ['Diesel', '33%', '9,1%'], ['Etanol', '12%', '12,8%'], ['Conveniência', '9%', '38,4%'], ['Lubrificantes e serviços', '5%', '46,2%']].map(([name, share, margin]) => ({ name, share, margin, mc: parseFloat(margin) > 30 ? 'var(--a1-ok-fg,#1B6E4A)' : 'var(--a1-text,#15171C)' })),
+      exportPdf: () => notify('Relatório gerencial de novembro gerado (PDF).', 'info')
+    };
+  }
+}
+
+</script>
+</body>
+</html>

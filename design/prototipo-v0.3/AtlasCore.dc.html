@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="display:flex;flex-direction:column;gap:18px;animation:a1in .2s ease">
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap">
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <div style="font-family:'Geist Mono',monospace;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--a1-text-3,#7A7D85)">{{ h.eyebrow }}</div>
+      <div style="font-size:28px;font-weight:600;letter-spacing:-.025em">{{ h.title }}</div>
+      <div style="font-size:13.5px;color:var(--a1-text-2,#62656D)">{{ h.sub }}</div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <sc-if value="{{ h.secondary }}" hint-placeholder-val="{{ false }}"><button onClick="{{ secondaryRun }}" style="height:40px;padding:0 14px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:9px;background:var(--a1-surface,#fff);font-size:13px;font-weight:550;cursor:pointer;display:flex;align-items:center;gap:8px"><x-import component="Icon" from="./Icon.js" i="download" size="16" hint-size="16px,16px"></x-import>{{ h.secondary }}</button></sc-if>
+      <sc-if value="{{ h.primary }}" hint-placeholder-val="{{ false }}"><button onClick="{{ openCreate }}" style="height:40px;padding:0 16px;border:0;border-radius:9px;background:#2D5BD8;color:#fff;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px" style-hover="background:#2450C4"><x-import component="Icon" from="./Icon.js" i="plus" size="16" hint-size="16px,16px"></x-import>{{ h.primary }}</button></sc-if>
+    </div>
+  </div>
+
+  <sc-if value="{{ h.banner }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:10px;background:var(--a1-info-bg2,#EEF2FC);border:1px solid var(--a1-info-border,#D6E0F8);font-size:13px;line-height:1.5">
+      <span style="color:var(--a1-accent-text,#2D5BD8);display:flex;margin-top:1px"><x-import component="Icon" from="./Icon.js" i="{{ h.bannerIcon }}" size="16" hint-size="16px,16px"></x-import></span>
+      <span>{{ h.banner }}</span>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isList }}" hint-placeholder-val="{{ true }}">
+    <div style="background:var(--a1-surface,#fff);border:1px solid var(--a1-border,#E6E5E0);border-radius:12px;overflow:hidden">
+      <div style="padding:14px 16px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--a1-divider,#EFEEEA)">
+        <div style="display:flex;align-items:center;gap:8px;height:36px;flex:1 1 240px;max-width:360px;padding:0 10px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:8px;color:var(--a1-text-4,#8A8D95)"><x-import component="Icon" from="./Icon.js" i="search" size="15" hint-size="15px,15px"></x-import><input value="{{ q }}" onChange="{{ setQ }}" placeholder="{{ L.ph }}" style="flex:1;min-width:0;border:0;outline:0;font-size:13px;background:transparent"></input></div>
+        <sc-for list="{{ L.filters }}" as="f" hint-placeholder-count="2">
+          <select value="{{ f.value }}" onChange="{{ f.onChange }}" style="height:36px;padding:0 10px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:8px;background:var(--a1-surface,#fff);font-size:13px;max-width:240px"><sc-for list="{{ f.options }}" as="o" hint-placeholder-count="3"><option>{{ o }}</option></sc-for></select>
+        </sc-for>
+        <span style="margin-left:auto;font-size:12.5px;color:var(--a1-text-3,#7A7D85)">{{ L.count }}</span>
+      </div>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:13px;min-width:{{ L.minW }}">
+          <thead><tr style="background:var(--a1-surface-2,#FAFAF8);color:var(--a1-text-2,#62656D);font-size:12px"><sc-for list="{{ L.cols }}" as="c" hint-placeholder-count="6"><th style="padding:10px 14px;font-weight:550;text-align:left;white-space:nowrap">{{ c }}</th></sc-for><th style="width:36px"></th></tr></thead>
+          <tbody>
+            <sc-for list="{{ L.rows }}" as="r" hint-placeholder-count="6">
+              <tr onClick="{{ r.open }}" style="border-top:1px solid var(--a1-divider-2,#F2F1ED);cursor:pointer" style-hover="background:var(--a1-surface-2,#FAFAF8)">
+                <sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="6">
+                  <td style="padding:11px 14px;vertical-align:middle">
+                    <sc-if value="{{ c.badge }}" hint-placeholder-val="{{ false }}"><span style="font-size:11.5px;font-weight:600;padding:3px 8px;border-radius:999px;background:{{ c.bBg }};color:{{ c.bFg }};white-space:nowrap">{{ c.t }}</span></sc-if>
+                    <sc-if value="{{ c.text }}" hint-placeholder-val="{{ true }}">
+                      <div style="display:flex;flex-direction:column;gap:2px">
+                        <span style="font-weight:{{ c.w }};font-family:{{ c.font }};font-size:{{ c.fs }};white-space:{{ c.ws }}">{{ c.t }}</span>
+                        <sc-if value="{{ c.sub }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px;color:var(--a1-text-3,#7A7D85);white-space:nowrap">{{ c.sub }}</span></sc-if>
+                      </div>
+                    </sc-if>
+                  </td>
+                </sc-for>
+                <td style="padding:11px 12px;color:var(--a1-text-6,#B4B6BC)"><x-import component="Icon" from="./Icon.js" i="chevron-right" size="15" hint-size="15px,15px"></x-import></td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+      <sc-if value="{{ L.empty }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:48px 16px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center">
+          <div style="width:44px;height:44px;border-radius:11px;background:var(--a1-muted,#F1F0EC);color:var(--a1-text-2,#62656D);display:flex;align-items:center;justify-content:center"><x-import component="Icon" from="./Icon.js" i="search-x" size="20" hint-size="20px,20px"></x-import></div>
+          <div style="font-size:14.5px;font-weight:600">Nenhum registro encontrado</div>
+          <div style="font-size:13px;color:var(--a1-text-3,#7A7D85);max-width:380px;line-height:1.5">Ajuste a pesquisa ou os filtros. Os resultados consideram apenas a organização ativa.</div>
+          <button onClick="{{ clearFilters }}" style="height:36px;padding:0 14px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:8px;background:var(--a1-surface,#fff);font-size:13px;font-weight:550;cursor:pointer;margin-top:4px">Limpar filtros</button>
+        </div>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isModulos }}" hint-placeholder-val="{{ false }}">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px">
+      <div style="background:var(--a1-surface,#fff);border:1px solid var(--a1-border,#E6E5E0);border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--a1-text-2,#62656D)"><span>Assinatura</span><span style="font-size:11.5px;font-weight:600;padding:3px 8px;border-radius:999px;background:{{ sub.stBg }};color:{{ sub.stFg }}">{{ sub.status }}</span></div>
+        <div style="font-size:20px;font-weight:600;letter-spacing:-.01em">{{ sub.plan }}</div>
+        <div style="font-size:12.5px;color:var(--a1-text-2,#62656D)">Ciclo anual · renovação em {{ sub.renew }}</div>
+      </div>
+      <div style="background:var(--a1-surface,#fff);border:1px solid var(--a1-border,#E6E5E0);border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;gap:8px">
+        <div style="font-size:13px;color:var(--a1-text-2,#62656D)">Licenças de usuário</div>
+        <div style="font-size:20px;font-weight:600;font-variant-numeric:tabular-nums">{{ sub.lic }}</div>
+        <div style="height:6px;border-radius:99px;background:var(--a1-divider,#EFEEEA);overflow:hidden"><div style="height:100%;width:{{ sub.licPct }};background:#2D5BD8;border-radius:99px"></div></div>
+      </div>
+      <div style="background:var(--a1-surface,#fff);border:1px solid var(--a1-border,#E6E5E0);border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;gap:8px">
+        <div style="font-size:13px;color:var(--a1-text-2,#62656D)">Módulos contratados</div>
+        <div style="font-size:20px;font-weight:600;font-variant-numeric:tabular-nums">{{ sub.mods }}</div>
+        <div style="font-size:12.5px;color:var(--a1-text-2,#62656D)">{{ sub.modsNote }}</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:4px;border-bottom:1px solid var(--a1-border-2,#E1E0DA)">
+      <sc-for list="{{ modSegs }}" as="t" hint-placeholder-count="3">
+        <button onClick="{{ t.pick }}" style="height:42px;padding:0 14px;border:0;border-bottom:2px solid {{ t.line }};background:transparent;color:{{ t.fg }};font-size:13.5px;font-weight:600;cursor:pointer;margin-bottom:-1px">{{ t.label }}</button>
+      </sc-for>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px">
+      <sc-for list="{{ catalog }}" as="m" hint-placeholder-count="6">
+        <div style="background:var(--a1-surface,#fff);border:1px solid var(--a1-border,#E6E5E0);border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
+            <div style="width:38px;height:38px;border-radius:10px;background:{{ m.tileBg }};color:{{ m.tileFg }};display:flex;align-items:center;justify-content:center"><x-import component="Icon" from="./Icon.js" i="{{ m.icon }}" size="18" hint-size="18px,18px"></x-import></div>
+            <span style="font-size:11.5px;font-weight:600;padding:3px 8px;border-radius:999px;background:{{ m.bBg }};color:{{ m.bFg }};white-space:nowrap">{{ m.badge }}</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:15px;font-weight:600">{{ m.name }}</span><span style="font-size:11.5px;color:var(--a1-text-4,#8A8D95);letter-spacing:.04em;text-transform:uppercase">{{ m.group }}</span></div>
+          <div style="font-size:13px;line-height:1.5;color:var(--a1-text-2,#62656D);flex:1">{{ m.desc }}</div>
+          <button onClick="{{ m.run }}" style="height:36px;border:1px solid {{ m.btnBorder }};border-radius:8px;background:{{ m.btnBg }};color:{{ m.btnFg }};font-size:13px;font-weight:600;cursor:pointer">{{ m.action }}</button>
+        </div>
+      </sc-for>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isConfig }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <sc-for list="{{ cfgSections }}" as="sec" hint-placeholder-count="4">
+        <div style="background:var(--a1-surface,#fff);border:1px solid var(--a1-border,#E6E5E0);border-radius:12px;overflow:hidden">
+          <div style="padding:16px 20px;border-bottom:1px solid var(--a1-divider,#EFEEEA);display:flex;flex-direction:column;gap:3px"><span style="font-size:15px;font-weight:600">{{ sec.title }}</span><span style="font-size:12.5px;color:var(--a1-text-3,#7A7D85)">{{ sec.desc }}</span></div>
+          <sc-for list="{{ sec.fields }}" as="f" hint-placeholder-count="3">
+            <div style="padding:14px 20px;border-top:1px solid var(--a1-divider-2,#F2F1ED);display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap">
+              <div style="display:flex;flex-direction:column;gap:3px;flex:1 1 280px;min-width:0"><span style="font-size:13.5px;font-weight:550">{{ f.label }}</span><span style="font-size:12.5px;color:var(--a1-text-3,#7A7D85);line-height:1.45">{{ f.help }}</span></div>
+              <sc-if value="{{ f.isToggle }}" hint-placeholder-val="{{ false }}"><button onClick="{{ f.toggle }}" style="width:40px;height:22px;border-radius:999px;border:0;background:{{ f.track }};position:relative;cursor:pointer;flex:none;padding:0"><span style="position:absolute;top:3px;left:{{ f.knob }};width:16px;height:16px;border-radius:50%;background:var(--a1-surface,#fff);box-shadow:0 1px 2px rgba(0,0,0,.2);transition:left .15s"></span></button></sc-if>
+              <sc-if value="{{ f.isSelect }}" hint-placeholder-val="{{ false }}"><select value="{{ f.value }}" onChange="{{ f.onChange }}" style="height:36px;padding:0 10px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:8px;background:var(--a1-surface,#fff);font-size:13px;min-width:220px"><sc-for list="{{ f.options }}" as="o" hint-placeholder-count="3"><option>{{ o }}</option></sc-for></select></sc-if>
+              <sc-if value="{{ f.isText }}" hint-placeholder-val="{{ false }}"><input value="{{ f.value }}" onChange="{{ f.onChange }}" style="height:36px;padding:0 12px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:8px;font-size:13px;min-width:260px"></input></sc-if>
+              <sc-if value="{{ f.isLocked }}" hint-placeholder-val="{{ false }}"><span style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:5px 10px;border-radius:999px;background:var(--a1-ok-bg,#E6F4EC);color:var(--a1-ok-fg,#1B6E4A)"><x-import component="Icon" from="./Icon.js" i="lock" size="12" hint-size="12px,12px"></x-import>Sempre ativo</span></sc-if>
+            </div>
+          </sc-for>
+        </div>
+      </sc-for>
+      <div style="position:sticky;bottom:0;background:var(--a1-surface,#fff);border:1px solid var(--a1-border,#E6E5E0);border-radius:12px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;box-shadow:0 -6px 20px rgba(15,17,21,.05)">
+        <span style="font-size:12.5px;color:{{ cfgDirtyColor }}">{{ cfgDirtyMsg }}</span>
+        <div style="display:flex;gap:8px">
+          <button onClick="{{ cfgDiscard }}" style="height:38px;padding:0 14px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:9px;background:var(--a1-surface,#fff);font-size:13px;font-weight:550;cursor:pointer">Descartar</button>
+          <button onClick="{{ cfgSave }}" style="height:38px;padding:0 16px;border:0;border-radius:9px;background:{{ cfgSaveBg }};color:#fff;font-size:13px;font-weight:600;cursor:pointer">Salvar configurações</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ d }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeDrawer }}" style="position:fixed;inset:0;background:rgba(15,17,21,.4);z-index:90"></div>
+    <div style="position:fixed;top:0;right:0;bottom:0;width:min(520px,100vw);background:var(--a1-surface,#fff);z-index:91;display:flex;flex-direction:column;box-shadow:-20px 0 50px rgba(15,17,21,.18);animation:a1in .2s ease">
+      <div style="padding:20px 24px;border-bottom:1px solid var(--a1-divider,#EFEEEA);display:flex;justify-content:space-between;gap:12px">
+        <div style="display:flex;flex-direction:column;gap:6px;min-width:0">
+          <span style="font-family:'Geist Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--a1-text-3,#7A7D85)">{{ d.kind }}</span>
+          <span style="font-size:19px;font-weight:600;letter-spacing:-.01em">{{ d.title }}</span>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span style="font-size:11.5px;font-weight:600;padding:3px 8px;border-radius:999px;background:{{ d.bBg }};color:{{ d.bFg }}">{{ d.badge }}</span><span style="font-size:12.5px;color:var(--a1-text-3,#7A7D85)">{{ d.sub }}</span></div>
+        </div>
+        <button onClick="{{ closeDrawer }}" style="width:34px;height:34px;border:0;border-radius:8px;background:var(--a1-bg,#F5F5F2);cursor:pointer;display:flex;align-items:center;justify-content:center;flex:none"><x-import component="Icon" from="./Icon.js" i="x" size="16" hint-size="16px,16px"></x-import></button>
+      </div>
+      <div style="flex:1;overflow:auto;padding:18px 24px;display:flex;flex-direction:column;gap:22px">
+        <sc-for list="{{ d.sections }}" as="sec" hint-placeholder-count="3">
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="font-size:11.5px;font-weight:600;color:var(--a1-text-3,#7A7D85);letter-spacing:.06em;text-transform:uppercase">{{ sec.title }}</div>
+            <sc-if value="{{ sec.rows }}" hint-placeholder-val="{{ false }}">
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px 18px">
+                <sc-for list="{{ sec.rows }}" as="rw" hint-placeholder-count="4">
+                  <div style="display:flex;flex-direction:column;gap:3px;min-width:0"><span style="font-size:12px;color:var(--a1-text-3,#7A7D85)">{{ rw.k }}</span><span style="font-size:13.5px;font-weight:550;font-family:{{ rw.font }};overflow-wrap:anywhere">{{ rw.v }}</span></div>
+                </sc-for>
+              </div>
+            </sc-if>
+            <sc-if value="{{ sec.items }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:6px">
+                <sc-for list="{{ sec.items }}" as="it" hint-placeholder-count="3">
+                  <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--a1-divider,#EFEEEA);border-radius:9px">
+                    <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:13px;font-weight:550">{{ it.t }}</span><span style="font-size:12px;color:var(--a1-text-3,#7A7D85)">{{ it.s }}</span></div>
+                    <sc-if value="{{ it.badge }}" hint-placeholder-val="{{ false }}"><span style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;background:{{ it.bBg }};color:{{ it.bFg }};white-space:nowrap">{{ it.badge }}</span></sc-if>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+            <sc-if value="{{ sec.chips }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-wrap:wrap;gap:6px">
+                <sc-for list="{{ sec.chips }}" as="ch" hint-placeholder-count="6">
+                  <span style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:550;padding:5px 10px;border-radius:999px;background:{{ ch.bg }};color:{{ ch.fg }};border:1px solid {{ ch.border }}"><x-import component="Icon" from="./Icon.js" i="{{ ch.icon }}" size="12" hint-size="12px,12px"></x-import>{{ ch.label }}</span>
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
+        </sc-for>
+      </div>
+      <div style="padding:14px 24px;border-top:1px solid var(--a1-divider,#EFEEEA);display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">
+        <sc-for list="{{ d.actions }}" as="a" hint-placeholder-count="2">
+          <button onClick="{{ a.run }}" style="height:40px;padding:0 16px;border:1px solid {{ a.border }};border-radius:9px;background:{{ a.bg }};color:{{ a.fg }};font-size:13px;font-weight:600;cursor:pointer">{{ a.label }}</button>
+        </sc-for>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ m }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;z-index:95;background:rgba(15,17,21,.45);display:flex;align-items:center;justify-content:center;padding:16px">
+      <div style="width:100%;max-width:560px;max-height:calc(100vh - 32px);display:flex;flex-direction:column;background:var(--a1-surface,#fff);border-radius:16px;box-shadow:0 24px 60px rgba(15,17,21,.25);overflow:hidden;animation:a1in .2s ease">
+        <div style="padding:20px 24px 16px;border-bottom:1px solid var(--a1-divider,#EFEEEA);display:flex;justify-content:space-between;gap:12px">
+          <div style="display:flex;flex-direction:column;gap:4px"><span style="font-size:18px;font-weight:600">{{ m.title }}</span><span style="font-size:12.5px;color:var(--a1-text-3,#7A7D85);line-height:1.45">{{ m.sub }}</span></div>
+          <button onClick="{{ closeModal }}" style="width:34px;height:34px;border:0;border-radius:8px;background:var(--a1-bg,#F5F5F2);cursor:pointer;display:flex;align-items:center;justify-content:center;flex:none"><x-import component="Icon" from="./Icon.js" i="x" size="16" hint-size="16px,16px"></x-import></button>
+        </div>
+        <div style="flex:1;overflow:auto;padding:18px 24px;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px">
+          <sc-for list="{{ m.fields }}" as="f" hint-placeholder-count="4">
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:12.5px;font-weight:550">{{ f.label }}
+              <sc-if value="{{ f.isSelect }}" hint-placeholder-val="{{ false }}"><select value="{{ f.value }}" onChange="{{ f.onChange }}" style="height:40px;padding:0 10px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:8px;background:var(--a1-surface,#fff);font-size:13.5px;font-weight:400"><sc-for list="{{ f.options }}" as="o" hint-placeholder-count="3"><option>{{ o }}</option></sc-for></select></sc-if>
+              <sc-if value="{{ f.isText }}" hint-placeholder-val="{{ true }}"><input value="{{ f.value }}" onChange="{{ f.onChange }}" placeholder="{{ f.ph }}" style="height:40px;padding:0 12px;border:1px solid {{ f.border }};border-radius:8px;font-size:13.5px;font-weight:400"></input></sc-if>
+              <sc-if value="{{ f.err }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px;font-weight:500;color:var(--a1-err-fg2,#B23A31)">{{ f.err }}</span></sc-if>
+            </label>
+          </sc-for>
+        </div>
+        <div style="padding:14px 24px;border-top:1px solid var(--a1-divider,#EFEEEA);display:flex;gap:8px;justify-content:flex-end">
+          <button onClick="{{ closeModal }}" style="height:40px;padding:0 16px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:9px;background:var(--a1-surface,#fff);font-size:13px;font-weight:550;cursor:pointer">Cancelar</button>
+          <button onClick="{{ submitModal }}" style="height:40px;padding:0 18px;border:0;border-radius:9px;background:#2D5BD8;color:#fff;font-size:13px;font-weight:600;cursor:pointer">{{ m.submit }}</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const TONE = (s) => {
+  if (['Ativa', 'Ativo', 'Sucesso', 'Contratado'].includes(s)) return ['var(--a1-ok-bg,#E6F4EC)', 'var(--a1-ok-fg,#1B6E4A)'];
+  if (['Implantação', 'Em implantação', 'Aguardando aceite', 'Pendente', 'Expira em breve', 'Suspensa', 'Suspenso', 'Solicitado'].includes(s)) return ['var(--a1-warn-bg,#FBF1DF)', 'var(--a1-warn-fg,#8A5A12)'];
+  if (['Negado', 'Falha', 'Revogado', 'Encerrado', 'Bloqueado', 'Inativa'].includes(s)) return ['var(--a1-err-bg,#FBEAE8)', 'var(--a1-err-fg,#9E2F27)'];
+  return ['var(--a1-muted,#F1F0EC)', 'var(--a1-text-2s,#4A4D55)'];
+};
+const MONO = "'Geist Mono',monospace";
+const txt = (t, sub, o) => ({ text: true, badge: false, t: String(t), sub: sub || '', w: (o && o.w) || 450, font: o && o.mono ? MONO : 'inherit', fs: o && o.mono ? '12px' : '13px', ws: o && o.wrap ? 'normal' : 'nowrap' });
+const bdg = (t, tone) => { const [bBg, bFg] = tone || TONE(t); return { text: false, badge: true, t, bBg, bFg }; };
+const kv = (k, v, mono) => ({ k, v: v == null || v === '' ? '—' : String(v), font: mono ? MONO : 'inherit' });
+const MY_ROLE = { cci: 'Administrador', gh: 'Administrador', vv: 'Auditor' };
+const CATALOG = [
+  ['core', 'Atlas Core', 'layout-grid', 'Plataforma', 'Organizações, empresas, usuários, permissões e auditoria. Incluído em todos os planos.'],
+  ['postos', 'Atlas Postos', 'fuel', 'Operação', 'Tanques, bombas, encerrantes, abastecimentos, compras e estoque do posto.'],
+  ['pdv', 'Atlas PDV', 'scan-barcode', 'Operação', 'Frente de caixa para pista e loja, com pagamento integrado.'],
+  ['conv', 'Atlas Conveniência', 'store', 'Operação', 'Mix, promoções e inventário da loja de conveniência.'],
+  ['payments', 'Atlas Payments', 'credit-card', 'Gestão', 'Conectores de pagamento, transações, conciliação e recebíveis.'],
+  ['fin', 'Atlas Financeiro', 'landmark', 'Gestão', 'Contas a pagar e a receber, fluxo de caixa e conciliação bancária.'],
+  ['contabil', 'Atlas Contábil', 'book-open', 'Gestão', 'Carteira contábil, escrituração, folha e obrigações acessórias.'],
+  ['fiscal', 'Atlas Fiscal', 'receipt-text', 'Gestão', 'Documentos fiscais, apuração de impostos e certificados digitais.'],
+  ['bi', 'Atlas BI', 'chart-column', 'Inteligência', 'Dashboards executivos, comparativos entre períodos e rankings.'],
+  ['ai', 'Atlas AI', 'sparkles', 'Inteligência', 'Assistente, previsão de demanda e detecção de anomalias.'],
+  ['docs', 'Atlas Documents', 'folder-open', 'Serviços', 'Repositório de documentos, vencimentos e assinaturas eletrônicas.'],
+  ['int', 'Atlas Integrations', 'plug', 'Serviços', 'Importação, exportação e monitoramento das integrações.']
+];
+const MOD_ROUTE = { core: 'home', postos: 'postos', pdv: 'pdv', conv: 'conv', payments: 'payments', fin: 'financeiro', contabil: 'contabil', fiscal: 'fiscal', bi: 'bi', ai: 'ai', docs: 'docs', int: 'int' };
+const SUBS = { cci: ['Atlas One Enterprise', 'Ativa', '01/03/2027', 24, 40], gh: ['Atlas One Business', 'Ativa', '15/08/2027', 38, 50], vv: ['Atlas One Start', 'Em implantação', '10/11/2027', 6, 10] };
+const ORG_USERS = {
+  cci: [['Mariana Lopes', 'Administrador · Toda a organização'], ['Fernanda Lima', 'Fiscal · CCI Consultoria Contábil'], ['Rodrigo Teles', 'Financeiro · Toda a organização'], ['Otávio Serra', 'Gerente · Posto Serra Azul'], ['Beatriz Campos', 'Operador · Posto Serra Azul']],
+  gh: [['Mariana Lopes', 'Administrador · Toda a organização'], ['Paulo Nunes', 'Financeiro · Toda a organização'], ['Juliana Alves', 'Gerente · Posto Central'], ['Fernanda Lima', 'Fiscal · Horizonte Combustíveis'], ['Rafael Souza', 'Operador · Posto Central']],
+  vv: [['Helena Prates', 'Administrador · Toda a organização'], ['Mariana Lopes', 'Auditor · Toda a organização'], ['Igor Bastos', 'Operador · Posto Trevo']]
+};
+const PEOPLE = { cci: ['Mariana Lopes', 'Beatriz Campos', 'Otávio Serra', 'Rodrigo Teles', 'Fernanda Lima', 'Diego Martins'], gh: ['Mariana Lopes', 'Rafael Souza', 'Juliana Alves', 'Paulo Nunes', 'Fernanda Lima', 'Marcos Rocha'], vv: ['Helena Prates', 'Igor Bastos', 'Helena Prates', 'Helena Prates', 'Fernanda Lima', 'Igor Bastos'] };
+const REL = [
+  ['Auto Posto Serra Azul Ltda', '33.902.114/0001-58', 'cci', 'Contábil · Fiscal · DP', 'Fernanda Lima', '03/2024', 'Ativo'],
+  ['Horizonte Combustíveis Ltda', '12.418.330/0001-07', 'gh', 'Contábil · Fiscal', 'Fernanda Lima', '08/2025', 'Ativo'],
+  ['Horizonte Rodovia Com. de Combustíveis Ltda', '28.551.096/0001-44', 'gh', 'Fiscal', 'Fernanda Lima', '10/2026', 'Ativo'],
+  ['Vale Verde Postos e Serviços Ltda', '19.663.208/0001-71', 'vv', 'Contábil · Fiscal · DP', 'Rodrigo Teles', '11/2026', 'Aguardando aceite'],
+  ['Padaria Pão Dourado ME', '18.442.071/0001-30', null, 'Contábil · DP', 'Rodrigo Teles', '05/2024', 'Ativo'],
+  ['Clínica Vida Plena S/S', '27.115.803/0001-09', null, 'Contábil · Fiscal · DP', 'Rodrigo Teles', '01/2025', 'Ativo']
+];
+const GRANTS = [
+  ['cci', 'Vendas, cupons e LMC', 'Posto Serra Azul', 'CCI Consultoria Contábil (interno)', 'Escrituração fiscal e contábil', 'Indeterminada', 'Ativo'],
+  ['cci', 'Folha de pagamento', 'Auto Posto Serra Azul Ltda', 'CCI Consultoria Contábil (interno)', 'Departamento pessoal', 'Indeterminada', 'Ativo'],
+  ['cci', 'Transações de cartão', 'Posto Serra Azul', 'Boa Vista · conector de pagamentos', 'Conciliação de recebíveis', 'Em especificação', 'Pendente'],
+  ['gh', 'Vendas e documentos fiscais', 'Horizonte Combustíveis Ltda', 'CCI Consultoria', 'Escrituração e apuração de impostos', '31/12/2027', 'Ativo'],
+  ['gh', 'Extratos bancários', 'Horizonte Combustíveis Ltda', 'CCI Consultoria', 'Conciliação contábil', '31/12/2027', 'Ativo'],
+  ['gh', 'Indicadores consolidados (BI)', 'Todas as empresas', 'Auditoria Externa', 'Auditoria anual 2026', '15/12/2026', 'Expira em breve'],
+  ['gh', 'Transações de cartão', 'Posto Central · Posto Avenida', 'Boa Vista · conector de pagamentos', 'Conciliação de recebíveis', 'Em especificação', 'Pendente'],
+  ['gh', 'Folha de pagamento', 'Horizonte Rodovia', 'CCI Consultoria', 'Departamento pessoal', '—', 'Revogado'],
+  ['vv', 'Vendas e documentos fiscais', 'Vale Verde Postos e Serviços Ltda', 'CCI Consultoria', 'Escrituração contábil', 'Aguardando aceite', 'Pendente']
+];
+const auditFor = (org, P, E) => [
+  ['23/11/2026 09:42:18', P[0], 'Alterou permissões do papel', 'Atlas Core', 'Papel Gerente · ' + E, 'Sucesso', '177.84.12.40'],
+  ['23/11/2026 09:31:05', P[1], 'Cancelou item com autorização', 'Atlas PDV', 'Cupom 004.498 · item 3', 'Sucesso', '10.0.4.21'],
+  ['23/11/2026 09:30:51', P[1], 'Tentou cancelar venda sem autorização', 'Atlas PDV', 'Cupom 004.497', 'Negado', '10.0.4.21'],
+  ['23/11/2026 09:12:40', P[2], 'Registrou sangria', 'Atlas PDV', 'Caixa 02 · R$ 1.500,00', 'Sucesso', '10.0.4.22'],
+  ['23/11/2026 08:55:02', 'Sistema', 'Importou vendas', 'Atlas Integrations', 'Lote 2026-11-23-01 · 612 registros', 'Sucesso', '—'],
+  ['23/11/2026 08:41:19', P[3], 'Baixou título a pagar', 'Atlas Financeiro', 'Título 8812 · Distribuidora Rota Sul', 'Sucesso', '177.84.12.51'],
+  ['23/11/2026 08:10:33', P[4], 'Gerou apuração de ICMS', 'Atlas Fiscal', 'Competência 10/2026', 'Sucesso', '189.40.7.12'],
+  ['23/11/2026 07:58:12', 'Sistema', 'Consultou transações do conector', 'Atlas Payments', 'Boa Vista · conector em especificação', 'Falha', '—'],
+  ['23/11/2026 07:30:02', P[2], 'Entrou na plataforma', 'Atlas Core', 'Sessão web · 2FA', 'Sucesso', '177.84.12.77'],
+  ['22/11/2026 22:04:47', P[5], 'Ajustou estoque', 'Atlas Postos', 'Água mineral 500 ml · −6 un · ' + E, 'Sucesso', '10.0.4.30'],
+  ['22/11/2026 18:40:10', 'Não identificado', 'Tentativa de acesso', 'Atlas Core', '5ª senha incorreta · conta bloqueada', 'Negado', '200.153.9.4'],
+  ['22/11/2026 17:15:00', P[0], 'Convidou usuário', 'Atlas Core', 'novo.operador@' + org.domain, 'Sucesso', '177.84.12.40'],
+  ['22/11/2026 16:02:44', P[0], 'Alterou preço de combustível', 'Atlas Postos', 'Gasolina comum · R$ 6,19 → R$ 6,29', 'Sucesso', '177.84.12.40'],
+  ['22/11/2026 11:20:09', P[4], 'Exportou relatório', 'Atlas Contábil', 'Balancete 10/2026', 'Sucesso', '189.40.7.12']
+];
+const CFG_DEFAULT = (org) => ({ name: org.name, domain: org.domain || '', tz: 'America/Sao_Paulo (UTC−3)', lang: 'Português (Brasil)', mfa: true, lock: true, session: '8 horas', sso: 'Desativado', retention: '5 anos', approve: true, nOps: true, nDaily: false, nCert: true });
+
+class Component extends DCLogic {
+  state = { q: '', f: {}, drawer: null, modal: null, form: {}, tried: false, addOrg: [], addComp: {}, addEst: {}, orgSt: {}, estSt: {}, relSt: {}, addRel: [], grantSt: {}, addGrant: [], modSeg: 'all', requested: {}, cfg: null, cfgSaved: null };
+  renderVals() {
+    const s = this.state, p = this.props;
+    const ctx = p.ctx || { tree: [] }, notify = p.notify || (() => {}), navigate = p.navigate || (() => {}), setCtx = p.setCtx || (() => {});
+    const tree = ctx.tree || [];
+    const view = p.view || 'organizacoes';
+    const org = tree.find((o) => o.id === ctx.orgId) || tree[0] || { id: 'x', name: '', short: '', companies: [], mods: [] };
+    const companiesOf = (o) => o.companies || [];
+    const estabsOf = (o) => companiesOf(o).flatMap((c) => (c.estabs || []).map((e) => ({ e, c })));
+    const estSt = (e) => e.status;
+    const fv = (id, def) => (s.f[id] == null ? def : s.f[id]);
+    const setF = (id) => (ev) => this.setState({ f: { ...s.f, [id]: ev.target.value } });
+    const q = s.q.trim().toLowerCase();
+    const match = (arr) => !q || arr.join(' ').toLowerCase().includes(q);
+    const act = (label, run, kind) => ({ label, run, bg: kind === 'primary' ? '#2D5BD8' : kind === 'danger' ? 'var(--a1-err-bg,#FBEAE8)' : 'var(--a1-surface,#fff)', fg: kind === 'primary' ? '#fff' : kind === 'danger' ? 'var(--a1-err-fg,#9E2F27)' : 'var(--a1-text,#15171C)', border: kind === 'primary' ? '#2D5BD8' : kind === 'danger' ? 'var(--a1-err-border,#F0C4BF)' : 'var(--a1-field-border,#DCDBD5)' });
+    const close = () => this.setState({ drawer: null });
+    const store = ctx.store || {};
+    const edit = (type, id, form) => this.setState({ drawer: null, modal: type, editId: id, form, tried: false });
+    let h = { eyebrow: 'Atlas Core', title: '', sub: '', primary: null, secondary: null, banner: null, bannerIcon: 'shield-check' };
+    let L = null, d = null, m = null;
+    let modal = null;
+    const list = (cfg) => {
+      const rows = cfg.rows.filter((r) => match(r.search) && cfg.filters.every((f) => f.test(r)));
+      return { ph: cfg.ph, minW: cfg.minW || '860px', cols: cfg.cols, count: rows.length + ' de ' + cfg.rows.length + ' registros', empty: rows.length === 0,
+        filters: cfg.filters.map((f) => ({ value: fv(f.id, f.options[0]), options: f.options, onChange: setF(f.id) })),
+        rows: rows.map((r) => ({ cells: r.cells, open: r.open })) };
+    };
+    const flt = (id, options, get) => ({ id, options, test: (r) => { const v = fv(id, options[0]); return v === options[0] || get(r) === v; } });
+
+    if (view === 'organizacoes') {
+      const orgs = tree;
+      h = { ...h, eyebrow: 'Atlas Core · Plataforma', title: 'Organizações', sub: 'Organizações das quais você participa · ' + orgs.length + ' no total', primary: 'Nova organização',
+        banner: 'Uma organização reúne empresas, estabelecimentos, usuários e contratos. Você participa de ' + orgs.length + ' organizações; os dados de cada uma ficam isolados — para operar em outra, troque o contexto no cabeçalho.', bannerIcon: 'network' };
+      const rows = orgs.map((o) => {
+        const st = o.status; const comps = companiesOf(o); const ne = estabsOf(o).length; const nm = (o.mods || []).length;
+        return { search: [o.name, o.type, o.plan], st, cells: [txt(o.name, o.type + (o.id === ctx.orgId ? ' · contexto ativo' : ''), { w: 600 }), txt(MY_ROLE[o.id] || 'Administrador'), txt(comps.length), txt(ne), txt(o.users || 1), txt(nm + ' de 12'), txt(o.plan), bdg(st)],
+          open: () => this.setState({ drawer: { t: 'org', id: o.id } }) };
+      });
+      L = list({ ph: 'Buscar organização', cols: ['Organização', 'Seu papel', 'Empresas', 'Estab.', 'Usuários', 'Módulos', 'Plano', 'Situação'], rows, filters: [flt('st', ['Todas as situações', 'Ativa', 'Implantação', 'Suspensa'], (r) => r.st)] });
+      if (s.drawer && s.drawer.t === 'org') {
+        const o = orgs.find((x) => x.id === s.drawer.id);
+        if (o) {
+          const st = o.status; const [bBg, bFg] = TONE(st); const active = o.id === ctx.orgId;
+          d = { kind: 'Organização', title: o.name, sub: o.type, badge: st, bBg, bFg, sections: [
+            { title: 'Dados da organização', rows: [kv('CNPJ responsável', o.doc, true), kv('Plano', o.plan), kv('Cliente desde', o.since), kv('Seu papel', MY_ROLE[o.id] || 'Administrador'), kv('Usuários', o.users || 1), kv('Contexto', active ? 'Organização ativa' : 'Inativa nesta sessão')] },
+            { title: 'Empresas', items: companiesOf(o).length ? companiesOf(o).map((c) => { const [b1, b2] = TONE(c.status); return { t: c.name, s: 'CNPJ-base ' + c.cnpjBase + ' · ' + (c.estabs || []).length + ' estabelecimento(s)', badge: c.status, bBg: b1, bFg: b2 }; }) : [{ t: 'Nenhuma empresa cadastrada', s: 'Cadastre a primeira empresa após concluir a implantação.', badge: '' }] },
+            { title: 'Usuários vinculados', items: (ORG_USERS[o.id] || [['Mariana Lopes', 'Administrador · Toda a organização']]).map(([n, r]) => ({ t: n, s: r, badge: '' })) },
+            { title: 'Módulos disponíveis', chips: CATALOG.map((c) => { const on = (o.mods || []).includes(c[0]); return { label: c[1], icon: on ? 'check' : 'lock', bg: on ? 'var(--a1-ok-bg,#E6F4EC)' : 'var(--a1-bg,#F5F5F2)', fg: on ? 'var(--a1-ok-fg,#1B6E4A)' : 'var(--a1-text-4,#8A8D95)', border: on ? 'var(--a1-ok-border,#CDEBD9)' : 'var(--a1-border,#E6E5E0)' }; }) }],
+            actions: [
+              act(st === 'Suspensa' ? 'Reativar' : 'Suspender', () => { if (active && st !== 'Suspensa') return notify('Não é possível suspender a organização ativa. Troque o contexto primeiro.', 'warn'); store.updateOrg(o.id, { status: st === 'Suspensa' ? 'Ativa' : 'Suspensa' }); notify('Organização ' + (st === 'Suspensa' ? 'reativada' : 'suspensa') + ': ' + o.name + (st === 'Suspensa' ? '' : '. Ela sai do seletor de contexto.'), st === 'Suspensa' ? 'success' : 'warn'); }, st === 'Suspensa' ? null : 'danger'),
+              act('Editar', () => edit('organizacoes', o.id, { name: o.name, type: o.type, doc: o.doc, plan: o.plan })),
+              act('Gerenciar módulos', () => { if (st === 'Suspensa') return notify('Reative a organização primeiro.', 'warn'); if (!active) setCtx(o.id); navigate('core:modulos'); }),
+              act(active ? 'Organização ativa' : 'Tornar contexto ativo', () => { if (active) return close(); if (st === 'Suspensa') return notify('Reative a organização para usá-la como contexto.', 'warn'); close(); setCtx(o.id); }, 'primary')] };
+        }
+      }
+      modal = { title: s.editId ? 'Editar organização' : 'Nova organização', sub: 'A organização nasce isolada: empresas, usuários e dados não são compartilhados com outras organizações.', submit: s.editId ? 'Salvar alterações' : 'Criar organização', fields: [
+        { key: 'name', label: 'Nome da organização', ph: 'Ex.: Rede Bandeirantes', req: true },
+        { key: 'type', label: 'Tipo', options: ['Rede de postos', 'Posto independente', 'Escritório contábil e gestão', 'Empresa de varejo'] },
+        { key: 'doc', label: 'CNPJ responsável', ph: '00.000.000/0001-00', req: true, re: /^\d{2}\.?\d{3}\.?\d{3}\/?\d{4}-?\d{2}$/, reMsg: 'CNPJ inválido' },
+        { key: 'plan', label: 'Plano', options: ['Atlas One Start', 'Atlas One Business', 'Atlas One Enterprise'] },
+        ...(s.editId ? [] : [{ key: 'admin', label: 'E-mail do administrador', ph: 'admin@empresa.com.br', req: true, re: /^\S+@\S+\.\S+$/, reMsg: 'E-mail inválido' }])],
+        done: (fm) => { const short = fm.name.length > 22 ? fm.name.split(' ').slice(0, 2).join(' ') : fm.name; if (s.editId) { store.updateOrg(s.editId, { name: fm.name, short, type: fm.type, doc: fm.doc, plan: fm.plan }); return notify('Organização atualizada: ' + fm.name, 'success'); } store.addOrg({ id: 'n' + Date.now(), name: fm.name, short, initials: fm.name.split(' ').filter((w) => w.length > 2).map((w) => w[0]).slice(0, 2).join('').toUpperCase() || 'NO', type: fm.type, doc: fm.doc, plan: fm.plan, domain: fm.admin.split('@')[1] || '' }); notify('Organização criada e já disponível no seletor de contexto. Convite enviado para ' + fm.admin, 'success'); } };
+    }
+
+    if (view === 'empresas') {
+      const comps = companiesOf(org);
+      h = { ...h, eyebrow: 'Atlas Core · ' + org.short, title: 'Empresas', sub: org.name + ' · ' + comps.length + ' empresas', primary: 'Nova empresa',
+        banner: 'Exibindo apenas as empresas de ' + org.name + '. Uma organização pode ter várias empresas, e cada empresa possui uma matriz e suas filiais.', bannerIcon: 'building-2' };
+      const rows = comps.map((c) => {
+        const es = c.estabs || []; const nf = es.filter((e) => e.type === 'Filial').length; const nm = es.length - nf;
+        return { search: [c.name, c.fantasia, c.cnpjBase], reg: c.regime, st: c.status, cells: [txt(c.name, c.fantasia, { w: 600 }), txt(c.cnpjBase, '', { mono: true }), txt(c.regime), txt(nm + ' matriz · ' + nf + (nf === 1 ? ' filial' : ' filiais')), txt(org.short), bdg(c.status)],
+          open: () => this.setState({ drawer: { t: 'emp', id: c.id } }) };
+      });
+      L = list({ ph: 'Razão social, fantasia ou CNPJ-base', cols: ['Razão social', 'CNPJ-base', 'Regime tributário', 'Estabelecimentos', 'Organização', 'Situação'], rows,
+        filters: [flt('reg', ['Todos os regimes', 'Simples Nacional', 'Lucro Presumido', 'Lucro Real'], (r) => r.reg), flt('st', ['Todas as situações', 'Ativa', 'Implantação', 'Inativa'], (r) => r.st)] });
+      if (s.drawer && s.drawer.t === 'emp') {
+        const c = comps.find((x) => x.id === s.drawer.id);
+        if (c) {
+          const [bBg, bFg] = TONE(c.status);
+          d = { kind: 'Empresa', title: c.name, sub: c.fantasia, badge: c.status, bBg, bFg, sections: [
+            { title: 'Identificação', rows: [kv('Razão social', c.name), kv('Nome fantasia', c.fantasia), kv('CNPJ-base', c.cnpjBase, true), kv('Regime tributário', c.regime)] },
+            { title: 'Relação com a organização', rows: [kv('Organização', org.name), kv('Vínculo', 'Empresa da organização'), kv('Contexto', ctx.companyId === c.id ? 'Empresa ativa' : '—')] },
+            { title: 'Estabelecimentos', items: (c.estabs || []).length ? c.estabs.map((e) => { const st = estSt(e); const [b1, b2] = TONE(st); return { t: e.name, s: e.type + ' · ' + e.cnpj, badge: st, bBg: b1, bFg: b2 }; }) : [{ t: 'Nenhum estabelecimento', s: 'Cadastre a matriz para iniciar a operação.', badge: '' }] }],
+            actions: [act('Novo estabelecimento', () => this.setState({ drawer: null, modal: 'estab', editId: null, tried: false, form: { comp: c.fantasia, type: (c.estabs || []).length ? 'Filial' : 'Matriz' } })),
+              act(c.status === 'Inativa' ? 'Reativar empresa' : 'Desativar empresa', () => { const ns = c.status === 'Inativa' ? 'Ativa' : 'Inativa'; store.updateCompany(org.id, c.id, { status: ns }); notify('Empresa ' + (ns === 'Ativa' ? 'reativada' : 'desativada') + ': ' + c.fantasia + (ns === 'Inativa' ? '. Ela e seus estabelecimentos saem do seletor de contexto.' : ''), ns === 'Ativa' ? 'success' : 'warn'); }, c.status === 'Inativa' ? null : 'danger'),
+              act('Editar', () => edit('empresas', c.id, { name: c.name, fantasia: c.fantasia, cnpjBase: c.cnpjBase, regime: c.regime })),
+              act('Definir como contexto', () => { if (c.status === 'Inativa') return notify('Reative a empresa para usá-la como contexto.', 'warn'); close(); setCtx(org.id, c.id, 'all'); }, 'primary')] };
+        }
+      }
+      modal = { title: s.editId ? 'Editar empresa' : 'Nova empresa', sub: 'A empresa será vinculada à organização ' + org.name + '.', submit: s.editId ? 'Salvar alterações' : 'Cadastrar empresa', fields: [
+        { key: 'name', label: 'Razão social', ph: 'Ex.: Auto Posto Exemplo Ltda', req: true },
+        { key: 'fantasia', label: 'Nome fantasia', ph: 'Ex.: Posto Exemplo', req: true },
+        { key: 'cnpjBase', label: 'CNPJ-base (8 dígitos)', ph: '00.000.000', req: true, re: /^\d{2}\.?\d{3}\.?\d{3}$/, reMsg: 'Informe os 8 primeiros dígitos do CNPJ' },
+        { key: 'regime', label: 'Regime tributário', options: ['Simples Nacional', 'Lucro Presumido', 'Lucro Real'] }],
+        done: (fm) => { if (s.editId) { store.updateCompany(org.id, s.editId, { name: fm.name, fantasia: fm.fantasia, cnpjBase: fm.cnpjBase, regime: fm.regime }); return notify('Empresa atualizada: ' + fm.name, 'success'); } store.addCompany(org.id, { id: 'c' + Date.now(), name: fm.name, fantasia: fm.fantasia, cnpjBase: fm.cnpjBase, regime: fm.regime, status: 'Ativa', estabs: [] }); notify('Empresa cadastrada em ' + org.short + ' e já disponível no seletor: ' + fm.name, 'success'); } };
+    }
+
+    if (view === 'estabelecimentos' || s.modal === 'estab') {
+      const comps = companiesOf(org);
+      const all = estabsOf(org);
+      if (view === 'estabelecimentos') {
+        h = { ...h, eyebrow: 'Atlas Core · ' + org.short, title: 'Estabelecimentos', sub: org.name + ' · ' + all.length + ' estabelecimentos', primary: 'Novo estabelecimento',
+          banner: 'Estabelecimentos de ' + org.name + '. A matriz e as filiais compartilham o CNPJ-base da empresa; cada uma tem inscrições, endereço e situação operacional próprios.', bannerIcon: 'map-pin' };
+        const compOpts = ['Todas as empresas'].concat(comps.map((c) => c.fantasia));
+        const rows = all.map(({ e, c }) => { const st = estSt(e);
+          return { search: [e.name, e.cnpj, e.city, c.name], comp: c.fantasia, type: e.type, st, cells: [txt(e.name, e.city, { w: 600 }), bdg(e.type, e.type === 'Matriz' ? ['var(--a1-info-bg,#EAF0FD)', 'var(--a1-accent-text,#2D5BD8)'] : ['var(--a1-muted,#F1F0EC)', 'var(--a1-text-2s,#4A4D55)']), txt(c.fantasia, c.cnpjBase), txt(e.cnpj, '', { mono: true }), txt('IE ' + e.ie, 'IM ' + e.im), bdg(st)],
+            open: () => this.setState({ drawer: { t: 'est', id: e.id } }) }; });
+        if (s.f.comp == null && ctx.companyId && ctx.companyId !== 'all') { const cc = comps.find((x) => x.id === ctx.companyId); if (cc) s.f.comp = cc.fantasia; }
+        L = list({ ph: 'Nome, CNPJ ou cidade', minW: '920px', cols: ['Estabelecimento', 'Tipo', 'Empresa', 'CNPJ', 'Inscrições', 'Situação operacional'], rows,
+          filters: [flt('comp', compOpts, (r) => r.comp), flt('type', ['Matriz e filiais', 'Matriz', 'Filial'], (r) => r.type), flt('st', ['Todas as situações', 'Ativo', 'Implantação', 'Suspenso'], (r) => r.st)] });
+        if (s.drawer && s.drawer.t === 'est') {
+          const it = all.find((x) => x.e.id === s.drawer.id);
+          if (it) {
+            const { e, c } = it; const st = estSt(e); const [bBg, bFg] = TONE(st);
+            d = { kind: 'Estabelecimento · ' + e.type, title: e.name, sub: c.name, badge: st, bBg, bFg, sections: [
+              { title: 'Identificação', rows: [kv('Tipo', e.type), kv('Empresa', c.name), kv('CNPJ', e.cnpj, true), kv('Organização', org.name)] },
+              { title: 'Inscrições', rows: [kv('Inscrição estadual', e.ie, true), kv('Inscrição municipal', e.im, true)] },
+              { title: 'Endereço', rows: [kv('Logradouro', e.addr), kv('Cidade · UF', e.city)] },
+              { title: 'Contatos', rows: [kv('Telefone', e.phone), kv('E-mail', e.email)] },
+              { title: 'Situação operacional', rows: [kv('Situação', st), kv('Módulos em uso', e.posto ? 'Postos · PDV · Payments · Fiscal' : 'Financeiro · Contábil · Documents')] }],
+              actions: [act(st === 'Suspenso' ? 'Reativar operação' : 'Suspender operação', () => { const ns = st === 'Suspenso' ? 'Ativo' : 'Suspenso'; store.updateEstab(org.id, e.id, { status: ns }); notify('Operação ' + (ns === 'Ativo' ? 'reativada' : 'suspensa') + ': ' + e.name + (ns === 'Suspenso' && ctx.estabId === e.id ? '. O contexto foi ajustado automaticamente.' : ''), ns === 'Ativo' ? 'success' : 'warn'); }, st === 'Suspenso' ? null : 'danger'),
+                act('Editar', () => edit('estab', e.id, { name: e.name, comp: c.fantasia, type: e.type, cnpj: e.cnpj, ie: e.ie, im: e.im, city: e.city, addr: e.addr })),
+                act('Definir como contexto', () => { if (st === 'Suspenso') return notify('Reative a operação para usar este estabelecimento como contexto.', 'warn'); if (c.status === 'Inativa') return notify('A empresa ' + c.fantasia + ' está inativa.', 'warn'); close(); setCtx(org.id, c.id, e.id); }, 'primary')] };
+          }
+        }
+      }
+      const estabModal = { title: s.editId ? 'Editar estabelecimento' : 'Novo estabelecimento', sub: 'Matriz ou filial de uma empresa de ' + org.name + '.', submit: s.editId ? 'Salvar alterações' : 'Cadastrar estabelecimento', fields: [
+        { key: 'name', label: 'Nome do estabelecimento', ph: 'Ex.: Posto Jardim', req: true },
+        ...(s.editId ? [] : [{ key: 'comp', label: 'Empresa', options: comps.filter((c) => c.status !== 'Inativa').map((c) => c.fantasia) }]),
+        { key: 'type', label: 'Tipo', options: ['Filial', 'Matriz'] },
+        { key: 'cnpj', label: 'CNPJ completo', ph: '00.000.000/0002-00', req: true, re: /^\d{2}\.?\d{3}\.?\d{3}\/?\d{4}-?\d{2}$/, reMsg: 'CNPJ inválido' },
+        { key: 'ie', label: 'Inscrição estadual', ph: 'Número ou Isento' },
+        { key: 'im', label: 'Inscrição municipal', ph: 'Número' },
+        { key: 'city', label: 'Cidade · UF', ph: 'Ex.: Franca · SP', req: true },
+        { key: 'addr', label: 'Endereço', ph: 'Logradouro, número' }],
+        done: (fm) => { if (s.editId) { store.updateEstab(org.id, s.editId, { name: fm.name, type: fm.type, cnpj: fm.cnpj, ie: fm.ie || '—', im: fm.im || '—', city: fm.city, addr: fm.addr }); return notify('Estabelecimento atualizado: ' + fm.name, 'success'); } const c = comps.filter((x) => x.status !== 'Inativa').find((x) => x.fantasia === fm.comp) || comps.find((x) => x.status !== 'Inativa'); if (!c) return notify('Cadastre ou reative uma empresa antes do estabelecimento.', 'warn');
+          store.addEstab(org.id, c.id, { id: 'e' + Date.now(), name: fm.name, type: fm.type, cnpj: fm.cnpj, ie: fm.ie || '—', im: fm.im || '—', city: fm.city, addr: fm.addr, phone: '', email: '', status: 'Implantação', posto: true }); notify('Estabelecimento cadastrado em ' + c.fantasia + ' e já disponível no seletor: ' + fm.name, 'success'); } };
+      if (view === 'estabelecimentos' || s.modal === 'estab') modal = s.modal === 'estab' || view === 'estabelecimentos' ? estabModal : modal;
+    }
+
+    if (view === 'relacionamentos') {
+      const isOffice = org.id === 'cci';
+      const all = REL.concat(s.addRel).map((r, i) => ({ r, i, st: s.relSt[i] || r[6] })).filter(({ r }) => isOffice || r[2] === org.id);
+      const orgName = (id) => (tree.find((o) => o.id === id) || {}).name || 'Fora da plataforma';
+      h = { ...h, eyebrow: 'Atlas Core · ' + org.short, title: 'Relacionamentos contábeis', sub: isOffice ? 'Empresas atendidas pela CCI Consultoria · ' + all.length : 'Escritórios com acesso contábil a ' + org.name, primary: isOffice ? 'Novo relacionamento' : null,
+        banner: isOffice ? 'O relacionamento contábil permite que o escritório acesse dados de empresas clientes, inclusive de outras organizações, somente após aceite e dentro do escopo autorizado.' : 'Escritórios contábeis só acessam os dados de ' + org.short + ' com aceite da organização e dentro do escopo autorizado. O acesso pode ser revogado a qualquer momento.', bannerIcon: 'handshake' };
+      const rows = all.map(({ r, i, st }) => ({ search: [r[0], r[1], r[3], r[4]], st,
+        cells: isOffice ? [txt(r[0], r[1], { w: 600 }), txt(orgName(r[2])), txt(r[3]), txt(r[4]), txt(r[5]), bdg(st)] : [txt('CCI Consultoria', 'Escritório contábil', { w: 600 }), txt(r[0], r[1]), txt(r[3]), txt(r[4]), txt(r[5]), bdg(st)],
+        open: () => this.setState({ drawer: { t: 'rel', id: i } }) }));
+      L = list({ ph: 'Empresa, CNPJ ou responsável', cols: isOffice ? ['Empresa cliente', 'Organização do cliente', 'Serviços', 'Responsável', 'Desde', 'Situação'] : ['Escritório', 'Empresa atendida', 'Serviços', 'Responsável', 'Desde', 'Situação'], rows,
+        filters: [flt('st', ['Todas as situações', 'Ativo', 'Aguardando aceite', 'Encerrado'], (r) => r.st)] });
+      if (s.drawer && s.drawer.t === 'rel') {
+        const it = all.find((x) => x.i === s.drawer.id);
+        if (it) {
+          const { r, i, st } = it; const [bBg, bFg] = TONE(st); const svc = r[3].split(' · ');
+          const scope = [['Escrituração contábil', svc.includes('Contábil')], ['Documentos fiscais e apuração', svc.includes('Fiscal')], ['Folha e departamento pessoal', svc.includes('DP')], ['Financeiro (somente leitura)', svc.includes('Contábil')], ['Vendas e operação do posto', false]];
+          d = { kind: 'Relacionamento contábil', title: r[0], sub: 'CCI Consultoria · ' + r[3], badge: st, bBg, bFg, sections: [
+            { title: 'Partes', rows: [kv('Escritório', 'CCI Consultoria'), kv('Empresa cliente', r[0]), kv('CNPJ', r[1], true), kv('Organização do cliente', orgName(r[2]))] },
+            { title: 'Escopo de acesso autorizado', chips: scope.map(([l, on]) => ({ label: l, icon: on ? 'check' : 'minus', bg: on ? 'var(--a1-ok-bg,#E6F4EC)' : 'var(--a1-bg,#F5F5F2)', fg: on ? 'var(--a1-ok-fg,#1B6E4A)' : 'var(--a1-text-4,#8A8D95)', border: on ? 'var(--a1-ok-border,#CDEBD9)' : 'var(--a1-border,#E6E5E0)' })) },
+            { title: 'Consentimento', rows: [kv('Responsável no escritório', r[4]), kv('Desde', r[5]), kv('Aceite', st === 'Aguardando aceite' ? 'Pendente' : st === 'Encerrado' ? 'Revogado' : 'Registrado pela organização do cliente')] }],
+            actions: (st === 'Aguardando aceite' && !isOffice ? [act('Aceitar relacionamento', () => { this.setState({ relSt: { ...s.relSt, [i]: 'Ativo' } }); notify('Relacionamento aceito. A CCI Consultoria passa a acessar o escopo autorizado.', 'success'); }, 'primary')] : [])
+              .concat(st !== 'Encerrado' ? [act(isOffice ? 'Encerrar relacionamento' : 'Revogar acesso', () => { this.setState({ relSt: { ...s.relSt, [i]: 'Encerrado' } }); notify('Relacionamento encerrado: ' + r[0], 'warn'); }, 'danger')] : [act('Fechar', close)]) };
+        }
+      }
+      modal = { title: 'Novo relacionamento contábil', sub: 'A empresa cliente receberá um pedido de aceite antes de qualquer acesso aos dados.', submit: 'Enviar pedido de aceite', fields: [
+        { key: 'name', label: 'Empresa cliente', ph: 'Razão social', req: true },
+        { key: 'cnpj', label: 'CNPJ', ph: '00.000.000/0001-00', req: true, re: /^\d{2}\.?\d{3}\.?\d{3}\/?\d{4}-?\d{2}$/, reMsg: 'CNPJ inválido' },
+        { key: 'svc', label: 'Serviços', options: ['Contábil · Fiscal · DP', 'Contábil · Fiscal', 'Fiscal', 'DP'] },
+        { key: 'resp', label: 'Responsável', options: ['Fernanda Lima', 'Rodrigo Teles'] }],
+        done: (fm) => { this.setState({ addRel: s.addRel.concat([[fm.name, fm.cnpj, null, fm.svc, fm.resp, '11/2026', 'Aguardando aceite']]) }); notify('Pedido de aceite enviado para ' + fm.name, 'success'); } };
+    }
+
+    if (view === 'compartilhamento') {
+      const all = GRANTS.concat(s.addGrant).map((g, i) => ({ g, i, st: s.grantSt[i] || g[6] })).filter(({ g }) => g[0] === org.id);
+      h = { ...h, eyebrow: 'Atlas Core · ' + org.short, title: 'Compartilhamento de dados', sub: 'Concessões feitas por ' + org.name, primary: 'Novo compartilhamento',
+        banner: 'Os dados pertencem à organização. Nada é compartilhado com outras organizações, escritórios ou conectores sem uma concessão explícita, com finalidade e validade definidas.', bannerIcon: 'share-2' };
+      const rows = all.map(({ g, i, st }) => ({ search: [g[1], g[2], g[3], g[4]], st, cells: [txt(g[1], g[4], { w: 600 }), txt(g[2]), txt(g[3]), txt(g[5]), bdg(st)], open: () => this.setState({ drawer: { t: 'grant', id: i } }) }));
+      L = list({ ph: 'Dados, origem ou destinatário', cols: ['Dados compartilhados', 'Origem', 'Destinatário', 'Validade', 'Situação'], rows,
+        filters: [flt('st', ['Todas as situações', 'Ativo', 'Pendente', 'Expira em breve', 'Revogado'], (r) => r.st)] });
+      if (s.drawer && s.drawer.t === 'grant') {
+        const it = all.find((x) => x.i === s.drawer.id);
+        if (it) {
+          const { g, i, st } = it; const [bBg, bFg] = TONE(st);
+          d = { kind: 'Compartilhamento', title: g[1], sub: g[3], badge: st, bBg, bFg, sections: [
+            { title: 'Concessão', rows: [kv('Proprietário dos dados', org.name), kv('Origem', g[2]), kv('Destinatário', g[3]), kv('Finalidade', g[4]), kv('Validade', g[5]), kv('Aprovação', st === 'Pendente' ? 'Aguardando aprovação do administrador' : 'Aprovado por Mariana Lopes')] }],
+            actions: st === 'Revogado' ? [act('Fechar', close)] : [act('Revogar', () => { this.setState({ grantSt: { ...s.grantSt, [i]: 'Revogado' } }); notify('Compartilhamento revogado: ' + g[1] + ' → ' + g[3], 'warn'); }, 'danger')].concat(st === 'Pendente' || st === 'Expira em breve' ? [act(st === 'Pendente' ? 'Aprovar' : 'Renovar por 1 ano', () => { this.setState({ grantSt: { ...s.grantSt, [i]: 'Ativo' } }); notify('Compartilhamento ' + (st === 'Pendente' ? 'aprovado' : 'renovado') + '.', 'success'); }, 'primary')] : []) };
+        }
+      }
+      modal = { title: 'Novo compartilhamento', sub: 'Defina quais dados, para quem, com qual finalidade e por quanto tempo.', submit: 'Enviar para aprovação', fields: [
+        { key: 'data', label: 'Dados', options: ['Vendas e documentos fiscais', 'Extratos bancários', 'Folha de pagamento', 'Indicadores consolidados (BI)', 'Transações de cartão'] },
+        { key: 'origin', label: 'Origem', options: ['Todas as empresas'].concat(companiesOf(org).map((c) => c.name)) },
+        { key: 'dest', label: 'Destinatário', ph: 'Organização, escritório ou conector', req: true },
+        { key: 'purpose', label: 'Finalidade', ph: 'Ex.: Auditoria anual', req: true },
+        { key: 'valid', label: 'Validade', options: ['6 meses', '1 ano', 'Indeterminada'] }],
+        done: (fm) => { this.setState({ addGrant: s.addGrant.concat([[org.id, fm.data, fm.origin, fm.dest, fm.purpose, fm.valid, 'Pendente']]) }); notify('Compartilhamento enviado para aprovação.', 'info'); } };
+    }
+
+    if (view === 'auditoria') {
+      const E = ctx.firstPosto || (ctx.estabs || [])[0] || org.short;
+      const all = auditFor(org, PEOPLE[org.id] || PEOPLE.cci, E);
+      h = { ...h, eyebrow: 'Atlas Core · ' + org.short, title: 'Auditoria', sub: 'Registro imutável de ações em ' + org.name, secondary: 'Exportar CSV',
+        banner: 'Cada ação registra usuário, módulo, registro afetado e resultado. O log é por organização e não pode ser editado nem excluído.', bannerIcon: 'scroll-text' };
+      const rows = all.map((a, i) => ({ search: a, mod: a[3], res: a[5], cells: [txt(a[0], '', { mono: true }), txt(a[1], '', { w: 550 }), txt(a[2]), txt(a[3]), txt(a[4], '', { wrap: true }), bdg(a[5])], open: () => this.setState({ drawer: { t: 'aud', id: i } }) }));
+      L = list({ ph: 'Usuário, ação ou registro', minW: '980px', cols: ['Data e hora', 'Usuário', 'Ação executada', 'Módulo', 'Registro afetado', 'Resultado'], rows,
+        filters: [flt('mod', ['Todos os módulos', 'Atlas Core', 'Atlas Postos', 'Atlas PDV', 'Atlas Payments', 'Atlas Financeiro', 'Atlas Fiscal', 'Atlas Contábil', 'Atlas Integrations'], (r) => r.mod), flt('res', ['Todos os resultados', 'Sucesso', 'Negado', 'Falha'], (r) => r.res)] });
+      if (s.drawer && s.drawer.t === 'aud') {
+        const a = all[s.drawer.id];
+        if (a) { const [bBg, bFg] = TONE(a[5]);
+          d = { kind: 'Evento de auditoria', title: a[2], sub: a[0], badge: a[5], bBg, bFg, sections: [
+            { title: 'Evento', rows: [kv('Usuário', a[1]), kv('Módulo', a[3]), kv('Registro afetado', a[4]), kv('Resultado', a[5])] },
+            { title: 'Origem', rows: [kv('Organização', org.name), kv('Estabelecimento', a[3] === 'Atlas Core' ? '—' : E), kv('Endereço IP', a[6], true), kv('Dispositivo', a[6] && a[6].startsWith('10.') ? 'Terminal PDV' : 'Navegador web'), kv('ID de correlação', 'evt_' + (918204 + s.drawer.id * 37).toString(36), true)] }],
+            actions: [act('Fechar', close)] }; }
+      }
+    }
+
+    if (view === 'modulos') {
+      const mods = org.mods || [];
+      const [plan, stt, renew, used, tot] = SUBS[org.id] || ['Atlas One Start', 'Ativa', '—', 1, 5];
+      const [sBg, sFg] = TONE(stt === 'Em implantação' ? 'Implantação' : stt);
+      h = { ...h, eyebrow: 'Atlas Core · ' + org.short, title: 'Módulos e assinaturas', sub: org.name + ' · ' + plan,
+        banner: 'Contratação e permissão são independentes: a organização contrata os módulos; o papel de cada usuário define o que ele pode fazer dentro deles.', bannerIcon: 'puzzle' };
+      const seg = s.modSeg;
+      const catalog = CATALOG.filter((c) => seg === 'all' || (seg === 'on') === mods.includes(c[0])).map(([id, name, icon, group, desc]) => {
+        const on = mods.includes(id); const req = s.requested[org.id + id];
+        const badge = on ? 'Contratado' : req ? 'Solicitado' : 'Não contratado'; const [bBg, bFg] = TONE(badge);
+        return { name, icon, group, desc, badge, bBg, bFg, tileBg: on ? 'var(--a1-strong,#15171C)' : 'var(--a1-muted,#F1F0EC)', tileFg: on ? '#E8A23A' : 'var(--a1-text-4,#8A8D95)',
+          action: on ? 'Acessar módulo' : req ? 'Solicitação enviada' : 'Solicitar contratação', btnBg: on ? 'var(--a1-strong,#15171C)' : 'var(--a1-surface,#fff)', btnFg: on ? '#fff' : req ? 'var(--a1-text-4,#8A8D95)' : 'var(--a1-text,#15171C)', btnBorder: on ? 'var(--a1-text,#15171C)' : 'var(--a1-field-border,#DCDBD5)',
+          run: () => { if (on) return navigate(MOD_ROUTE[id]); if (req) return; this.setState({ requested: { ...s.requested, [org.id + id]: true } }); notify('Solicitação de contratação do ' + name + ' enviada ao comercial da CCI.', 'success'); } };
+      });
+      const n = mods.length;
+      var sub = { plan, status: stt, stBg: sBg, stFg: sFg, renew, lic: used + ' de ' + tot + ' em uso', licPct: Math.round((used / tot) * 100) + '%', mods: n + ' de ' + CATALOG.length, modsNote: CATALOG.length - n ? CATALOG.length - n + ' disponíveis para contratação' : 'Todos os módulos contratados' };
+      var modSegs = [['all', 'Todos'], ['on', 'Contratados'], ['off', 'Não contratados']].map(([id, label]) => ({ label, line: seg === id ? 'var(--a1-text,#15171C)' : 'transparent', fg: seg === id ? 'var(--a1-text,#15171C)' : 'var(--a1-text-3,#7A7D85)', pick: () => this.setState({ modSeg: id }) }));
+      var cat = catalog;
+    }
+
+    if (view === 'config') {
+      const cfg = s.cfg || CFG_DEFAULT(org);
+      const saved = s.cfgSaved || CFG_DEFAULT(org);
+      h = { ...h, eyebrow: 'Atlas Core · ' + org.short, title: 'Configurações da plataforma', sub: 'Preferências de ' + org.name };
+      const set = (k, v) => this.setState({ cfg: { ...cfg, [k]: v } });
+      const T = (k, label, help) => ({ label, help, isToggle: true, track: cfg[k] ? '#2D5BD8' : 'var(--a1-track-off,#D3D2CC)', knob: cfg[k] ? '21px' : '3px', toggle: () => set(k, !cfg[k]) });
+      const S = (k, label, help, options) => ({ label, help, isSelect: true, value: cfg[k], options, onChange: (e) => set(k, e.target.value) });
+      const X = (k, label, help) => ({ label, help, isText: true, value: cfg[k], onChange: (e) => set(k, e.target.value) });
+      var cfgSections = [
+        { title: 'Organização', desc: 'Identificação exibida para todos os membros.', fields: [X('name', 'Nome de exibição', 'Aparece no seletor de contexto e nos relatórios.'), X('domain', 'Domínio de e-mail', 'Convites para outros domínios exigem aprovação do administrador.'), S('tz', 'Fuso horário', 'Usado em turnos, fechamentos de caixa e auditoria.', ['America/Sao_Paulo (UTC−3)', 'America/Cuiaba (UTC−4)', 'America/Manaus (UTC−4)']), S('lang', 'Idioma', 'Idioma padrão da interface.', ['Português (Brasil)'])] },
+        { title: 'Segurança e acesso', desc: 'Regras aplicadas a todos os usuários desta organização.', fields: [T('mfa', 'Autenticação em dois fatores obrigatória', 'Exigida no primeiro acesso de cada usuário.'), T('lock', 'Bloquear após 5 tentativas', 'A conta é bloqueada e o administrador é notificado.'), S('session', 'Expiração da sessão', 'Terminais PDV usam regra própria por turno.', ['30 minutos', '2 horas', '8 horas', '12 horas']), S('sso', 'SSO corporativo', 'Provedores dependem da etapa de especificação.', ['Desativado', 'Microsoft Entra ID (em especificação)', 'Google Workspace (em especificação)'])] },
+        { title: 'Dados e isolamento', desc: 'Como os dados desta organização são protegidos e compartilhados.', fields: [{ label: 'Isolamento entre organizações', help: 'Dados de organizações diferentes nunca são combinados. Regra da plataforma.', isLocked: true }, T('approve', 'Exigir aprovação para novos compartilhamentos', 'Concessões ficam pendentes até a aprovação de um administrador.'), S('retention', 'Retenção dos logs de auditoria', 'Período mínimo de guarda dos eventos.', ['1 ano', '5 anos', '10 anos'])] },
+        { title: 'Notificações', desc: 'Avisos enviados aos administradores.', fields: [T('nOps', 'Alertas operacionais por e-mail', 'Tanques críticos, divergências de caixa e falhas de integração.'), T('nDaily', 'Resumo diário', 'Enviado às 7h com os indicadores do dia anterior.'), T('nCert', 'Vencimento de certificados e documentos', 'Aviso com 30, 15 e 7 dias de antecedência.')] }];
+      const dirty = JSON.stringify(cfg) !== JSON.stringify(saved);
+      var cfgVals = { cfgDirtyMsg: dirty ? 'Alterações não salvas' : 'Configurações salvas', cfgDirtyColor: dirty ? 'var(--a1-warn-fg,#8A5A12)' : 'var(--a1-text-3,#7A7D85)', cfgSaveBg: dirty ? '#2D5BD8' : '#9DB4EE',
+        cfgDiscard: () => this.setState({ cfg: saved }), cfgSave: () => { if (!dirty) return; this.setState({ cfgSaved: cfg }); notify('Configurações de ' + org.short + ' salvas.', 'success'); } };
+    }
+
+    if (s.modal && modal) {
+      const fm = s.form;
+      const errOf = (f) => { if (!s.tried) return ''; const v = (fm[f.key] == null ? '' : String(fm[f.key])).trim(); if (f.req && !v) return 'Campo obrigatório'; if (f.re && v && !f.re.test(v)) return f.reMsg; return ''; };
+      m = { title: modal.title, sub: modal.sub, submit: modal.submit, fields: modal.fields.map((f) => { const err = errOf(f);
+        return { label: f.label + (f.req ? ' *' : ''), isSelect: !!f.options, isText: !f.options, options: f.options, value: fm[f.key] == null ? (f.options ? f.options[0] : '') : fm[f.key], ph: f.ph || '', err, border: err ? 'var(--a1-err-border2,#E59A92)' : 'var(--a1-field-border,#DCDBD5)',
+          onChange: (e) => this.setState({ form: { ...this.state.form, [f.key]: e.target.value } }) }; }) };
+      var submitModal = () => {
+        const full = {}; modal.fields.forEach((f) => (full[f.key] = fm[f.key] == null ? (f.options ? f.options[0] : '') : String(fm[f.key]).trim()));
+        const bad = modal.fields.some((f) => (f.req && !full[f.key]) || (f.re && full[f.key] && !f.re.test(full[f.key])));
+        if (bad) { this.setState({ tried: true }); return notify('Revise os campos destacados.', 'danger'); }
+        modal.done(full); this.setState({ modal: null, form: {}, tried: false });
+      };
+    }
+
+    return {
+      h, isList: !!L, L: L || { filters: [], cols: [], rows: [] }, q: s.q, setQ: (e) => this.setState({ q: e.target.value }),
+      clearFilters: () => this.setState({ q: '', f: { comp: 'Todas as empresas' } }),
+      isModulos: view === 'modulos', sub: sub || {}, modSegs: modSegs || [], catalog: cat || [],
+      isConfig: view === 'config', cfgSections: cfgSections || [], ...(cfgVals || {}),
+      d, closeDrawer: close,
+      m, closeModal: () => this.setState({ modal: null, editId: null, form: {}, tried: false }), submitModal: submitModal || (() => {}),
+      openCreate: () => this.setState({ modal: view === 'estabelecimentos' ? 'estab' : view, editId: null, form: {}, tried: false }),
+      secondaryRun: () => notify('Exportação gerada: auditoria_' + org.id + '_2026-11-23.csv', 'success')
+    };
+  }
+}
+
+</script>
+</body>
+</html>

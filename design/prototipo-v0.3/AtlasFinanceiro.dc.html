@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="display:flex;flex-direction:column;gap:18px;animation:a1in .2s ease">
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap">
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <div style="font-family:'Geist Mono',monospace;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--a1-text-3,#7A7D85)">Atlas Financeiro · Visão financeira</div>
+      <div style="font-size:28px;font-weight:600;letter-spacing:-.025em">Financeiro</div>
+      <div style="font-size:13.5px;color:var(--a1-text-2,#62656D)">{{ ctx.org }} · {{ ctx.estab }}</div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button onClick="{{ reconcile }}" style="height:40px;padding:0 14px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:9px;background:var(--a1-surface,#fff);font-size:13px;font-weight:550;cursor:pointer;display:flex;align-items:center;gap:8px"><x-import component="Icon" from="./Icon.js" i="git-compare-arrows" size="16" hint-size="16px,16px"></x-import>Conciliar extratos</button>
+      <button onClick="{{ newBill }}" style="height:40px;padding:0 16px;border:0;border-radius:9px;background:#2D5BD8;color:#fff;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px" style-hover="background:#2450C4"><x-import component="Icon" from="./Icon.js" i="plus" size="16" hint-size="16px,16px"></x-import>Novo lançamento</button>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px">
+    <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
+      <div style="background:var(--a1-surface,#fff);border:1px solid var(--a1-border,#E6E5E0);border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;justify-content:space-between;color:var(--a1-text-2,#62656D);font-size:13px"><span>{{ k.label }}</span><x-import component="Icon" from="./Icon.js" i="{{ k.icon }}" size="16" color="{{ k.ic }}" hint-size="16px,16px"></x-import></div>
+        <div style="font-size:25px;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums">{{ k.value }}</div>
+        <div style="font-size:12.5px;color:var(--a1-text-2,#62656D)">{{ k.foot }}</div>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;gap:14px">
+    <div style="flex:2 1 560px;min-width:0;background:var(--a1-surface,#fff);border:1px solid var(--a1-border,#E6E5E0);border-radius:12px;padding:18px 20px;display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start">
+        <div style="display:flex;flex-direction:column;gap:3px"><div style="font-size:15px;font-weight:600">Fluxo de caixa</div><div style="font-size:12.5px;color:var(--a1-text-3,#7A7D85)">Semanal · 6 semanas realizadas + 6 projetadas</div></div>
+        <div style="display:flex;gap:14px;font-size:12px;color:var(--a1-text-2,#62656D);flex-wrap:wrap"><span style="display:flex;align-items:center;gap:6px"><span style="width:9px;height:9px;border-radius:3px;background:var(--a1-ok-fg2,#1F8A5B)"></span>Entradas</span><span style="display:flex;align-items:center;gap:6px"><span style="width:9px;height:9px;border-radius:3px;background:#C8433A"></span>Saídas</span><span style="display:flex;align-items:center;gap:6px"><span style="width:14px;height:2px;background:var(--a1-strong,#15171C)"></span>Saldo</span></div>
+      </div>
+      <div style="position:relative;height:260px;display:flex;gap:8px">
+        <sc-for list="{{ flow }}" as="f" hint-placeholder-count="12">
+          <div title="{{ f.tip }}" style="flex:1;display:flex;flex-direction:column;min-width:0">
+            <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center"><div style="width:62%;height:{{ f.inH }};background:var(--a1-ok-fg2,#1F8A5B);opacity:{{ f.op }};border-radius:3px 3px 0 0"></div></div>
+            <div style="height:1px;background:var(--a1-border-strong,#C9C8C1)"></div>
+            <div style="flex:1;display:flex;flex-direction:column;align-items:center"><div style="width:62%;height:{{ f.outH }};background:#C8433A;opacity:{{ f.op }};border-radius:0 0 3px 3px"></div></div>
+            <div style="height:18px;font-family:'Geist Mono',monospace;font-size:10px;color:var(--a1-text-5,#9A9DA4);text-align:center;padding-top:4px">{{ f.l }}</div>
+          </div>
+        </sc-for>
+        <svg viewBox="0 0 1200 242" preserveAspectRatio="none" style="position:absolute;left:0;top:0;width:100%;height:242px;pointer-events:none;overflow:visible"><path d="{{ saldoPath }}" fill="none" stroke="#15171C" style="stroke:var(--a1-text,#15171C)" stroke-width="2" vector-effect="non-scaling-stroke"></path></svg>
+        <div style="position:absolute;left:50%;top:0;bottom:18px;border-left:1px dashed var(--a1-text-6,#B4B6BC)"></div>
+        <span style="position:absolute;left:calc(50% + 6px);top:0;font-size:11px;color:var(--a1-text-3,#7A7D85);background:var(--a1-surface,#fff);padding:0 4px">Hoje</span>
+      </div>
+    </div>
+    <div style="flex:1 1 320px;min-width:0;background:var(--a1-surface,#fff);border:1px solid var(--a1-border,#E6E5E0);border-radius:12px;display:flex;flex-direction:column">
+      <div style="padding:16px 20px;border-bottom:1px solid var(--a1-divider,#EFEEEA);display:flex;justify-content:space-between;align-items:center"><span style="font-size:15px;font-weight:600">Contas bancárias</span><span style="font-size:12px;color:var(--a1-text-3,#7A7D85)">5 contas</span></div>
+      <sc-for list="{{ banks }}" as="b" hint-placeholder-count="5">
+        <div style="display:flex;align-items:center;gap:12px;padding:12px 20px;border-bottom:1px solid var(--a1-divider-2,#F2F1ED)">
+          <div style="width:34px;height:34px;border-radius:9px;background:var(--a1-muted,#F1F0EC);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--a1-text-2s,#4A4D55);flex:none">{{ b.ini }}</div>
+          <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:13.5px;font-weight:550">{{ b.name }}</span><span style="font-size:11.5px;color:{{ b.recColor }}">{{ b.rec }}</span></div>
+          <span style="font-size:13.5px;font-weight:600;font-variant-numeric:tabular-nums">{{ b.bal }}</span>
+        </div>
+      </sc-for>
+      <div style="padding:14px 20px;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;justify-content:space-between;font-size:12.5px"><span style="color:var(--a1-text-2,#62656D)">Conciliação de novembro</span><span style="font-weight:600">87%</span></div>
+        <div style="height:6px;border-radius:6px;background:var(--a1-muted,#F1F0EC)"><div style="width:87%;height:100%;border-radius:6px;background:var(--a1-ok-fg2,#1F8A5B)"></div></div>
+        <span style="font-size:12px;color:var(--a1-text-3,#7A7D85)">14 lançamentos aguardando conciliação</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;gap:14px">
+    <div style="flex:2 1 560px;min-width:0;background:var(--a1-surface,#fff);border:1px solid var(--a1-border,#E6E5E0);border-radius:12px;overflow:hidden">
+      <div style="padding:0 16px;display:flex;gap:4px;border-bottom:1px solid var(--a1-divider,#EFEEEA);align-items:center;flex-wrap:wrap">
+        <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="2">
+          <button onClick="{{ t.pick }}" style="height:48px;padding:0 12px;border:0;border-bottom:2px solid {{ t.line }};background:transparent;color:{{ t.fg }};font-size:13.5px;font-weight:600;cursor:pointer;margin-bottom:-1px;display:flex;align-items:center;gap:8px">{{ t.label }}<span style="font-size:11px;padding:2px 7px;border-radius:999px;background:var(--a1-muted,#F1F0EC);color:var(--a1-text-2,#62656D)">{{ t.n }}</span></button>
+        </sc-for>
+        <div style="flex:1"></div>
+        <span style="font-size:12.5px;color:var(--a1-text-2,#62656D);padding:8px 0">Total em aberto: <b style="color:var(--a1-text,#15171C);font-variant-numeric:tabular-nums">{{ openSum }}</b></span>
+      </div>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:13px;min-width:760px">
+          <thead><tr style="background:var(--a1-surface-2,#FAFAF8);color:var(--a1-text-2,#62656D);text-align:left;font-size:12px"><th style="padding:10px 16px;font-weight:550">Vencimento</th><th style="padding:10px 14px;font-weight:550">Descrição</th><th style="padding:10px 14px;font-weight:550">Centro de custo</th><th style="padding:10px 14px;font-weight:550;text-align:right">Valor</th><th style="padding:10px 14px;font-weight:550">Situação</th><th style="padding:10px 16px"></th></tr></thead>
+          <tbody>
+            <sc-for list="{{ bills }}" as="b" hint-placeholder-count="8">
+              <tr style="border-top:1px solid var(--a1-divider-2,#F2F1ED)">
+                <td style="padding:11px 16px;font-variant-numeric:tabular-nums;color:{{ b.dueColor }};font-weight:550">{{ b.due }}</td>
+                <td style="padding:11px 14px"><div style="display:flex;flex-direction:column;gap:2px"><span style="font-weight:550">{{ b.who }}</span><span style="font-size:12px;color:var(--a1-text-3,#7A7D85)">{{ b.cat }}</span></div></td>
+                <td style="padding:11px 14px;color:var(--a1-text-2,#62656D)">{{ b.cc }}</td>
+                <td style="padding:11px 14px;text-align:right;font-variant-numeric:tabular-nums;font-weight:600">{{ b.val }}</td>
+                <td style="padding:11px 14px"><span style="font-size:11.5px;font-weight:600;padding:3px 8px;border-radius:999px;background:{{ b.stBg }};color:{{ b.stFg }};white-space:nowrap">{{ b.st }}</span></td>
+                <td style="padding:11px 16px;text-align:right"><sc-if value="{{ b.open }}" hint-placeholder-val="{{ true }}"><button onClick="{{ b.settle }}" style="height:30px;padding:0 10px;border:1px solid var(--a1-border-2,#E1E0DA);border-radius:7px;background:var(--a1-surface,#fff);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">{{ b.action }}</button></sc-if></td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div style="flex:1 1 320px;min-width:0;background:var(--a1-surface,#fff);border:1px solid var(--a1-border,#E6E5E0);border-radius:12px;padding:18px 20px;display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;flex-direction:column;gap:3px"><div style="font-size:15px;font-weight:600">Receitas x despesas</div><div style="font-size:12.5px;color:var(--a1-text-3,#7A7D85)">Por centro de custo · novembro</div></div>
+      <sc-for list="{{ ccs }}" as="c" hint-placeholder-count="5">
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;justify-content:space-between;font-size:12.5px"><span style="font-weight:550">{{ c.name }}</span><span style="font-variant-numeric:tabular-nums;color:{{ c.resColor }};font-weight:600">{{ c.res }}</span></div>
+          <div style="display:flex;flex-direction:column;gap:3px">
+            <div style="height:7px;border-radius:4px;background:var(--a1-muted,#F1F0EC)"><div style="height:100%;width:{{ c.inW }};background:var(--a1-ok-fg2,#1F8A5B);border-radius:4px"></div></div>
+            <div style="height:7px;border-radius:4px;background:var(--a1-muted,#F1F0EC)"><div style="height:100%;width:{{ c.outW }};background:#C8433A;border-radius:4px"></div></div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const brl = (v) => 'R$ ' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const brlK = (v) => 'R$ ' + Math.round(v / 1000).toLocaleString('pt-BR') + ' mil';
+const PAY = [
+  ['20/11', 'Distribuidora Rota Sul', 'Combustíveis · NF-e 48.211', 'Operação · Pista', 212400, 'today'],
+  ['21/11', 'Energia elétrica · CPFL', 'Utilidades', 'Administrativo', 18420.55, 'open'],
+  ['22/11', 'Folha de pagamento · 2ª parcela', 'Pessoal', 'Administrativo', 96300, 'open'],
+  ['18/11', 'Manutenção de bombas · TecFuel', 'Serviços', 'Operação · Pista', 4850, 'late'],
+  ['25/11', 'Distribuidora Rota Sul', 'Combustíveis · NF-e 48.244', 'Operação · Pista', 186900, 'open'],
+  ['26/11', 'Atacadão Bebidas Norte', 'Conveniência · NF-e 9.901', 'Conveniência', 12340.8, 'open'],
+  ['17/11', 'Aluguel · Posto Avenida', 'Imóveis', 'Administrativo', 22000, 'paid'],
+  ['28/11', 'DAS / tributos federais', 'Impostos', 'Fiscal', 41280.33, 'open']
+];
+const REC = [
+  ['20/11', 'Boa Vista · crédito D+30', 'Recebíveis de cartão', 'Operação · Pista', 148302.4, 'today'],
+  ['21/11', 'Boa Vista · débito D+1', 'Recebíveis de cartão', 'Operação · Pista', 62118.9, 'open'],
+  ['19/11', 'Frota Agro Sertão Ltda', 'Faturamento frota · fatura 2211', 'Comercial', 38740, 'late'],
+  ['24/11', 'Transportadora Veloz Ltda', 'Faturamento frota · fatura 2214', 'Comercial', 52210.15, 'open'],
+  ['22/11', 'Boa Vista · crédito D+30', 'Recebíveis de cartão', 'Conveniência', 21490.6, 'open'],
+  ['18/11', 'PIX liquidados', 'Vendas PIX', 'Operação · Pista', 97210.3, 'paid']
+];
+const ST = { today: ['Vence hoje', 'var(--a1-warn-bg,#FBF1DF)', 'var(--a1-warn-fg,#8A5A12)', 'var(--a1-warn-fg,#8A5A12)'], open: ['Em aberto', 'var(--a1-info-bg,#EAF0FD)', 'var(--a1-info-fg,#23459F)', 'var(--a1-text,#15171C)'], late: ['Atrasado', 'var(--a1-err-bg,#FBEAE8)', 'var(--a1-err-fg,#9E2F27)', 'var(--a1-err-fg2,#B23A31)'], paid: ['Liquidado', 'var(--a1-ok-bg,#E6F4EC)', 'var(--a1-ok-fg,#1B6E4A)', 'var(--a1-text-3,#7A7D85)'] };
+class Component extends DCLogic {
+  state = { tab: 'pay', pay: PAY, rec: REC };
+  renderVals() {
+    const s = this.state; const ctx = this.props.ctx || { org: '', estab: '' }; const notify = this.props.notify || (() => {});
+    const inV = [612, 588, 640, 671, 655, 702, 690, 715, 708, 742, 730, 760];
+    const outV = [548, 602, 571, 590, 628, 610, 655, 640, 668, 652, 690, 671];
+    let bal = 980; const bals = inV.map((v, i) => (bal += v - outV[i]));
+    const pad = (Math.max(...bals) - Math.min(...bals)) * 0.08;
+    const maxB = Math.max(...bals) + pad, minB = Math.min(...bals) - pad;
+    const saldoPath = bals.map((b, i) => (i ? 'L' : 'M') + ((i + 0.5) / 12 * 1200).toFixed(1) + ' ' + (242 - (b - minB) / (maxB - minB) * 242).toFixed(1)).join(' ');
+    const weeks = ['13/10', '20/10', '27/10', '03/11', '10/11', '17/11', '24/11', '01/12', '08/12', '15/12', '22/12', '29/12'];
+    const list = s.tab === 'pay' ? s.pay : s.rec;
+    const key = s.tab;
+    return {
+      ctx,
+      kpis: [
+        { label: 'Saldo em contas', icon: 'landmark', ic: 'var(--a1-text-5,#9A9DA4)', value: 'R$ 1.284.902', foot: '5 contas · atualizado 09:30' },
+        { label: 'A receber · 30 dias', icon: 'arrow-down-left', ic: 'var(--a1-ok-fg2,#1F8A5B)', value: 'R$ 892.410', foot: '71% recebíveis de cartão' },
+        { label: 'A pagar · 30 dias', icon: 'arrow-up-right', ic: '#C8433A', value: 'R$ 1.046.330', foot: '12 vencem nesta semana' },
+        { label: 'Resultado do mês', icon: 'trending-up', ic: 'var(--a1-text-5,#9A9DA4)', value: 'R$ 318.204', foot: 'Margem líquida de 6,6%' }
+      ],
+      flow: weeks.map((l, i) => ({ l, inH: (inV[i] / 800 * 100) + '%', outH: (outV[i] / 800 * 100) + '%', op: i < 6 ? 1 : 0.35, tip: 'Semana ' + l + ' · entradas ' + brlK(inV[i] * 1000) + ' · saídas ' + brlK(outV[i] * 1000) + (i >= 6 ? ' (projeção)' : '') })),
+      saldoPath,
+      banks: [['IT', 'Itaú · c/c 12044-7', 486210.12, 'Conciliada hoje'], ['BB', 'Banco do Brasil · c/c 8812-0', 322904.8, 'Conciliada hoje'], ['SC', 'Sicoob · c/c 40112-3', 214388.06, '6 pendências'], ['CX', 'Caixa · c/c 0931-2', 158402.34, 'Conciliada ontem'], ['BV', 'Conta de recebíveis · Boa Vista', 102997.12, '8 pendências']]
+        .map(([ini, name, b, rec]) => ({ ini, name, bal: brl(b), rec, recColor: rec.includes('pend') ? 'var(--a1-warn-fg,#8A5A12)' : 'var(--a1-text-3,#7A7D85)' })),
+      tabs: [['pay', 'Contas a pagar', s.pay], ['rec', 'Contas a receber', s.rec]].map(([id, label, arr]) => ({ label, n: arr.filter((x) => x[5] !== 'paid').length, line: s.tab === id ? 'var(--a1-text,#15171C)' : 'transparent', fg: s.tab === id ? 'var(--a1-text,#15171C)' : 'var(--a1-text-3,#7A7D85)', pick: () => this.setState({ tab: id }) })),
+      openSum: brl(list.filter((x) => x[5] !== 'paid').reduce((a, x) => a + x[4], 0)),
+      bills: list.map((b, i) => { const st = ST[b[5]]; return { due: b[0], who: b[1], cat: b[2], cc: b[3], val: brl(b[4]), st: st[0], stBg: st[1], stFg: st[2], dueColor: st[3], open: b[5] !== 'paid', action: key === 'pay' ? 'Baixar' : 'Receber',
+        settle: () => { this.setState({ [key]: s[key].map((x, j) => j === i ? [...x.slice(0, 5), 'paid'] : x) }); notify((key === 'pay' ? 'Pagamento baixado: ' : 'Recebimento registrado: ') + b[1] + ' · ' + brl(b[4]), 'success'); } }; }),
+      ccs: [['Operação · Pista', 1320, 1190], ['Conveniência', 214, 152], ['Comercial · Frotas', 186, 41], ['Administrativo', 0, 168], ['Fiscal', 0, 96]].map(([name, a, b]) => ({ name, inW: (a / 1320 * 100) + '%', outW: (b / 1320 * 100) + '%', res: (a - b >= 0 ? '+ ' : '− ') + brlK(Math.abs(a - b) * 1000), resColor: a - b >= 0 ? 'var(--a1-ok-fg,#1B6E4A)' : 'var(--a1-err-fg,#9E2F27)' })),
+      reconcile: () => notify('Importando extratos OFX das 5 contas…', 'info'),
+      newBill: () => notify('Formulário de lançamento será detalhado na próxima etapa.', 'info')
+    };
+  }
+}
+
+</script>
+</body>
+</html>

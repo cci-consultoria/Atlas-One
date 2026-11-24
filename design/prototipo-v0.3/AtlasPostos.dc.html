@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="display:flex;flex-direction:column;gap:20px;animation:a1in .2s ease">
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap">
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <div style="font-family:'Geist Mono',monospace;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--a1-text-3,#7A7D85)">Atlas Postos · Visão geral do posto</div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><div style="font-size:28px;font-weight:600;letter-spacing:-.025em">{{ estab }}</div><span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 9px;border-radius:999px;background:var(--a1-ok-bg,#E6F4EC);color:var(--a1-ok-fg,#1B6E4A)"><span style="width:6px;height:6px;border-radius:50%;background:var(--a1-ok-fg2,#1F8A5B);animation:a1pulse 1.6s infinite"></span>Em operação</span></div>
+      <div style="font-size:13.5px;color:var(--a1-text-2,#62656D)">Turno 2 · 06:00–14:00 · Supervisor de pista: Carlos Mendes</div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button onClick="{{ goNF }}" style="height:40px;padding:0 14px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:9px;background:var(--a1-surface,#fff);font-size:13px;font-weight:550;cursor:pointer;display:flex;align-items:center;gap:8px" style-hover="background:var(--a1-surface-2,#FAFAF8)"><x-import component="Icon" from="./Icon.js" i="file-input" size="16" hint-size="16px,16px"></x-import>Entrada de NF</button>
+      <button onClick="{{ goEstoque }}" style="height:40px;padding:0 14px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:9px;background:var(--a1-surface,#fff);font-size:13px;font-weight:550;cursor:pointer;display:flex;align-items:center;gap:8px" style-hover="background:var(--a1-surface-2,#FAFAF8)"><x-import component="Icon" from="./Icon.js" i="boxes" size="16" hint-size="16px,16px"></x-import>Estoque</button>
+      <button onClick="{{ goPDV }}" style="height:40px;padding:0 16px;border:0;border-radius:9px;background:var(--a1-strong,#15171C);color:#fff;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px" style-hover="background:var(--a1-strong-hover,#2A2D35)"><x-import component="Icon" from="./Icon.js" i="scan-barcode" size="16" color="#E8A23A" hint-size="16px,16px"></x-import>Abrir PDV</button>
+    </div>
+  </div>
+
+  <div style="background:#0F1115;border-radius:14px;padding:4px;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:4px">
+    <sc-for list="{{ fuels }}" as="f" hint-placeholder-count="4">
+      <div style="padding:14px 16px;border-radius:10px;background:#161920;display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;align-items:center;gap:8px;color:#A3A7B0;font-size:12.5px"><span style="width:8px;height:8px;border-radius:2px;background:{{ f.color }}"></span>{{ f.name }}</div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px">
+          <span style="font-family:'Geist Mono',monospace;font-size:24px;font-weight:500;color:#F5F2EA;letter-spacing:-.02em;white-space:nowrap">{{ f.price }}</span>
+          <span style="font-size:12px;color:#7D818B;font-variant-numeric:tabular-nums;white-space:nowrap">{{ f.liters }} hoje</span>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px">
+    <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
+      <div style="background:var(--a1-surface,#fff);border:1px solid var(--a1-border,#E6E5E0);border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;justify-content:space-between;color:var(--a1-text-2,#62656D);font-size:13px"><span>{{ k.label }}</span><x-import component="Icon" from="./Icon.js" i="{{ k.icon }}" size="16" color="var(--a1-text-5,#9A9DA4)" hint-size="16px,16px"></x-import></div>
+        <div style="font-size:26px;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums">{{ k.value }}</div>
+        <div style="display:flex;gap:6px;align-items:center;font-size:12.5px;color:var(--a1-text-2,#62656D)"><span style="padding:2px 6px;border-radius:6px;background:{{ k.dBg }};color:{{ k.dFg }};font-weight:600">{{ k.delta }}</span>{{ k.foot }}</div>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="background:var(--a1-surface,#fff);border:1px solid var(--a1-border,#E6E5E0);border-radius:12px;padding:18px 20px;display:flex;flex-direction:column;gap:16px">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+      <div style="display:flex;flex-direction:column;gap:3px"><div style="font-size:15px;font-weight:600">Tanques</div><div style="font-size:12.5px;color:var(--a1-text-3,#7A7D85)">Medição automática · última leitura às 09:40</div></div>
+      <button onClick="{{ goEstoque }}" style="height:32px;padding:0 12px;border:1px solid var(--a1-border-2,#E1E0DA);border-radius:8px;background:var(--a1-surface,#fff);font-size:12.5px;font-weight:550;cursor:pointer">Ver estoque completo</button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px">
+      <sc-for list="{{ tanks }}" as="t" hint-placeholder-count="5">
+        <div style="display:flex;gap:14px;padding:14px;border:1px solid {{ t.border }};border-radius:11px;background:{{ t.bg }}">
+          <div style="position:relative;width:46px;height:104px;border-radius:10px;background:var(--a1-muted,#F1F0EC);overflow:hidden;flex:none;border:1px solid var(--a1-border,#E6E5E0)">
+            <div style="position:absolute;left:0;right:0;bottom:0;height:{{ t.pct }};background:{{ t.color }};opacity:.9"></div>
+            <div style="position:absolute;left:0;right:0;bottom:20%;border-top:1px dashed rgba(200,67,58,.7)"></div>
+          </div>
+          <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:6px">
+            <div style="display:flex;justify-content:space-between;gap:6px;align-items:center"><span style="font-family:'Geist Mono',monospace;font-size:11.5px;color:var(--a1-text-3,#7A7D85)">{{ t.id }}</span><sc-if value="{{ t.low }}" hint-placeholder-val="{{ false }}"><span style="font-size:11px;font-weight:600;padding:2px 7px;border-radius:999px;background:var(--a1-err-bg,#FBEAE8);color:var(--a1-err-fg,#9E2F27)">Abaixo do mínimo</span></sc-if></div>
+            <div style="font-size:14px;font-weight:600">{{ t.name }}</div>
+            <div style="font-size:24px;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums">{{ t.pctLabel }}</div>
+            <div style="font-size:12px;color:var(--a1-text-2,#62656D);font-variant-numeric:tabular-nums">{{ t.vol }} de {{ t.cap }}</div>
+            <div style="font-size:12px;color:{{ t.autoColor }};font-weight:500">Autonomia: {{ t.auto }}</div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;gap:14px;align-items:stretch">
+    <div style="flex:1.4 1 520px;min-width:0;background:var(--a1-surface,#fff);border:1px solid var(--a1-border,#E6E5E0);border-radius:12px;padding:18px 20px;display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+        <div style="display:flex;flex-direction:column;gap:3px"><div style="font-size:15px;font-weight:600">Bombas e bicos</div><div style="font-size:12.5px;color:var(--a1-text-3,#7A7D85)">Status em tempo real · 4 bombas · 8 bicos</div></div>
+        <div style="display:flex;gap:12px;font-size:12px;color:var(--a1-text-2,#62656D);flex-wrap:wrap">
+          <span style="display:flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:50%;background:#E8A23A"></span>Abastecendo</span>
+          <span style="display:flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:50%;background:var(--a1-ok-fg2,#1F8A5B)"></span>Livre</span>
+          <span style="display:flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:50%;background:var(--a1-text-6,#B4B6BC)"></span>Bloqueado</span>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px">
+        <sc-for list="{{ pumps }}" as="p" hint-placeholder-count="4">
+          <div style="border:1px solid var(--a1-border,#E6E5E0);border-radius:11px;overflow:hidden">
+            <div style="padding:9px 12px;background:var(--a1-surface-2b,#F7F7F4);border-bottom:1px solid var(--a1-divider,#EFEEEA);display:flex;justify-content:space-between;font-size:12.5px"><span style="font-weight:600">{{ p.name }}</span><span style="color:var(--a1-text-3,#7A7D85)">{{ p.model }}</span></div>
+            <sc-for list="{{ p.nozzles }}" as="n" hint-placeholder-count="2">
+              <div style="padding:10px 12px;display:flex;flex-direction:column;gap:5px;border-bottom:1px solid var(--a1-divider-2,#F2F1ED)">
+                <div style="display:flex;align-items:center;gap:8px;font-size:13px"><span style="width:8px;height:8px;border-radius:50%;background:{{ n.dot }};animation:{{ n.anim }}"></span><span style="font-weight:550;flex:1">Bico {{ n.id }} · {{ n.fuel }}</span></div>
+                <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--a1-text-2,#62656D)"><span>{{ n.status }}</span><span style="font-family:'Geist Mono',monospace;color:var(--a1-text,#15171C)">{{ n.live }}</span></div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="flex:1 1 360px;min-width:0;display:flex;flex-direction:column;gap:14px">
+      <div style="background:var(--a1-surface,#fff);border:1px solid var(--a1-border,#E6E5E0);border-radius:12px;padding:18px 20px;display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;justify-content:space-between;align-items:center"><div style="font-size:15px;font-weight:600">Vendas por hora</div><span style="font-size:12px;color:var(--a1-text-3,#7A7D85)">Hoje</span></div>
+        <div style="display:flex;gap:5px;height:150px;align-items:flex-end">
+          <sc-for list="{{ hours }}" as="h" hint-placeholder-count="16">
+            <div title="{{ h.tip }}" style="flex:1;display:flex;flex-direction:column;align-items:stretch;gap:5px;height:100%;justify-content:flex-end">
+              <div style="height:{{ h.c }};background:#E8A23A;border-radius:2px 2px 0 0;opacity:{{ h.op }}"></div>
+              <div style="height:{{ h.f }};background:#2D5BD8;opacity:{{ h.op }};border:{{ h.dash }}"></div>
+              <div style="font-family:'Geist Mono',monospace;font-size:9.5px;color:var(--a1-text-5,#9A9DA4);text-align:center;height:12px">{{ h.l }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:flex;gap:14px;font-size:12px;color:var(--a1-text-2,#62656D)"><span style="display:flex;align-items:center;gap:6px"><span style="width:9px;height:9px;border-radius:3px;background:#2D5BD8"></span>Combustíveis</span><span style="display:flex;align-items:center;gap:6px"><span style="width:9px;height:9px;border-radius:3px;background:#E8A23A"></span>Conveniência</span><span style="display:flex;align-items:center;gap:6px"><span style="width:9px;height:9px;border-radius:3px;background:var(--a1-border-5,#D8D7D1)"></span>Projeção</span></div>
+      </div>
+      <div style="background:var(--a1-surface,#fff);border:1px solid var(--a1-border,#E6E5E0);border-radius:12px;padding:18px 20px;display:flex;flex-direction:column;gap:12px">
+        <div style="font-size:15px;font-weight:600">Mix de combustíveis</div>
+        <sc-for list="{{ mix }}" as="m" hint-placeholder-count="5">
+          <div style="display:flex;flex-direction:column;gap:5px">
+            <div style="display:flex;justify-content:space-between;font-size:12.5px"><span>{{ m.name }}</span><span style="font-variant-numeric:tabular-nums;color:var(--a1-text-2,#62656D)"><b style="color:var(--a1-text,#15171C);font-weight:600">{{ m.pct }}</b> · {{ m.l }}</span></div>
+            <div style="height:6px;border-radius:6px;background:var(--a1-muted,#F1F0EC)"><div style="height:100%;width:{{ m.pct }};background:{{ m.color }};border-radius:6px"></div></div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const FUELS = [
+  { name: 'Gasolina comum', color: '#E8A23A', price: 6.19, l: 5840 },
+  { name: 'Gasolina aditivada', color: 'var(--a1-purple-fg,#5B45A8)', price: 6.39, l: 1920 },
+  { name: 'Etanol', color: 'var(--a1-ok-fg2,#1F8A5B)', price: 4.29, l: 2610 },
+  { name: 'Diesel S10', color: 'var(--a1-text-2s,#4A4D55)', price: 6.09, l: 4010 }
+];
+const fmtL = (n) => Math.round(n).toLocaleString('pt-BR') + ' L';
+class Component extends DCLogic {
+  state = { tick: 0 };
+  componentDidMount() { this.iv = setInterval(() => this.setState((s) => ({ tick: s.tick + 1 })), 1000); }
+  componentWillUnmount() { clearInterval(this.iv); }
+  renderVals() {
+    const ctx = this.props.ctx || {};
+    const nav = this.props.navigate || (() => {});
+    const t = this.state.tick;
+    const estab = ctx.firstPosto || (!ctx.estab || ctx.estab.startsWith('Todos') ? 'Posto Central' : ctx.estab);
+    const tanks = [
+      ['T1', 'Gasolina comum', 30000, 0.62, '3,2 dias', '#E8A23A'], ['T2', 'Gasolina aditivada', 15000, 0.54, '4,1 dias', 'var(--a1-purple-fg,#5B45A8)'],
+      ['T3', 'Etanol', 15000, 0.71, '4,0 dias', 'var(--a1-ok-fg2,#1F8A5B)'], ['T4', 'Diesel S10', 30000, 0.18, '1,4 dia', 'var(--a1-text-2s,#4A4D55)'], ['T5', 'Diesel S500', 15000, 0.44, '6,8 dias', 'var(--a1-text-4,#8A8D95)']
+    ].map(([id, name, cap, p, auto, color]) => {
+      const low = p < 0.2;
+      return { id, name, color, low, pct: Math.round(p * 100) + '%', pctLabel: Math.round(p * 100) + '%', vol: fmtL(cap * p), cap: fmtL(cap), auto,
+        autoColor: low ? 'var(--a1-err-fg2,#B23A31)' : 'var(--a1-text-2,#62656D)', border: low ? 'var(--a1-err-border,#F0C4BF)' : 'var(--a1-border,#E6E5E0)', bg: low ? '#FFFBFA' : 'var(--a1-surface,#fff)' };
+    });
+    const live = (base, rate) => (base + t * rate).toFixed(2).replace('.', ',');
+    const N = (id, fuel, st, a, b) => {
+      const map = { a: ['Abastecendo', '#E8A23A', 'a1pulse 1.2s infinite'], l: ['Livre', 'var(--a1-ok-fg2,#1F8A5B)', 'none'], b: ['Bloqueado · manutenção', 'var(--a1-text-6,#B4B6BC)', 'none'] };
+      const [status, dot, anim] = map[st];
+      return { id, fuel, status, dot, anim, live: st === 'a' ? live(a, b) + ' L' : st === 'l' ? 'enc. ' + (812000 + id * 3911).toLocaleString('pt-BR') : '—' };
+    };
+    const pumps = [
+      { name: 'Bomba 01', model: 'Ilha 1', nozzles: [N(1, 'Gasolina comum', 'a', 12.4, 0.38), N(2, 'Etanol', 'l')] },
+      { name: 'Bomba 02', model: 'Ilha 1', nozzles: [N(3, 'Gasolina aditivada', 'l'), N(4, 'Gasolina comum', 'a', 31.1, 0.42)] },
+      { name: 'Bomba 03', model: 'Ilha 2', nozzles: [N(5, 'Diesel S10', 'a', 88.7, 0.9), N(6, 'Diesel S500', 'b')] },
+      { name: 'Bomba 04', model: 'Ilha 2', nozzles: [N(7, 'Etanol', 'l'), N(8, 'Gasolina comum', 'l')] }
+    ];
+    const hv = [[3.1, .4], [6.8, .9], [9.2, 1.3], [8.1, 1.1], [7.4, 1.0], [7.9, 1.2], [9.6, 1.5], [8.8, 1.4], [7.2, 1.1], [6.9, 1.0], [7.8, 1.2], [9.4, 1.6], [10.2, 1.8], [8.6, 1.5], [6.1, 1.1], [4.2, .8]];
+    const hours = hv.map(([f, c], i) => { const h = 6 + i; const past = h <= 13; return { l: String(h).padStart(2, '0'), f: (f / 12 * 100) + '%', c: (c / 12 * 100) + '%', op: past ? 1 : 0.18, dash: 'none', tip: h + 'h · R$ ' + ((f + c) * 1000).toLocaleString('pt-BR') + (past ? '' : ' (projeção)') }; });
+    const tot = FUELS.reduce((a, f) => a + f.l, 0) + 1200;
+    const mix = FUELS.concat([{ name: 'Diesel S500', color: 'var(--a1-text-4,#8A8D95)', l: 1200 }]).map((f) => ({ name: f.name, color: f.color, pct: Math.round(f.l / tot * 100) + '%', l: fmtL(f.l) }));
+    return {
+      estab, tanks, pumps, hours, mix,
+      fuels: FUELS.map((f) => ({ name: f.name, color: f.color, price: 'R$ ' + f.price.toFixed(2).replace('.', ','), liters: fmtL(f.l) })),
+      kpis: [
+        { label: 'Vendas hoje', icon: 'receipt', value: 'R$ 86.412', delta: '+4,1%', dBg: 'var(--a1-ok-bg,#E6F4EC)', dFg: 'var(--a1-ok-fg,#1B6E4A)', foot: 'vs. mesma hora ontem' },
+        { label: 'Litros vendidos', icon: 'droplet', value: '15.580 L', delta: '+2,7%', dBg: 'var(--a1-ok-bg,#E6F4EC)', dFg: 'var(--a1-ok-fg,#1B6E4A)', foot: '312 abastecimentos' },
+        { label: 'Ticket médio', icon: 'shopping-cart', value: 'R$ 142,60', delta: '−1,2%', dBg: 'var(--a1-err-bg,#FBEAE8)', dFg: 'var(--a1-err-fg,#9E2F27)', foot: 'vs. média do mês' },
+        { label: 'Conveniência', icon: 'shopping-bag', value: 'R$ 9.284', delta: '+8,9%', dBg: 'var(--a1-ok-bg,#E6F4EC)', dFg: 'var(--a1-ok-fg,#1B6E4A)', foot: '187 cupons' }
+      ],
+      goPDV: () => nav('pdv'), goEstoque: () => nav('estoque'), goNF: () => nav('stub:postos:7')
+    };
+  }
+}
+
+</script>
+</body>
+</html>

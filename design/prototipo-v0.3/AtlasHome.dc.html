@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="display:flex;flex-direction:column;gap:20px;animation:a1in .2s ease">
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap">
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <div style="font-family:'Geist Mono',monospace;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--a1-text-3,#7A7D85)">Atlas Core · Visão geral</div>
+      <div style="font-size:28px;font-weight:600;letter-spacing:-.025em">Bom dia, Mariana</div>
+      <div style="font-size:13.5px;color:var(--a1-text-2,#62656D)">{{ ctx.org }} · {{ ctx.estab }} · atualizado às 09:42</div>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+      <label style="display:flex;align-items:center;gap:8px;height:38px;padding:0 6px 0 12px;border:1px solid var(--a1-border-2,#E1E0DA);border-radius:9px;background:var(--a1-surface,#fff);font-size:12.5px;color:var(--a1-text-2,#62656D)">Visualizar como
+        <select value="{{ role }}" onChange="{{ setRole }}" style="height:30px;border:0;background:var(--a1-bg,#F5F5F2);border-radius:6px;padding:0 8px;font-size:12.5px;font-weight:600;color:var(--a1-text,#15171C)">
+          <option value="admin">Administrador da rede</option>
+          <option value="gerente">Gerente de unidade</option>
+          <option value="operador">Operador de caixa</option>
+        </select>
+      </label>
+      <div style="display:flex;padding:3px;border:1px solid var(--a1-border-2,#E1E0DA);border-radius:9px;background:var(--a1-surface,#fff);gap:2px">
+        <sc-for list="{{ periods }}" as="p" hint-placeholder-count="3">
+          <button onClick="{{ p.pick }}" style="height:30px;padding:0 12px;border:0;border-radius:6px;background:{{ p.bg }};color:{{ p.fg }};font-size:12.5px;font-weight:550;cursor:pointer">{{ p.label }}</button>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+
+  <sc-if value="{{ restricted }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;gap:10px;align-items:center;padding:11px 14px;border-radius:10px;background:var(--a1-info-bg,#EAF0FD);color:var(--a1-info-fg,#23459F);font-size:13px;flex-wrap:wrap">
+      <x-import component="Icon" from="./Icon.js" i="shield-check" size="16" hint-size="16px,16px"></x-import>
+      <span style="flex:1;min-width:220px">Simulação de perfil <b>{{ roleLabel }}</b>: {{ roleNote }}</span>
+      <button onClick="{{ resetRole }}" style="height:28px;padding:0 10px;border:1px solid var(--a1-sel-border,#B9C9F2);border-radius:7px;background:var(--a1-surface,#fff);color:var(--a1-info-fg,#23459F);font-size:12px;font-weight:600;cursor:pointer">Voltar para Administrador</button>
+    </div>
+  </sc-if>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px">
+    <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
+      <div style="background:var(--a1-surface,#fff);border:1px solid var(--a1-border,#E6E5E0);border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;gap:12px;min-height:128px">
+        <div style="display:flex;justify-content:space-between;align-items:center;color:var(--a1-text-2,#62656D);font-size:13px">
+          <span>{{ k.label }}</span>
+          <x-import component="Icon" from="./Icon.js" i="{{ k.icon }}" size="16" color="var(--a1-text-5,#9A9DA4)" hint-size="16px,16px"></x-import>
+        </div>
+        <sc-if value="{{ k.locked }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;align-items:center;gap:8px;color:var(--a1-text-5,#9A9DA4);font-size:13px;flex:1"><x-import component="Icon" from="./Icon.js" i="lock" size="15" hint-size="15px,15px"></x-import>Restrito ao seu perfil</div>
+        </sc-if>
+        <sc-if value="{{ k.open }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;align-items:baseline;gap:6px"><span style="font-size:28px;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums">{{ k.value }}</span><span style="font-size:14px;color:var(--a1-text-5,#9A9DA4)">{{ k.of }}</span></div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--a1-text-2,#62656D)">
+            <sc-if value="{{ k.delta }}" hint-placeholder-val="{{ false }}"><span style="display:inline-flex;align-items:center;gap:3px;padding:2px 6px;border-radius:6px;background:var(--a1-ok-bg,#E6F4EC);color:var(--a1-ok-fg,#1B6E4A);font-weight:600"><x-import component="Icon" from="./Icon.js" i="trending-up" size="12" hint-size="12px,12px"></x-import>{{ k.delta }}</span></sc-if>
+            <span>{{ k.foot }}</span>
+          </div>
+        </sc-if>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;gap:14px;align-items:stretch">
+    <div style="flex:2 1 560px;min-width:0;background:var(--a1-surface,#fff);border:1px solid var(--a1-border,#E6E5E0);border-radius:12px;padding:18px 20px;display:flex;flex-direction:column;gap:16px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+        <div style="display:flex;flex-direction:column;gap:3px"><div style="font-size:15px;font-weight:600">Faturamento por estabelecimento</div><div style="font-size:12.5px;color:var(--a1-text-3,#7A7D85)">Últimos 14 dias · combustíveis + conveniência</div></div>
+        <div style="display:flex;gap:14px;flex-wrap:wrap">
+          <sc-for list="{{ legend }}" as="l" hint-placeholder-count="3">
+            <div style="display:flex;align-items:center;gap:7px;font-size:12.5px"><span style="width:9px;height:9px;border-radius:3px;background:{{ l.color }}"></span><span style="color:var(--a1-text-2,#62656D)">{{ l.name }}</span><span style="font-weight:600;font-variant-numeric:tabular-nums">{{ l.total }}</span></div>
+          </sc-for>
+        </div>
+      </div>
+      <sc-if value="{{ finLocked }}" hint-placeholder-val="{{ false }}">
+        <div style="flex:1;min-height:220px;border:1px dashed var(--a1-field-border,#DCDBD5);border-radius:10px;display:flex;align-items:center;justify-content:center;gap:8px;color:var(--a1-text-5,#9A9DA4);font-size:13px"><x-import component="Icon" from="./Icon.js" i="lock" size="15" hint-size="15px,15px"></x-import>Indicadores financeiros não disponíveis para este perfil</div>
+      </sc-if>
+      <sc-if value="{{ finOpen }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;gap:10px;height:240px">
+          <div style="display:flex;flex-direction:column;justify-content:space-between;font-family:'Geist Mono',monospace;font-size:10.5px;color:var(--a1-text-5,#9A9DA4);padding-bottom:22px;text-align:right;width:40px">
+            <span>200 mil</span><span>150 mil</span><span>100 mil</span><span>50 mil</span><span>0</span>
+          </div>
+          <div style="flex:1;display:flex;gap:6px;align-items:stretch;position:relative">
+            <div style="position:absolute;left:0;right:0;top:0;bottom:22px;display:flex;flex-direction:column;justify-content:space-between;pointer-events:none"><div style="border-top:1px dashed var(--a1-grid,#EDECE7)"></div><div style="border-top:1px dashed var(--a1-grid,#EDECE7)"></div><div style="border-top:1px dashed var(--a1-grid,#EDECE7)"></div><div style="border-top:1px dashed var(--a1-grid,#EDECE7)"></div><div style="border-top:1px solid var(--a1-border-2,#E1E0DA)"></div></div>
+            <sc-for list="{{ bars }}" as="b" hint-placeholder-count="14">
+              <div title="{{ b.tip }}" style="flex:1;display:flex;flex-direction:column;gap:6px;min-width:0;position:relative">
+                <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:2px">
+                  <div style="height:{{ b.h3 }};background:#E8A23A;border-radius:3px 3px 0 0"></div>
+                  <div style="height:{{ b.h2 }};background:#9DB4EE"></div>
+                  <div style="height:{{ b.h1 }};background:#2D5BD8;border-radius:0 0 2px 2px"></div>
+                </div>
+                <div style="height:16px;font-family:'Geist Mono',monospace;font-size:10px;color:var(--a1-text-5,#9A9DA4);text-align:center">{{ b.d }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+    </div>
+
+    <div style="flex:1 1 320px;min-width:0;background:var(--a1-surface,#fff);border:1px solid var(--a1-border,#E6E5E0);border-radius:12px;padding:18px 20px;display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
+        <div style="display:flex;flex-direction:column;gap:3px"><div style="font-size:15px;font-weight:600">Assinatura</div><div style="font-size:12.5px;color:var(--a1-text-3,#7A7D85)">{{ subs.plan }} · renova em {{ subs.renew }}</div></div>
+        <span style="font-size:11.5px;font-weight:600;padding:3px 9px;border-radius:999px;background:{{ subs.stBg }};color:{{ subs.stFg }}">{{ subs.status }}</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <div style="display:flex;justify-content:space-between;font-size:12.5px"><span style="color:var(--a1-text-2,#62656D)">Usuários</span><span style="font-weight:600;font-variant-numeric:tabular-nums">{{ subs.lic }}</span></div>
+        <div style="height:6px;border-radius:6px;background:var(--a1-divider,#EFEEEA);overflow:hidden"><div style="width:{{ subs.pct }};height:100%;background:var(--a1-strong,#15171C);border-radius:6px"></div></div>
+      </div>
+      <div style="display:flex;flex-direction:column;border-top:1px solid var(--a1-divider,#EFEEEA)">
+        <sc-for list="{{ modules }}" as="m" hint-placeholder-count="8">
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--a1-divider-2,#F2F1ED);font-size:13px">
+            <x-import component="Icon" from="./Icon.js" i="{{ m.icon }}" size="15" color="var(--a1-text-3,#7A7D85)" hint-size="15px,15px"></x-import>
+            <span style="flex:1">{{ m.name }}</span>
+            <span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;background:{{ m.bg }};color:{{ m.fg }}">{{ m.status }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;gap:14px;align-items:stretch">
+    <div style="flex:1 1 420px;min-width:0;background:var(--a1-surface,#fff);border:1px solid var(--a1-border,#E6E5E0);border-radius:12px;display:flex;flex-direction:column">
+      <div style="padding:16px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--a1-divider,#EFEEEA)">
+        <div style="font-size:15px;font-weight:600">Alertas e pendências</div>
+        <span style="font-size:12px;color:var(--a1-text-3,#7A7D85)">{{ pendCount }} abertas</span>
+      </div>
+      <sc-for list="{{ pend }}" as="p" hint-placeholder-count="5">
+        <div style="display:flex;gap:12px;align-items:center;padding:12px 20px;border-bottom:1px solid var(--a1-divider-2,#F2F1ED)">
+          <span style="width:8px;height:8px;border-radius:50%;background:{{ p.dot }};flex:none"></span>
+          <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><div style="font-size:13.5px;font-weight:500">{{ p.t }}</div><div style="font-size:12px;color:var(--a1-text-3,#7A7D85)">{{ p.s }}</div></div>
+          <button onClick="{{ p.go }}" style="height:30px;padding:0 10px;border:1px solid var(--a1-border-2,#E1E0DA);border-radius:7px;background:var(--a1-surface,#fff);font-size:12px;font-weight:550;cursor:pointer;white-space:nowrap" style-hover="background:var(--a1-bg,#F5F5F2)">{{ p.cta }}</button>
+        </div>
+      </sc-for>
+    </div>
+    <div style="flex:1 1 380px;min-width:0;background:var(--a1-surface,#fff);border:1px solid var(--a1-border,#E6E5E0);border-radius:12px;display:flex;flex-direction:column">
+      <div style="padding:16px 20px;border-bottom:1px solid var(--a1-divider,#EFEEEA);font-size:15px;font-weight:600">Atividades recentes</div>
+      <div style="padding:8px 20px 12px;display:flex;flex-direction:column">
+        <sc-for list="{{ acts }}" as="a" hint-placeholder-count="6">
+          <div style="display:flex;gap:12px;padding:9px 0">
+            <div style="width:30px;height:30px;border-radius:50%;background:var(--a1-muted,#F1F0EC);color:var(--a1-text-2s,#4A4D55);font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex:none">{{ a.who }}</div>
+            <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><div style="font-size:13px;line-height:1.4"><b style="font-weight:600">{{ a.name }}</b> {{ a.t }}</div><div style="font-size:11.5px;color:var(--a1-text-5,#9A9DA4)">{{ a.when }} · {{ a.mod }}</div></div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:12px">
+    <div style="font-size:15px;font-weight:600">Acessos rápidos</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px">
+      <sc-for list="{{ quick }}" as="q" hint-placeholder-count="8">
+        <button onClick="{{ q.go }}" style="display:flex;flex-direction:column;align-items:flex-start;gap:12px;padding:16px;border:1px solid var(--a1-border,#E6E5E0);border-radius:12px;background:var(--a1-surface,#fff);cursor:pointer;text-align:left;opacity:{{ q.op }}" style-hover="border-color:var(--a1-border-strong,#C9C8C1);box-shadow:0 4px 14px rgba(15,17,21,.06)">
+          <div style="display:flex;justify-content:space-between;width:100%">
+            <div style="width:36px;height:36px;border-radius:9px;background:{{ q.bg }};color:{{ q.fg }};display:flex;align-items:center;justify-content:center"><x-import component="Icon" from="./Icon.js" i="{{ q.icon }}" size="18" hint-size="18px,18px"></x-import></div>
+            <x-import component="Icon" from="./Icon.js" i="{{ q.arrow }}" size="16" color="var(--a1-text-5,#9A9DA4)" hint-size="16px,16px"></x-import>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:3px"><div style="font-size:14px;font-weight:600">{{ q.name }}</div><div style="font-size:12.5px;color:var(--a1-text-3,#7A7D85);line-height:1.45">{{ q.desc }}</div></div>
+        </button>
+      </sc-for>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const ROLES = {
+  admin: { label: 'Administrador da rede', note: '', fin: true, mods: null },
+  gerente: { label: 'Gerente de unidade', note: 'dados limitados ao Posto Central; módulos Contábil e Core administrativo ocultos.', fin: true, mods: ['postos', 'pdv', 'payments', 'financeiro', 'bi'] },
+  operador: { label: 'Operador de caixa', note: 'apenas o Atlas PDV está liberado; indicadores financeiros ocultos.', fin: false, mods: ['pdv'] }
+};
+const QUICK = [
+  { id: 'postos', name: 'Atlas Postos', desc: 'Tanques, bombas, estoque e vendas da unidade', icon: 'fuel', bg: 'var(--a1-warn-bg2,#FDF3E3)', fg: 'var(--a1-warn-fg4,#9A6514)' },
+  { id: 'pdv', name: 'Atlas PDV', desc: 'Frente de caixa para pista e conveniência', icon: 'scan-barcode', bg: 'var(--a1-strong,#15171C)', fg: '#E8A23A' },
+  { id: 'payments', name: 'Atlas Payments', desc: 'Conector Boa Vista, terminais e conciliação', icon: 'credit-card', bg: 'var(--a1-info-bg,#EAF0FD)', fg: 'var(--a1-accent-text,#2D5BD8)' },
+  { id: 'financeiro', name: 'Atlas Financeiro', desc: 'Contas, fluxo de caixa e conciliação bancária', icon: 'landmark', bg: 'var(--a1-ok-bg,#E6F4EC)', fg: 'var(--a1-ok-fg,#1B6E4A)' },
+  { id: 'contabil', name: 'Atlas Contábil', desc: 'Carteira de clientes, fiscal e obrigações', icon: 'book-open', bg: 'var(--a1-purple-bg,#F1EEFB)', fg: 'var(--a1-purple-fg,#5B45A8)' },
+  { id: 'bi', name: 'Atlas BI', desc: 'Indicadores executivos e comparativos', icon: 'chart-column', bg: 'var(--a1-info-bg,#EAF0FD)', fg: 'var(--a1-accent-text,#2D5BD8)' },
+  { id: 'conv', mod: 'conv', name: 'Atlas Conveniência', desc: 'Mix, promoções e inventário da loja', icon: 'store', bg: 'var(--a1-warn-bg2,#FDF3E3)', fg: 'var(--a1-warn-fg4,#9A6514)' },
+  { id: 'fiscal', mod: 'fiscal', name: 'Atlas Fiscal', desc: 'Documentos fiscais, apuração e certificados', icon: 'receipt-text', bg: 'var(--a1-purple-bg,#F1EEFB)', fg: 'var(--a1-purple-fg,#5B45A8)' },
+  { id: 'ai', mod: 'ai', name: 'Atlas AI', desc: 'Assistente, previsões e anomalias', icon: 'sparkles', bg: 'var(--a1-info-bg,#EAF0FD)', fg: 'var(--a1-accent-text,#2D5BD8)' },
+  { id: 'docs', mod: 'docs', name: 'Atlas Documents', desc: 'Repositório, vencimentos e assinaturas', icon: 'folder-open', bg: 'var(--a1-muted,#F1F0EC)', fg: 'var(--a1-text-2s,#4A4D55)' },
+  { id: 'int', mod: 'int', name: 'Atlas Integrations', desc: 'Importação, exportação e monitoramento', icon: 'plug', bg: 'var(--a1-muted,#F1F0EC)', fg: 'var(--a1-text-2s,#4A4D55)' },
+  { id: 'usuarios', mod: 'core', name: 'Usuários e permissões', desc: 'Membros, papéis e controle de acesso', icon: 'shield-check', bg: 'var(--a1-muted,#F1F0EC)', fg: 'var(--a1-text-2s,#4A4D55)' }
+];
+const SUBS = { cci: ['Atlas One Enterprise', 'Ativa', '01/03/2027', 24, 40], gh: ['Atlas One Business', 'Ativa', '15/08/2027', 38, 50], vv: ['Atlas One Start', 'Em implantação', '10/11/2027', 6, 10] };
+const PEOPLE = { cci: ['Beatriz Campos', 'Otávio Serra', 'Mariana Lopes', 'Rodrigo Teles', 'Fernanda Lima'], gh: ['Rafael Souza', 'Juliana Alves', 'Mariana Lopes', 'Paulo Nunes', 'Fernanda Lima'], vv: ['Igor Bastos', 'Helena Prates', 'Helena Prates', 'Helena Prates', 'Fernanda Lima'] };
+const MOD_OF = { postos: 'postos', pdv: 'pdv', payments: 'payments', financeiro: 'fin', contabil: 'contabil', bi: 'bi' };
+const ALL_MODS = [['core', 'Atlas Core', 'layout-grid'], ['postos', 'Atlas Postos', 'fuel'], ['pdv', 'Atlas PDV', 'scan-barcode'], ['conv', 'Atlas Conveniência', 'store'], ['payments', 'Atlas Payments', 'credit-card'], ['fin', 'Atlas Financeiro', 'landmark'], ['contabil', 'Atlas Contábil', 'book-open'], ['fiscal', 'Atlas Fiscal', 'receipt-text'], ['bi', 'Atlas BI', 'chart-column'], ['ai', 'Atlas AI', 'sparkles'], ['docs', 'Atlas Documents', 'folder-open'], ['int', 'Atlas Integrations', 'plug']];
+function rnd(seed) { let x = seed; return () => { x = (x * 9301 + 49297) % 233280; return x / 233280; }; }
+const brlK = (n) => 'R$ ' + (n / 1000).toLocaleString('pt-BR', { maximumFractionDigits: 0 }) + ' mil';
+
+class Component extends DCLogic {
+  state = { role: 'admin', period: '30d' };
+  renderVals() {
+    const ctx = this.props.ctx || { org: 'Grupo Horizonte Combustíveis', estab: 'Todos os estabelecimentos' };
+    const nav = this.props.navigate || (() => {});
+    const notify = this.props.notify || (() => {});
+    const role = ROLES[this.state.role];
+    const orgT0 = (ctx.tree || []).find((o) => o.id === ctx.orgId) || { companies: [] };
+    const allE = (orgT0.companies || []).flatMap((c) => c.estabs || []);
+    const postos = (allE.filter((e) => e.posto).length ? allE.filter((e) => e.posto) : allE).slice(0, 3).map((e) => e.name);
+    const nP = Math.max(1, postos.length);
+    const PN = [postos[0] || ctx.firstPosto || 'Posto', postos[1] || postos[0] || 'Posto', postos[2] || postos[0] || 'Posto'];
+    const r = rnd(7);
+    const days = ['07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20'];
+    let t1 = 0, t2 = 0, t3 = 0;
+    const bars = days.map((d, i) => {
+      const we = i % 7 === 5 || i % 7 === 6;
+      const a = 72000 + r() * 18000 + (we ? 9000 : 0), b = 48000 + r() * 14000, c = 26000 + r() * 12000 - (we ? 4000 : 0);
+      t1 += a; t2 += b; t3 += c;
+      const pct = (v) => (v / 200000 * 100).toFixed(1) + '%';
+      return { d, h1: pct(a), h2: nP > 1 ? pct(b) : '0%', h3: nP > 2 ? pct(c) : '0%', tip: d + '/11 · ' + brlK(a + (nP > 1 ? b : 0) + (nP > 2 ? c : 0)) };
+    });
+    const periods = [['hoje', 'Hoje'], ['7d', '7 dias'], ['30d', '30 dias']].map(([id, label]) => ({ label, bg: this.state.period === id ? 'var(--a1-strong,#15171C)' : 'transparent', fg: this.state.period === id ? '#fff' : 'var(--a1-text-2s,#4A4D55)', pick: () => this.setState({ period: id }) }));
+    const orgT = (ctx.tree || []).find((o) => o.id === ctx.orgId) || { companies: [], mods: [] };
+    const comps = orgT.companies || [];
+    const ests = comps.flatMap((c) => c.estabs || []);
+    const nAct = ests.filter((e) => e.status === 'Ativo').length, nImp = ests.length - nAct;
+    const omods = ctx.mods || orgT.mods || [];
+    const kpis = [
+      { label: 'Empresas cadastradas', icon: 'building-2', value: String(comps.length), of: '', foot: comps.map((c) => c.fantasia).join(' · ') || '—' },
+      { label: 'Estabelecimentos ativos', icon: 'store', value: String(nAct), of: 'de ' + ests.length, foot: nImp ? nImp + (nImp === 1 ? ' unidade em implantação' : ' unidades em implantação') : 'Todas as unidades em operação' },
+      { label: 'Módulos contratados', icon: 'blocks', value: String(omods.length), of: 'de ' + ALL_MODS.length, foot: ALL_MODS.length - omods.length ? (ALL_MODS.length - omods.length) + ' disponíveis para contratação' : 'Todos os módulos contratados' },
+      { label: 'Faturamento do mês', icon: 'circle-dollar-sign', value: 'R$ 4,82 mi', of: '', delta: '6,4%', foot: 'vs. outubro', fin: true }
+    ].map((k) => ({ ...k, locked: k.fin && !role.fin, open: !(k.fin && !role.fin) }));
+    const allowed = (id) => !role.mods || role.mods.includes(id.split(':')[0] === 'stub' ? 'int' : id);
+    const quick = QUICK.map((q) => { const mid = q.mod || MOD_OF[q.id]; const contracted = mid === 'core' || omods.includes(mid); const ok = contracted && allowed(q.id);
+      return { ...q, op: ok ? 1 : 0.5, arrow: ok ? 'arrow-up-right' : 'lock', go: () => !contracted ? notify(q.name + ' não está contratado para ' + (ctx.orgShort || ctx.org) + '.', 'warn') : ok ? nav(q.id) : notify('Acesso a ' + q.name + ' não liberado para o perfil ' + role.label + '.', 'warn') }; });
+    const pend = [
+      { t: 'Diesel S10 abaixo do mínimo · Tanque T4', s: PN[Math.min(1, nP - 1)] + ' · 18% · autonomia de 1,4 dia', dot: '#C8433A', cta: 'Ver estoque', go: () => nav('estoque') },
+      { t: 'Divergência na conciliação de cartões', s: 'Boa Vista · 19/11 · R$ 142,30 a identificar', dot: '#C98A1E', cta: 'Conciliar', go: () => nav('payments') },
+      { t: '3 NF-e de fornecedores aguardando entrada', s: PN[0] + ' · Distribuidora Rota Sul', dot: '#2D5BD8', cta: 'Abrir', go: () => nav('postos:compras') },
+      { t: 'Certificado digital A1 vence em 9 dias', s: PN[nP - 1] + ' · emissão de NFC-e', dot: '#C98A1E', cta: 'Renovar', go: () => notify('Solicitação de renovação registrada.', 'success') },
+      { t: '12 contas a pagar vencem nesta semana', s: 'Atlas Financeiro · R$ 386.420,18', dot: '#2D5BD8', cta: 'Ver contas', go: () => nav('financeiro') }
+    ];
+    return {
+      ctx, role: this.state.role, setRole: (e) => this.setState({ role: e.target.value }), resetRole: () => this.setState({ role: 'admin' }),
+      restricted: this.state.role !== 'admin', roleLabel: role.label, roleNote: role.note,
+      periods, kpis, bars, finLocked: !role.fin, finOpen: role.fin,
+      legend: [{ name: PN[0], color: '#2D5BD8', total: brlK(t1) }, { name: PN[1], color: '#9DB4EE', total: brlK(t2) }, { name: PN[2], color: '#E8A23A', total: brlK(t3) }].slice(0, nP),
+      modules: ALL_MODS.map(([id, name, icon]) => [name, icon, id === 'core' || omods.includes(id) ? 'Ativo' : 'Não contratado']).map(([name, icon, status]) => ({ name, icon, status, bg: status === 'Ativo' ? 'var(--a1-ok-bg,#E6F4EC)' : status.startsWith('Teste') ? 'var(--a1-warn-bg,#FBF1DF)' : 'var(--a1-muted,#F1F0EC)', fg: status === 'Ativo' ? 'var(--a1-ok-fg,#1B6E4A)' : status.startsWith('Teste') ? 'var(--a1-warn-fg,#8A5A12)' : 'var(--a1-text-2,#62656D)' })),
+      pend: role.fin ? pend : pend.slice(0, 1), pendCount: role.fin ? pend.length : 1,
+      acts: [
+        [0, 'fechou o caixa 02 com diferença de R$ 0,00', 'há 12 min', 'Atlas PDV'],
+        [1, 'lançou entrada da NF-e 48.211 · 15.000 L Etanol · ' + PN[0], 'há 38 min', 'Atlas Postos'],
+        [2, 'alterou permissões do papel Gerente em ' + (ctx.orgShort || ''), 'há 1 h', 'Atlas Core'],
+        [-1, 'consultou transações do conector Boa Vista (em especificação)', 'há 2 h', 'Atlas Payments'],
+        [3, 'aprovou pagamento de R$ 212.400,00 · Distribuidora Rota Sul', 'há 3 h', 'Atlas Financeiro'],
+        [1, 'reajustou preço da Gasolina comum para R$ 6,19', 'ontem', 'Atlas Postos']
+      ].map(([pi, tx, when, mod]) => { const nm = pi < 0 ? 'Sistema' : (PEOPLE[ctx.orgId] || PEOPLE.gh)[pi]; return { who: pi < 0 ? 'SB' : nm.split(' ').map((w) => w[0]).slice(0, 2).join(''), name: nm, t: tx, when, mod }; }),
+      subs: (() => { const [plan, status, renew, u, tot] = SUBS[ctx.orgId] || SUBS.gh; const ok = status === 'Ativa'; return { plan, status, renew, lic: u + ' de ' + tot, pct: Math.round(u / tot * 100) + '%', stBg: ok ? 'var(--a1-ok-bg,#E6F4EC)' : 'var(--a1-warn-bg,#FBF1DF)', stFg: ok ? 'var(--a1-ok-fg,#1B6E4A)' : 'var(--a1-warn-fg,#8A5A12)' }; })(),
+      quick
+    };
+  }
+}
+
+</script>
+</body>
+</html>

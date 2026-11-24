@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="display:flex;flex-direction:column;gap:22px;animation:a1in .2s ease">
+  <div style="display:flex;flex-direction:column;gap:6px">
+    <div style="font-family:'Geist Mono',monospace;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--a1-text-3,#7A7D85)">Atlas One · Sistema visual v0.1</div>
+    <div style="font-size:28px;font-weight:600;letter-spacing:-.025em">Identidade visual proposta</div>
+    <div style="font-size:14px;color:var(--a1-text-2,#62656D);max-width:720px;line-height:1.55;text-wrap:pretty">Uma base sóbria e precisa, como um instrumento: papel quente para leitura longa, grafite para navegação, azul Atlas para ação e âmbar como sinal operacional da pista.</div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:14px">
+    <div style="position:relative;overflow:hidden;background:#0F1115;border-radius:14px;min-height:240px;padding:28px;display:flex;flex-direction:column;justify-content:space-between">
+      <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);background-size:40px 40px"></div>
+      <span style="position:relative;font-family:'Geist Mono',monospace;font-size:11px;color:#6E727B">Assinatura · fundo grafite</span>
+      <div style="position:relative;display:flex;align-items:center;gap:16px">
+        <div style="position:relative;width:56px;height:56px;border-radius:14px;background:#2D5BD8;display:flex;align-items:center;justify-content:center"><div style="width:28px;height:28px;border-radius:50%;border:3px solid #fff"></div><div style="position:absolute;left:10px;right:10px;top:26.5px;height:3px;background:var(--a1-surface,#fff)"></div></div>
+        <div style="display:flex;flex-direction:column;gap:4px"><div style="font-size:34px;color:#F1F2F4;letter-spacing:-.02em"><span style="font-weight:650">Atlas</span> <span style="font-weight:400;color:#8C9099">One</span></div><div style="font-size:13px;color:#7D818B">by CCI Consultoria</div></div>
+      </div>
+      <span style="position:relative;font-size:12px;color:#7D818B;line-height:1.5">Símbolo: esfera (o mundo sustentado por Atlas) cortada pelo horizonte — módulos independentes unidos por uma linha comum.</span>
+    </div>
+    <div style="background:var(--a1-surface,#fff);border:1px solid var(--a1-border,#E6E5E0);border-radius:14px;min-height:240px;padding:28px;display:flex;flex-direction:column;justify-content:space-between;gap:18px">
+      <span style="font-family:'Geist Mono',monospace;font-size:11px;color:var(--a1-text-5,#9A9DA4)">Assinatura · fundo claro e variações</span>
+      <div style="display:flex;align-items:center;gap:14px">
+        <div style="position:relative;width:44px;height:44px;border-radius:11px;background:var(--a1-strong,#15171C);display:flex;align-items:center;justify-content:center"><div style="width:22px;height:22px;border-radius:50%;border:2.5px solid #fff"></div><div style="position:absolute;left:8px;right:8px;top:20.75px;height:2.5px;background:var(--a1-surface,#fff)"></div></div>
+        <div style="font-size:28px;letter-spacing:-.02em"><span style="font-weight:650">Atlas</span> <span style="font-weight:400;color:var(--a1-text-3,#7A7D85)">One</span></div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <sc-for list="{{ marks }}" as="m" hint-placeholder-count="4">
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 12px 8px 8px;border:1px solid var(--a1-divider,#EFEEEA);border-radius:10px">
+            <div style="position:relative;width:26px;height:26px;border-radius:7px;background:{{ m.bg }};display:flex;align-items:center;justify-content:center"><div style="width:13px;height:13px;border-radius:50%;border:2px solid {{ m.fg }}"></div><div style="position:absolute;left:5px;right:5px;top:12px;height:2px;background:{{ m.fg }}"></div></div>
+            <span style="font-size:12.5px;font-weight:600">{{ m.label }}</span>
+          </div>
+        </sc-for>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;padding:12px;border:1px dashed var(--a1-track-off,#D3D2CC);border-radius:10px">
+        <div style="width:88px;height:36px;border-radius:6px;background:repeating-linear-gradient(45deg,var(--a1-bg,#F5F5F2) 0 6px,var(--a1-skeleton,#ECEBE6) 6px 12px);display:flex;align-items:center;justify-content:center;font-family:'Geist Mono',monospace;font-size:9.5px;color:var(--a1-text-3,#7A7D85)">logo CCI</div>
+        <span style="font-size:12px;color:var(--a1-text-2,#62656D);line-height:1.45">Espaço reservado para o logotipo oficial da CCI Consultoria — não redesenhado. Aplicar a partir do arquivo de referência.</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="background:var(--a1-surface,#fff);border:1px solid var(--a1-border,#E6E5E0);border-radius:14px;padding:22px;display:flex;flex-direction:column;gap:16px">
+    <div style="font-size:15px;font-weight:600">Cores</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px">
+      <sc-for list="{{ colors }}" as="c" hint-placeholder-count="10">
+        <div style="border:1px solid var(--a1-divider,#EFEEEA);border-radius:11px;overflow:hidden">
+          <div style="height:72px;background:{{ c.hex }};border-bottom:1px solid var(--a1-divider,#EFEEEA)"></div>
+          <div style="padding:10px 12px;display:flex;flex-direction:column;gap:2px"><span style="font-size:13px;font-weight:600">{{ c.name }}</span><span style="font-family:'Geist Mono',monospace;font-size:11.5px;color:var(--a1-text-3,#7A7D85)">{{ c.hex }}</span><span style="font-size:11.5px;color:var(--a1-text-5,#9A9DA4)">{{ c.use }}</span></div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:14px">
+    <div style="background:var(--a1-surface,#fff);border:1px solid var(--a1-border,#E6E5E0);border-radius:14px;padding:22px;display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:15px;font-weight:600">Tipografia</span><span style="font-family:'Geist Mono',monospace;font-size:11.5px;color:var(--a1-text-5,#9A9DA4)">Geist + Geist Mono</span></div>
+      <div style="font-size:44px;font-weight:600;letter-spacing:-.03em;line-height:1">Aa Gestão</div>
+      <div style="display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--a1-divider,#EFEEEA);padding-top:14px">
+        <sc-for list="{{ type }}" as="t" hint-placeholder-count="5">
+          <div style="display:flex;align-items:baseline;gap:14px"><span style="font-family:'Geist Mono',monospace;font-size:11px;color:var(--a1-text-5,#9A9DA4);width:72px;flex:none">{{ t.spec }}</span><span style="font-size:{{ t.size }};font-weight:{{ t.w }};font-family:{{ t.f }};letter-spacing:{{ t.ls }}">{{ t.sample }}</span></div>
+        </sc-for>
+      </div>
+    </div>
+    <div style="background:var(--a1-surface,#fff);border:1px solid var(--a1-border,#E6E5E0);border-radius:14px;padding:22px;display:flex;flex-direction:column;gap:14px">
+      <span style="font-size:15px;font-weight:600">Princípios</span>
+      <sc-for list="{{ principles }}" as="p" hint-placeholder-count="4">
+        <div style="display:flex;gap:14px;padding:12px 0;border-top:1px solid var(--a1-divider-2,#F2F1ED)">
+          <span style="font-family:'Geist Mono',monospace;font-size:12px;color:#E8A23A;font-weight:600">{{ p.n }}</span>
+          <div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:14px;font-weight:600">{{ p.t }}</span><span style="font-size:13px;color:var(--a1-text-2,#62656D);line-height:1.5">{{ p.d }}</span></div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="background:var(--a1-surface,#fff);border:1px solid var(--a1-border,#E6E5E0);border-radius:14px;padding:22px;display:flex;flex-direction:column;gap:16px">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap"><span style="font-size:15px;font-weight:600">Componentes base</span><span style="font-size:12.5px;color:var(--a1-text-3,#7A7D85)">Botões, status, campos, atalhos e indicadores</span></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+      <button style="height:40px;padding:0 16px;border:0;border-radius:9px;background:#2D5BD8;color:#fff;font-size:13px;font-weight:600">Ação primária</button>
+      <button style="height:40px;padding:0 16px;border:0;border-radius:9px;background:var(--a1-strong,#15171C);color:#fff;font-size:13px;font-weight:600">Ação de destaque</button>
+      <button style="height:40px;padding:0 16px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:9px;background:var(--a1-surface,#fff);font-size:13px;font-weight:550">Secundária</button>
+      <button style="height:40px;padding:0 16px;border:1px solid var(--a1-err-border,#F0C4BF);border-radius:9px;background:var(--a1-err-bg,#FBEAE8);color:var(--a1-err-fg,#9E2F27);font-size:13px;font-weight:600">Destrutiva</button>
+      <button style="height:56px;padding:0 22px;border:0;border-radius:12px;background:#E8A23A;color:#15171C;font-size:16px;font-weight:700;display:flex;align-items:center;gap:10px">PDV · Finalizar<span style="font-family:'Geist Mono',monospace;font-size:12px;padding:3px 7px;border-radius:6px;background:rgba(15,17,21,.14)">F10</span></button>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <sc-for list="{{ badges }}" as="b" hint-placeholder-count="5"><span style="font-size:12px;font-weight:600;padding:4px 10px;border-radius:999px;background:{{ b.bg }};color:{{ b.fg }}">{{ b.l }}</span></sc-for>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px">
+      <label style="display:flex;flex-direction:column;gap:6px;font-size:12.5px;font-weight:550">Campo padrão<input placeholder="Digite aqui" style="height:40px;padding:0 12px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:8px;font-size:13.5px"></input></label>
+      <label style="display:flex;flex-direction:column;gap:6px;font-size:12.5px;font-weight:550">Campo com erro<input value="12,5,0" style="height:40px;padding:0 12px;border:1px solid var(--a1-err-border2,#E59A92);border-radius:8px;font-size:13.5px"></input><span style="font-size:12px;color:var(--a1-err-fg2,#B23A31);font-weight:400">Valor inválido</span></label>
+      <div style="background:var(--a1-surface-2,#FAFAF8);border:1px solid var(--a1-border,#E6E5E0);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:6px"><span style="font-size:12.5px;color:var(--a1-text-2,#62656D)">Card de indicador</span><span style="font-size:24px;font-weight:600;letter-spacing:-.02em">R$ 86.412</span><span style="font-size:12px;color:var(--a1-ok-fg,#1B6E4A);font-weight:600">+4,1% vs. ontem</span></div>
+    </div>
+  </div>
+
+  <div style="background:var(--a1-surface,#fff);border:1px solid var(--a1-border,#E6E5E0);border-radius:14px;padding:22px;display:flex;flex-direction:column;gap:16px">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap"><span style="font-size:15px;font-weight:600">Estrutura de navegação</span><span style="font-size:12.5px;color:var(--a1-text-3,#7A7D85)">Telas em negrito estão prototipadas · demais previstas</span></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">
+      <sc-for list="{{ navMap }}" as="g" hint-placeholder-count="8">
+        <div style="border:1px solid var(--a1-divider,#EFEEEA);border-radius:11px;padding:14px;display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:650"><x-import component="Icon" from="./Icon.js" i="{{ g.icon }}" size="16" hint-size="16px,16px"></x-import>{{ g.label }}</div>
+          <sc-for list="{{ g.items }}" as="it" hint-placeholder-count="4">
+            <button onClick="{{ it.go }}" style="border:0;background:transparent;padding:0;text-align:left;font-size:12.5px;color:{{ it.c }};font-weight:{{ it.w }};cursor:{{ it.cur }}">{{ it.l }}</button>
+          </sc-for>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const NAV = [
+  ['Atlas Core', 'layout-grid', [['home', 'Visão geral'], ['', 'Organizações e empresas'], ['', 'Estabelecimentos e filiais'], ['usuarios', 'Usuários e permissões'], ['', 'Módulos contratados'], ['', 'Assinaturas']]],
+  ['Atlas Postos', 'fuel', [['postos', 'Visão geral do posto'], ['produtos', 'Produtos'], ['estoque', 'Estoque'], ['vendas', 'Vendas'], ['', 'Tanques, bombas e bicos'], ['', 'Compras e entrada de NF'], ['', 'Conveniência e caixa']]],
+  ['Atlas PDV', 'scan-barcode', [['pdv', 'Frente de caixa'], ['pdv', 'Pagamento integrado'], ['pdv', 'Abertura e fechamento'], ['pdv', 'Sangria e suprimento']]],
+  ['Atlas Payments', 'credit-card', [['payments', 'Conector Boa Vista'], ['payments', 'Terminais'], ['payments', 'Transações e estornos'], ['payments', 'Conciliação'], ['payments', 'Taxas e recebíveis']]],
+  ['Atlas Financeiro', 'landmark', [['financeiro', 'Visão financeira'], ['', 'Contas a pagar e receber'], ['', 'Fluxo de caixa'], ['', 'Conciliação bancária'], ['', 'Centros de custo']]],
+  ['Atlas Contábil', 'book-open', [['contabil', 'Visão da carteira'], ['', 'Escrituração e lançamentos'], ['', 'Fiscal e apuração'], ['', 'Obrigações acessórias'], ['', 'Departamento pessoal']]],
+  ['Atlas BI', 'chart-column', [['bi', 'Dashboard executivo'], ['', 'Comparativos'], ['', 'Rankings'], ['', 'Relatórios gerenciais']]],
+  ['Atlas Integrations', 'plug', [['', 'Importação e exportação'], ['', 'Validação de arquivos'], ['', 'Monitoramento'], ['', 'Logs e erros']]]
+];
+class Component extends DCLogic {
+  renderVals() {
+    const nav = this.props.navigate || (() => {});
+    return {
+      marks: [['#2D5BD8', '#fff', 'Primária'], ['#15171C', '#fff', 'Monocromática'], ['#E8A23A', '#15171C', 'PDV'], ['#fff', '#15171C', 'Negativa']].map(([bg, fg, label]) => ({ bg, fg, label })),
+      colors: [
+        ['Tinta', '#15171C', 'Texto e ações de destaque'], ['Grafite', '#0F1115', 'Navegação e PDV'], ['Papel', '#F5F5F2', 'Fundo de trabalho'], ['Linha', '#E6E5E0', 'Bordas e divisores'],
+        ['Azul Atlas', '#2D5BD8', 'Ação primária, seleção'], ['Âmbar pista', '#E8A23A', 'Sinal operacional, PDV'], ['Positivo', '#1F8A5B', 'Aprovado, entradas'], ['Atenção', '#C98A1E', 'Pendências'],
+        ['Crítico', '#C8433A', 'Recusas, saídas, erros'], ['Violeta', '#5B45A8', 'Contábil, categorias']
+      ].map(([name, hex, use]) => ({ name, hex, use })),
+      type: [
+        ['28 / 600', '28px', 600, "'Geist',sans-serif", '-.025em', 'Título de página'], ['15 / 600', '15px', 600, "'Geist',sans-serif", '0', 'Título de card'],
+        ['13.5 / 400', '13.5px', 400, "'Geist',sans-serif", '0', 'Texto de interface e tabelas'], ['44 / Mono', '30px', 600, "'Geist Mono',monospace", '-.03em', 'R$ 1.281,34'],
+        ['11.5 / Mono', '11.5px', 500, "'Geist Mono',monospace", '.08em', 'NSU 400311 · NFC-E 118.403']
+      ].map(([spec, size, w, f, ls, sample]) => ({ spec, size, w, f, ls, sample })),
+      principles: [
+        ['01', 'Dado antes de decoração', 'Números tabulares, hierarquia clara e cor reservada para significado: ação, status e alerta.'],
+        ['02', 'Dois ritmos de uso', 'Telas de gestão densas e calmas; PDV com alvos grandes, alto contraste e atalhos de teclado.'],
+        ['03', 'Contexto sempre visível', 'Organização e estabelecimento ativos no topo; permissões determinam o que aparece.'],
+        ['04', 'Feedback em cada operação', 'Aprovado, recusado, erro e pendente têm cor, ícone e texto próprios — nunca só cor.']
+      ].map(([n, t, d]) => ({ n, t, d })),
+      badges: [['Ativo', '#E6F4EC', '#1B6E4A'], ['Pendente', '#FBF1DF', '#8A5A12'], ['Recusada', '#FBEAE8', '#9E2F27'], ['Em aberto', '#EAF0FD', '#23459F'], ['Estornada', '#F1EEFB', '#5B45A8'], ['Inativo', '#F1F0EC', '#62656D']].map(([l, bg, fg]) => ({ l, bg, fg })),
+      navMap: NAV.map(([label, icon, items]) => ({ label, icon, items: items.map(([r, l]) => ({ l, c: r ? 'var(--a1-text,#15171C)' : 'var(--a1-text-5,#9A9DA4)', w: r ? 600 : 400, cur: r ? 'pointer' : 'default', go: () => r && nav(r) })) }))
+    };
+  }
+}
+
+</script>
+</body>
+</html>

@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;family=Geist+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Geist',system-ui,sans-serif;color:#15171C;-webkit-font-smoothing:antialiased}
+a{color:#2D5BD8}a:hover{color:#1E44AE}
+doc-page:not(:defined){visibility:hidden}
+tr,pre{break-inside:avoid}
+h2{break-after:avoid}
+</style>
+<script src="./doc-page.js"></script>
+</helmet>
+<doc-page margin="0.75in">
+<div style="font-family:'Geist',system-ui,sans-serif;color:#15171C;font-size:12pt;line-height:1.5">
+
+<div style="display:flex;flex-direction:column;gap:6px;padding-bottom:18px;border-bottom:2px solid #15171C;margin-bottom:20px">
+  <div style="font-family:'Geist Mono',monospace;font-size:10pt;letter-spacing:.08em;text-transform:uppercase;color:#62656D">Atlas One · by CCI Consultoria · Preparação técnica do backend</div>
+  <h1 style="margin:0;font-size:26pt;font-weight:650;letter-spacing:-.02em;line-height:1.1">Congelamento do protótipo v0.3 e arquitetura alvo</h1>
+  <div style="font-size:12pt;color:#4A4D55">24/11/2026 · revisão 2 · decisões D1–D4 aprovadas · nenhuma migration executada · nenhum sistema alterado</div>
+</div>
+
+<div style="padding:14px 16px;border:1.5px solid #15171C;border-radius:6px;margin-bottom:22px;break-inside:avoid">
+  <div style="font-weight:650;margin-bottom:6px">Estado do protótipo</div>
+  <div>Versão aprovada congelada em <span style="font-family:'Geist Mono',monospace;font-size:11pt">backup/v0.3-aprovado-2026-11-24/</span> (15 telas, Icon.js e runtime). A interface ativa não foi modificada nesta etapa. O rascunho de esquema está em <span style="font-family:'Geist Mono',monospace;font-size:11pt">docs/atlas-one-schema-draft.sql</span>, marcado como <b>não executar</b> — rascunho 0.2, revisado conforme as decisões aprovadas.</div>
+</div>
+
+<h2 style="font-size:16pt;font-weight:650;margin:0 0 10px">1. Resumo executivo</h2>
+<ul style="margin:0 0 10px;padding-left:20px">
+  <li>O protótipo já expressa as regras de negócio centrais: organização › empresa › estabelecimento, membros em várias organizações, papéis com herança por nível, contratação de módulos independente de permissão e isolamento entre organizações.</li>
+  <li>Essas regras hoje vivem no navegador, com dados simulados. A próxima etapa leva a autoridade para o banco: <b>PostgreSQL + Supabase Auth + RLS</b>, com serviços de domínio para operações que exigem invariantes.</li>
+  <li>A interface pode continuar intacta se os dados passarem por uma <b>camada de acesso</b> com dois adaptadores — simulado (atual) e API (futuro) — trocados por configuração.</li>
+  <li>As quatro decisões estruturais foram <b>aprovadas</b> (§1A) e incorporadas a este documento e ao rascunho SQL. Restam decisões menores e itens de segurança que ainda <b>bloqueiam a primeira migration</b> (§12). Duas dependências externas bloqueiam os módulos operacionais: a análise do banco do AutoSystem e a especificação técnica da Boa Vista.</li>
+</ul>
+
+<h2 style="font-size:16pt;font-weight:650;margin:26px 0 10px">1A. Decisões aprovadas — diretrizes de arquitetura</h2>
+<p style="margin:0 0 10px">Aprovadas em 24/11/2026 para o Atlas Core. São diretrizes obrigatórias: qualquer implementação que divirja delas exige nova aprovação.</p>
+<table style="width:100%;border-collapse:collapse;margin-bottom:14px">
+  <thead><tr><th style="text-align:left;padding:6px 8px;border-bottom:1.5px solid #15171C;width:7%">Id</th><th style="text-align:left;padding:6px 8px;border-bottom:1.5px solid #15171C;width:30%">Decisão</th><th style="text-align:left;padding:6px 8px;border-bottom:1.5px solid #15171C">Como foi aplicada</th><th style="text-align:left;padding:6px 8px;border-bottom:1.5px solid #15171C;width:20%">Onde</th></tr></thead>
+  <tbody>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">D1</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top"><b>Permissões:</b> registrar somente as células alteradas, respeitando a herança por escopo.</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Uma linha por célula (papel × nível × módulo × ação). Ausência de linha = herda. Gravar um valor igual ao herdado remove a linha. “Restaurar herança” apaga a linha.</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">§5.2 · <span style="font-family:'Geist Mono',monospace;font-size:11pt">permission_overrides</span>, <span style="font-family:'Geist Mono',monospace;font-size:11pt">set_permission_cell</span></td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">D2</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top"><b>Papéis:</b> sete papéis padrão e papéis personalizados por organização.</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Papéis de sistema (organização nula, matriz mantida pela plataforma) e papéis da organização (criados a partir de um modelo, cópia independente). Só o Administrador de sistema é irrestrito.</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">§5.3 · <span style="font-family:'Geist Mono',monospace;font-size:11pt">roles</span>, <span style="font-family:'Geist Mono',monospace;font-size:11pt">role_permissions</span></td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">D3</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top"><b>Acesso empresarial:</b> combinação de empresas e estabelecimentos, com escopos explícitos.</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Cada participação tem um ou mais escopos (organização, empresa ou estabelecimento), combináveis por união. Participação ativa sem escopo não tem acesso.</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">§5.4 · <span style="font-family:'Geist Mono',monospace;font-size:11pt">membership_scopes</span>, <span style="font-family:'Geist Mono',monospace;font-size:11pt">scope_covers</span></td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">D4</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top"><b>Backend:</b> híbrido — Supabase Edge Functions inicialmente e serviços dedicados conforme a necessidade.</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Edge Functions chamam funções RPC do banco com o JWT do usuário; autorização e auditoria ficam no banco. Critérios objetivos para mover um domínio para serviço dedicado.</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">§9.4</td></tr>
+  </tbody>
+</table>
+<p style="margin:0 0 14px">Regra de governança: <b>nenhuma migration é executada enquanto houver decisão estrutural pendente ou problema de segurança não resolvido</b> (§12).</p>
+
+<h2 style="font-size:16pt;font-weight:650;margin:26px 0 10px">2. Estrutura atual</h2>
+<h3 style="font-size:13pt;font-weight:650;margin:0 0 8px">2.1 Componentes</h3>
+<table style="width:100%;border-collapse:collapse;margin-bottom:14px">
+  <thead><tr><th style="text-align:left;padding:6px 8px;border-bottom:1.5px solid #15171C;width:30%">Arquivo</th><th style="text-align:left;padding:6px 8px;border-bottom:1.5px solid #15171C">Responsabilidade</th></tr></thead>
+  <tbody>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;font-family:'Geist Mono',monospace;font-size:11pt">Atlas One.dc.html</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Shell: login simulado, sidebar em seções, cabeçalho com contexto em 3 níveis, seletor completo, roteamento, abas do Atlas Postos, carregamento, bloqueio de módulo, tema, notificações e o <b>estado compartilhado</b> (árvore de entidades + ações).</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;font-family:'Geist Mono',monospace;font-size:11pt">AtlasHome</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Visão geral do Core: KPIs da organização ativa, faturamento, assinatura, módulos, pendências, atividades, acessos rápidos.</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;font-family:'Geist Mono',monospace;font-size:11pt">AtlasCore</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">8 visões: organizações, empresas, estabelecimentos, módulos e assinaturas, relacionamentos contábeis, compartilhamento, auditoria, configurações. Tabela, painel de detalhes e formulário genéricos.</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;font-family:'Geist Mono',monospace;font-size:11pt">AtlasUsuarios</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Membros, convites e papéis; matriz de permissões por nível.</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;font-family:'Geist Mono',monospace;font-size:11pt">AtlasPostos</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Dashboard operacional do posto (Serra Azul no contexto padrão). <b>Preservado sem alteração visual.</b></td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;font-family:'Geist Mono',monospace;font-size:11pt">AtlasProdutos, AtlasEstoque, AtlasVendas</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Cadastro de produtos, estoque e vendas do posto.</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;font-family:'Geist Mono',monospace;font-size:11pt">AtlasPDV</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Frente de caixa em tela cheia, pagamento integrado simulado.</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;font-family:'Geist Mono',monospace;font-size:11pt">AtlasPayments, AtlasFinanceiro, AtlasContabil, AtlasBI</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Dashboards dos módulos de gestão e inteligência.</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;font-family:'Geist Mono',monospace;font-size:11pt">AtlasModulo</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Tela estrutural reutilizada por 13 rotas (subáreas do Postos, Conveniência, Fiscal, AI, Documents, Integrations).</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;font-family:'Geist Mono',monospace;font-size:11pt">AtlasIdentidade</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Identidade visual.</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;font-family:'Geist Mono',monospace;font-size:11pt">Icon.js</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Adaptador de ícones Lucide.</td></tr>
+  </tbody>
+</table>
+
+<h3 style="font-size:13pt;font-weight:650;margin:0 0 8px">2.2 Navegação</h3>
+<ul style="margin:0 0 14px;padding-left:20px">
+  <li>Sidebar com cinco seções: <b>Atlas Core</b>; <b>Operação</b> (Postos, PDV, Conveniência); <b>Gestão</b> (Payments, Financeiro, Contábil, Fiscal); <b>Inteligência</b> (BI, AI); <b>Serviços e integrações</b> (Documents, Integrations).</li>
+  <li>Cada item de menu é <span style="font-family:'Geist Mono',monospace;font-size:11pt">[rota, rótulo, tela, parâmetro]</span>. A tabela de rotas é derivada desse catálogo; a rota decide qual componente monta e qual parâmetro recebe (ex.: <span style="font-family:'Geist Mono',monospace;font-size:11pt">core:estabs → AtlasCore view=estabelecimentos</span>).</li>
+  <li>O Atlas Postos tem 15 abas internas; abas que apontam para telas existentes (Produtos, Estoque, Vendas, Financeiro) reutilizam os mesmos componentes.</li>
+  <li>Itens ainda não detalhados levam a uma tela “prevista na estrutura”.</li>
+</ul>
+
+<h3 style="font-size:13pt;font-weight:650;margin:0 0 8px">2.3 Estado compartilhado</h3>
+<p style="margin:0 0 8px">Fonte única no shell. Persistida em <span style="font-family:'Geist Mono',monospace;font-size:11pt">localStorage["atlas1.shell.v3"]</span> com <span style="font-family:'Geist Mono',monospace;font-size:11pt">{ authed, route, orgId, compId, estabId, theme, tree }</span>. Todas as telas recebem um objeto <b>ctx</b>:</p>
+<pre style="margin:0 0 14px;padding:12px 14px;background:#F5F5F2;border-radius:6px;font-family:'Geist Mono',monospace;font-size:10.5pt;line-height:1.5;white-space:pre-wrap">ctx = {
+  orgId, org, orgShort, orgInitials, orgType, role,   // organização ativa e papel do usuário nela
+  companyId | 'all', company,                         // empresa ativa
+  estabId | 'all', estab, estabs[],                   // estabelecimento ativo e conjunto visível
+  firstPosto,                                         // posto de referência para telas operacionais
+  mods[],                                             // módulos contratados pela organização
+  tree,                                               // organizações › empresas › estabelecimentos
+  store: { addOrg, updateOrg, addCompany, updateCompany, addEstab, updateEstab }
+}</pre>
+<p style="margin:0 0 14px">Estado ainda <b>local às telas</b> (não compartilhado): membros e convites, overrides de permissão, relacionamentos contábeis, compartilhamentos, eventos de auditoria, configurações e todos os dados operacionais (vendas, tanques, caixas, títulos). Catálogos duplicados: módulos (shell, Core, Home, Usuários), assinaturas (Core, Home) e papel do usuário (shell, Core).</p>
+
+<h2 style="font-size:16pt;font-weight:650;margin:26px 0 10px">3. Modelos de dados simulados</h2>
+<table style="width:100%;border-collapse:collapse;margin-bottom:14px">
+  <thead><tr><th style="text-align:left;padding:6px 8px;border-bottom:1.5px solid #15171C;width:22%">Entidade</th><th style="text-align:left;padding:6px 8px;border-bottom:1.5px solid #15171C">Campos e valores</th></tr></thead>
+  <tbody>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Organização</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">id, name, short, initials, type, doc (CNPJ responsável), plan, since, users, domain, <b>status</b> (Ativa · Implantação · Suspensa), <b>mods[]</b>, companies[]</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Empresa</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">id, name (razão social), fantasia, cnpjBase (8 dígitos), regime (Simples · Presumido · Real), <b>status</b> (Ativa · Implantação · Inativa), estabs[]</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Estabelecimento</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">id, name, type (Matriz · Filial), cnpj, ie, im, city, addr, phone, email, posto (bool), <b>status</b> (Ativo · Implantação · Suspenso)</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Membro</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">nome, e-mail, último acesso, 2FA, situação (Ativo · Bloqueado), <b>participações[]</b> = [orgId, papel, escopo]; escopo = <span style="font-family:'Geist Mono',monospace;font-size:11pt">'*'</span> (organização inteira) ou lista de ids de empresas/estabelecimentos</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Convite</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">orgId, e-mail, papel, escopo, enviado por, expiração (72 h), situação (Pendente · Expirado)</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Papel</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Administrador, Gerente, Operador, Financeiro, Fiscal, Estoque, Auditor; matriz padrão 12 módulos × 5 ações (Visualizar, Criar, Editar, Excluir, Aprovar)</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Override de permissão</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">chave <span style="font-family:'Geist Mono',monospace;font-size:11pt">org|papel[|empresa[|estabelecimento]]</span> → matriz completa 12 × 5</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Assinatura</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">plano, situação, renovação, licenças usadas/limite</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Relacionamento contábil</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">empresa cliente, CNPJ, organização do cliente (ou fora da plataforma), serviços, responsável, desde, situação (Ativo · Aguardando aceite · Encerrado)</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Compartilhamento</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">proprietário, dados, origem, destinatário, finalidade, validade, situação (Ativo · Pendente · Expira em breve · Revogado)</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Evento de auditoria</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">data e hora, usuário, ação, módulo, registro afetado, resultado (Sucesso · Negado · Falha), IP, dispositivo, id de correlação</td></tr>
+  </tbody>
+</table>
+<p style="margin:0 0 14px">Massa de demonstração: 3 organizações (CCI Consultoria, Grupo Horizonte, Rede Vale Verde), 5 empresas, 10 estabelecimentos, 17 usuários, 4 convites.</p>
+
+<h2 style="font-size:16pt;font-weight:650;margin:26px 0 10px">4. Fluxos de organização, empresa e estabelecimento</h2>
+<ol style="margin:0 0 14px;padding-left:22px">
+  <li><b>Seleção em cascata.</b> Organização › Empresa (ou “Todas as empresas”) › Estabelecimento (ou “Todos”). Trocar um nível reinicia os níveis abaixo.</li>
+  <li><b>Normalização contínua.</b> Após qualquer alteração de estado, o contexto é recalculado: organização suspensa, empresa inativa ou estabelecimento suspenso são descartados e substituídos pela opção válida mais próxima. Um único item disponível é selecionado automaticamente.</li>
+  <li><b>Pertencimento.</b> Um estabelecimento só é válido se pertencer à empresa ativa (ou à organização, quando a empresa é “Todas”). Não há como manter um estabelecimento de outro contexto.</li>
+  <li><b>Itens indisponíveis</b> aparecem esmaecidos no seletor, com o motivo, e não podem ser escolhidos.</li>
+  <li><b>Cadastro e edição</b> no Atlas Core atualizam imediatamente o seletor, a visão geral e a tela de permissões. Novas organizações nascem em Implantação, apenas com o Atlas Core contratado.</li>
+  <li><b>Proteções.</b> A organização ativa não pode ser suspensa; suspender o estabelecimento ativo ajusta o contexto e notifica o usuário.</li>
+  <li><b>Isolamento.</b> Telas do Core listam apenas dados da organização ativa; a única visão multi-organização é “Organizações”, restrita às participações do próprio usuário.</li>
+</ol>
+
+<h2 style="font-size:16pt;font-weight:650;margin:26px 0 10px">5. Permissões, papéis e acesso empresarial (D1, D2, D3)</h2><h3 style="font-size:13pt;font-weight:650;margin:14px 0 8px">5.1 Ordem de avaliação</h3>
+<ol style="margin:0 0 10px;padding-left:22px">
+  <li>Participação ativa do usuário na organização, e organização não suspensa.</li>
+  <li>Módulo contratado pela organização (verificação independente).</li>
+  <li>Empresa e estabelecimento pertencem à organização e são coerentes entre si.</li>
+  <li>Empresa inativa ou estabelecimento suspenso: somente leitura.</li>
+  <li>Escopo da participação cobre o alvo (§5.4).</li>
+  <li>Administrador: permitido. Demais papéis: valor da célula resolvido por <b>estabelecimento › empresa › organização › base do papel</b>; vence o nível mais específico que tiver célula registrada.</li>
+</ol>
+<h3 style="font-size:13pt;font-weight:650;margin:14px 0 8px">5.2 Somente células alteradas (D1)</h3>
+<ul style="margin:0 0 10px;padding-left:20px">
+  <li>Cada célula personalizada é um registro próprio; células não registradas continuam herdando, inclusive mudanças futuras feitas nos níveis acima.</li>
+  <li>Ao gravar, o backend compara com o valor herdado: se for igual, nada é registrado (ou o registro existente é removido).</li>
+  <li>A interface recebe, para cada célula, o valor efetivo e a <b>origem</b> (estabelecimento, empresa, organização ou papel) e envia apenas a célula alterada.</li>
+  <li>Diferença em relação ao protótipo congelado: ele copia a matriz inteira ao personalizar um nível. O front de produção deve seguir D1; o protótipo não será alterado.</li>
+</ul>
+<p style="margin:0 0 6px"><b>Exemplo</b> — papel Gerente, Atlas Financeiro, ação Aprovar, organização Grupo Horizonte:</p>
+<table style="width:100%;border-collapse:collapse;margin-bottom:14px">
+  <thead><tr><th style="text-align:left;padding:6px 8px;border-bottom:1.5px solid #15171C;width:45%">Registro</th><th style="text-align:left;padding:6px 8px;border-bottom:1.5px solid #15171C">Alvo avaliado</th><th style="text-align:left;padding:6px 8px;border-bottom:1.5px solid #15171C;width:24%">Resultado</th></tr></thead>
+  <tbody>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Base do papel: permitido</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Horizonte Rodovia › Posto Rodovia 330</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Sim (papel)</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Célula na empresa Horizonte Combustíveis: negado</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Horizonte Combustíveis › Posto Avenida</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Não (empresa)</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Célula no estabelecimento Posto Central: permitido</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Horizonte Combustíveis › Posto Central</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Sim (estabelecimento)</td></tr>
+  </tbody>
+</table>
+<h3 style="font-size:13pt;font-weight:650;margin:14px 0 8px">5.3 Papéis (D2)</h3>
+<ul style="margin:0 0 10px;padding-left:20px">
+  <li><b>Sete papéis de sistema</b>: Administrador, Gerente, Operador, Financeiro, Fiscal, Estoque, Auditor. Matriz base mantida pela plataforma (somente por migration). O Administrador é irrestrito e não aceita células personalizadas.</li>
+  <li><b>Papéis personalizados</b> pertencem a uma organização, têm nome único nela e são criados a partir de um modelo (papel de sistema ou outro papel da organização). A matriz é <b>copiada</b> na criação e passa a ser independente: mudanças no modelo não propagam.</li>
+  <li>Papéis personalizados nunca são irrestritos e aceitam células por nível, como os de sistema.</li>
+  <li>Um papel personalizado só pode ser arquivado sem participações nem convites ativos.</li>
+  <li><b>Anti-escalada:</b> só administradores com escopo de organização criam e editam papéis, alteram células, atribuem papéis e escopos e enviam convites. Ninguém altera a própria participação.</li>
+  <li>O banco garante que participações, convites e células usam papel ativo de sistema ou da mesma organização.</li>
+</ul>
+<h3 style="font-size:13pt;font-weight:650;margin:14px 0 8px">5.4 Acesso empresarial com escopos explícitos (D3)</h3><table style="width:100%;border-collapse:collapse;margin-bottom:14px">
+  <thead><tr><th style="text-align:left;padding:6px 8px;border-bottom:1.5px solid #15171C;width:22%">Escopo</th><th style="text-align:left;padding:6px 8px;border-bottom:1.5px solid #15171C">Cobre</th></tr></thead>
+  <tbody>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Organização</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Toda a organização: ações de organização, de qualquer empresa e de qualquer estabelecimento.</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Empresa</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">A empresa e todos os seus estabelecimentos, atuais e futuros.</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Estabelecimento</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Somente aquele estabelecimento. Permite ver a empresa dona na árvore, mas não concede ações sobre a empresa inteira.</td></tr>
+  </tbody>
+</table>
+<ul style="margin:0 0 10px;padding-left:20px">
+  <li>Escopos são combináveis; a área de acesso é a união. Exemplo: Carlos Mendes com escopo na empresa Horizonte Rodovia e no estabelecimento Posto Central.</li>
+  <li><b>Participação ativa sem escopo = sem acesso.</b> O rascunho anterior tratava “sem escopo” como organização inteira; isso foi removido por risco de escalada silenciosa.</li>
+  <li>O banco exige pelo menos um escopo por participação ativa e garante que cada escopo pertence à mesma organização.</li>
+  <li>Convites carregam os mesmos escopos, copiados para a participação no aceite.</li>
+  <li>Um usuário tem papel e escopos próprios em cada organização.</li>
+</ul>
+<h2 style="font-size:16pt;font-weight:650;margin:26px 0 10px">6. Contratação de módulos e bloqueio</h2>
+<ul style="margin:0 0 14px;padding-left:20px">
+  <li>A contratação é por organização (<span style="font-family:'Geist Mono',monospace;font-size:11pt">org.mods</span>); o Atlas Core é sempre incluído.</li>
+  <li>Módulo não contratado: cadeado na sidebar, tela “não contratado” com acesso a Módulos e assinaturas e a solicitação de contratação; acesso rápido esmaecido na visão geral; o PDV não abre.</li>
+  <li>Na matriz de permissões, módulos não contratados continuam editáveis, com o aviso “permissão registrada, sem efeito até a contratação”.</li>
+  <li>Regra: <b>acesso efetivo = módulo contratado E permissão do papel no nível</b>. As duas verificações são independentes.</li>
+  <li>Todo bloqueio atual é cosmético. No backend, a mesma regra deve ser aplicada por <span style="font-family:'Geist Mono',monospace;font-size:11pt">has_module</span> + <span style="font-family:'Geist Mono',monospace;font-size:11pt">has_permission</span> em RLS e nos serviços.</li>
+</ul>
+
+<h2 style="font-size:16pt;font-weight:650;margin:26px 0 10px">7. Critérios de aceite e testes aprovados</h2>
+<table style="width:100%;border-collapse:collapse;margin-bottom:14px">
+  <thead><tr><th style="text-align:left;padding:6px 8px;border-bottom:1.5px solid #15171C">Critério</th><th style="text-align:left;padding:6px 8px;border-bottom:1.5px solid #15171C;width:18%">Resultado</th></tr></thead>
+  <tbody>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Dashboard do Posto Serra Azul visualmente inalterado no tema claro</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Aprovado</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Produtos, Estoque, Vendas, Financeiro, Payments, PDV acessíveis</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Aprovado</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Telas do Core, Papéis e as 13 telas estruturais navegáveis</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Aprovado</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Estabelecimento criado no Core aparece e é selecionável no cabeçalho imediatamente</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Aprovado</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Suspender o estabelecimento ativo ajusta o contexto e notifica</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Aprovado</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Troca de organização atualiza visão geral, KPIs, assinatura, pendências e atividades</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Aprovado</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Módulo não contratado exibe estado bloqueado (ex.: Grupo Horizonte › Atlas Contábil)</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Aprovado</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Tema escuro por tokens, sem inversão; contraste de texto ≥ 3:1 no PDV (varredura automática)</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Aprovado</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Notificações funcionando; nenhum erro de console</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Aprovado</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Sem componentes duplicados desnecessários</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Aprovado</td></tr>
+  </tbody>
+</table>
+<p style="margin:0 0 14px">Esses critérios devem virar a <b>suíte de regressão</b> (testes end-to-end) executada a cada troca de adaptador de dados.</p>
+
+<h2 style="font-size:16pt;font-weight:650;margin:26px 0 10px">8. Pontos a substituir por API e persistência</h2>
+<table style="width:100%;border-collapse:collapse;margin-bottom:14px">
+  <thead><tr><th style="text-align:left;padding:6px 8px;border-bottom:1.5px solid #15171C;width:32%">Hoje no protótipo</th><th style="text-align:left;padding:6px 8px;border-bottom:1.5px solid #15171C">Substituir por</th></tr></thead>
+  <tbody>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Login simulado no shell</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Supabase Auth (e-mail e senha + MFA TOTP); SSO em fase posterior</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0"><span style="font-family:'Geist Mono',monospace;font-size:11pt">tree</span> + localStorage</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0"><span style="font-family:'Geist Mono',monospace;font-size:11pt">GET /me</span> e <span style="font-family:'Geist Mono',monospace;font-size:11pt">GET /orgs/{id}/tree</span>, com cache por organização</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0"><span style="font-family:'Geist Mono',monospace;font-size:11pt">store.*</span></td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Serviços de domínio (POST/PATCH) com validação, auditoria e resposta para atualização otimista</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Contexto ativo (orgId, compId, estabId)</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Mantido no cliente; validado contra a API; último contexto salvo em preferências do usuário</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Papel do usuário (MY_ROLE)</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">memberships.role_id (papel de sistema ou personalizado) + membership_scopes</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0"><span style="font-family:'Geist Mono',monospace;font-size:11pt">org.mods</span> e catálogos duplicados</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">organization_modules + tabela modules; um único catálogo no front</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Membros, convites, overrides</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Endpoints de membros, convites (token com expiração) e permissões efetivas com origem por célula</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Assinaturas</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">subscriptions (plano, renovação, licenças)</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Relacionamentos e compartilhamentos</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">accounting_relationships e data_grants, com fluxo de aceite e aprovação</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Gerador de auditoria</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">audit_events append-only, gravado pelos serviços e por triggers</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Configurações</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">organization_settings</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Dados operacionais (Postos, PDV, Payments, Financeiro, Contábil, Fiscal, BI)</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Modelos de leitura por domínio; dependem da análise do AutoSystem/WebPosto e dos contratos de cada módulo</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Tema</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Permanece no cliente (preferência do usuário)</td></tr>
+  </tbody>
+</table>
+
+<h2 style="font-size:16pt;font-weight:650;margin:26px 0 10px">9. Arquitetura alvo</h2>
+<h3 style="font-size:13pt;font-weight:650;margin:0 0 8px">9.1 Camadas</h3>
+<ul style="margin:0 0 14px;padding-left:20px">
+  <li><b>Cliente</b> (React + TypeScript, conforme briefing original): reaproveita telas, tokens de tema e regras de contexto. Acessa dados apenas pela camada de acesso.</li>
+  <li><b>Camada de acesso no front</b>: interfaces <span style="font-family:'Geist Mono',monospace;font-size:11pt">OrgRepository, MembershipRepository, PermissionRepository…</span> com adaptador simulado (dados atuais) e adaptador API.</li>
+  <li><b>Serviços de domínio</b> (D4: Edge Functions na fase inicial, serviços dedicados conforme §9.4): operações com invariantes e efeitos colaterais — criar organização com assinatura e convite do administrador; validar CNPJ-base e matriz única; aceitar convite; aceitar relacionamento contábil; aprovar compartilhamento; gravar auditoria.</li>
+  <li><b>PostgreSQL</b> (schema <span style="font-family:'Geist Mono',monospace;font-size:11pt">atlas</span>): fonte da verdade, com RLS em todas as tabelas multi-tenant.</li>
+  <li><b>Supabase Auth</b>: identidade (auth.users ↔ profiles). Organização ativa <b>não</b> vai no JWT; cada requisição informa organization_id e o banco valida participação.</li>
+</ul>
+<h3 style="font-size:13pt;font-weight:650;margin:0 0 8px">9.2 Autorização no backend</h3>
+<ul style="margin:0 0 14px;padding-left:20px">
+  <li><span style="font-family:'Geist Mono',monospace;font-size:11pt">is_member(org)</span>, <span style="font-family:'Geist Mono',monospace;font-size:11pt">has_module(org, módulo)</span> e <span style="font-family:'Geist Mono',monospace;font-size:11pt">has_permission(org, módulo, ação, empresa, estabelecimento)</span>, como funções <i>security definer</i>, usadas pelas políticas RLS e pelos serviços.</li>
+  <li>Acesso entre organizações apenas por <span style="font-family:'Geist Mono',monospace;font-size:11pt">has_accounting_access</span>, combinando relacionamento ativo e compartilhamento ativo.</li>
+  <li>Toda tabela operacional futura carrega organization_id, company_id e establishment_id, indexados e com chaves estrangeiras compostas.</li>
+  <li>Usuários não têm políticas de INSERT, UPDATE ou DELETE: toda escrita passa por funções RPC que verificam permissão e gravam auditoria na mesma transação.</li>
+  <li>Funções <i>security definer</i> com search_path vazio e nomes totalmente qualificados.</li>
+  <li>Endpoint <span style="font-family:'Geist Mono',monospace;font-size:11pt">GET /me/effective-access</span> devolve módulos e ações para a interface; a interface continua sendo apenas reflexo, nunca a autoridade.</li>
+</ul>
+<h3 style="font-size:13pt;font-weight:650;margin:0 0 8px">9.3 Contratos de API iniciais (rascunho)</h3>
+<pre style="margin:0 0 14px;padding:12px 14px;background:#F5F5F2;border-radius:6px;font-family:'Geist Mono',monospace;font-size:10.5pt;line-height:1.55;white-space:pre-wrap">GET    /me                                   perfil + participações (org, papel, status, módulos)
+GET    /me/effective-access?org&amp;company&amp;estab   módulos e ações efetivos
+GET    /orgs/{org}/tree                      empresas e estabelecimentos visíveis no escopo
+POST   /orgs                                 cria organização + assinatura + convite do admin
+PATCH  /orgs/{org}        POST /orgs/{org}/status
+POST   /orgs/{org}/companies                 PATCH /companies/{id}   POST /companies/{id}/status
+POST   /companies/{id}/establishments        PATCH /establishments/{id}   POST /establishments/{id}/status
+GET    /orgs/{org}/members                   PATCH /memberships/{id}
+POST   /orgs/{org}/invitations               POST /invitations/{token}/accept
+GET    /orgs/{org}/roles/{role}/permissions?company&amp;estab   matriz efetiva + origem por célula
+PUT    /orgs/{org}/roles/{role}/cells        {level, company?, estab?, module, action, allowed | null}
+                                             → { stored | inherited }   (D1: uma célula por chamada)
+GET|POST /orgs/{org}/roles                   PATCH /roles/{id}   POST /roles/{id}/archive   (D2)
+PUT    /memberships/{id}/scopes              [{level, company?, estab?}]  ≥ 1 escopo   (D3)
+GET    /orgs/{org}/modules                   POST /orgs/{org}/modules/{code}/requests
+GET    /orgs/{org}/audit?module&amp;result&amp;q    GET /orgs/{org}/audit/export
+GET|POST /orgs/{org}/relationships           POST /relationships/{id}/accept | /end
+GET|POST /orgs/{org}/grants                  POST /grants/{id}/approve | /revoke
+GET|PUT  /orgs/{org}/settings</pre>
+<p style="margin:0 0 14px">O esquema completo (tabelas, enumerações, funções e políticas) está em <span style="font-family:'Geist Mono',monospace;font-size:11pt">docs/atlas-one-schema-draft.sql</span>.</p>
+
+<h3 style="font-size:13pt;font-weight:650;margin:14px 0 8px">9.4 Limites: Edge Functions e serviços dedicados (D4)</h3><p style="margin:0 0 8px"><b>Fase inicial — Edge Functions.</b> Funções finas: validam a requisição, chamam a RPC correspondente <b>com o JWT do usuário</b> e devolvem o resultado. Autorização, integridade e auditoria ficam no banco, portanto a mesma regra vale para qualquer cliente.</p>
+<table style="width:100%;border-collapse:collapse;margin-bottom:14px">
+  <thead><tr><th style="text-align:left;padding:6px 8px;border-bottom:1.5px solid #15171C;width:24%">Edge Function</th><th style="text-align:left;padding:6px 8px;border-bottom:1.5px solid #15171C">Responsabilidade</th><th style="text-align:left;padding:6px 8px;border-bottom:1.5px solid #15171C;width:22%">Credencial</th></tr></thead>
+  <tbody>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top"><span style="font-family:'Geist Mono',monospace;font-size:11pt">core-organizations</span></td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Criar, editar, mudar situação; criação com assinatura e convite do administrador</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">JWT do usuário (criação: operador de plataforma)</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top"><span style="font-family:'Geist Mono',monospace;font-size:11pt">core-entities</span></td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Empresas e estabelecimentos: cadastro, edição, situação</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">JWT do usuário</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top"><span style="font-family:'Geist Mono',monospace;font-size:11pt">core-access</span></td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Papéis personalizados, células de permissão, papéis e escopos de membros</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">JWT do usuário</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top"><span style="font-family:'Geist Mono',monospace;font-size:11pt">core-invitations</span></td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Enviar, reenviar e cancelar convites; e-mail; gerar token</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">JWT + segredo de e-mail</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top"><span style="font-family:'Geist Mono',monospace;font-size:11pt">core-invitation-accept</span></td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Aceitar convite (usuário ainda sem participação)</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Service role, validação do token e auditoria explícitas</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top"><span style="font-family:'Geist Mono',monospace;font-size:11pt">core-modules</span></td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Consultar e solicitar contratação de módulos</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">JWT do usuário</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top"><span style="font-family:'Geist Mono',monospace;font-size:11pt">core-sharing</span></td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Relacionamentos contábeis e compartilhamentos: aceite, aprovação, revogação</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">JWT do usuário</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top"><span style="font-family:'Geist Mono',monospace;font-size:11pt">core-audit-export</span></td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Exportar auditoria filtrada</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">JWT do usuário</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top"><span style="font-family:'Geist Mono',monospace;font-size:11pt">core-jobs</span></td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Agendadas: expirar convites e compartilhamentos, lembretes de vencimento</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Service role, sem entrada de usuário</td></tr>
+  </tbody>
+</table>
+<p style="margin:0 0 8px"><b>Serviços dedicados — quando a necessidade aparecer.</b></p>
+<table style="width:100%;border-collapse:collapse;margin-bottom:14px">
+  <thead><tr><th style="text-align:left;padding:6px 8px;border-bottom:1.5px solid #15171C;width:22%">Domínio</th><th style="text-align:left;padding:6px 8px;border-bottom:1.5px solid #15171C">Por que tende a sair das Edge Functions</th></tr></thead>
+  <tbody>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">PDV e sincronização</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Operação offline, fila local, alto volume de eventos, contingência</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Fiscal</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Comunicação com a SEFAZ, certificado A1 em cofre, reenvios longos</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Conector Boa Vista</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Credenciais do parceiro, webhooks, lotes de conciliação; isolamento de escopo de pagamentos</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Integrations (AutoSystem, WebPosto)</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Importações grandes, idempotência, reprocessamento</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">BI</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Agregações pesadas e materializações agendadas</td></tr>
+  </tbody>
+</table>
+<p style="margin:0 0 6px">Critérios para promover um domínio a serviço dedicado (basta um):</p>
+<ul style="margin:0 0 10px;padding-left:20px">
+  <li>Execução que excede os limites de tempo ou memória das Edge Functions.</li>
+  <li>Necessidade de conexão persistente, estado em memória ou processamento contínuo.</li>
+  <li>Segredos ou requisitos de conformidade próprios (certificado digital, dados de pagamento).</li>
+  <li>Volume que exige escala independente.</li>
+  <li>Bibliotecas ou protocolos incompatíveis com o runtime das Edge Functions.</li>
+</ul>
+<p style="margin:0 0 14px">Regra comum: serviços dedicados usam as mesmas funções de autorização e auditoria. Quando operarem com service role, verificam organização e permissão explicitamente e registram o ator real.</p>
+<h3 style="font-size:13pt;font-weight:650;margin:14px 0 8px">9.5 Revisão técnica do rascunho SQL (0.1 → 0.2)</h3><table style="width:100%;border-collapse:collapse;margin-bottom:14px">
+  <thead><tr><th style="text-align:left;padding:6px 8px;border-bottom:1.5px solid #15171C;width:5%">#</th><th style="text-align:left;padding:6px 8px;border-bottom:1.5px solid #15171C;width:45%">Problema encontrado no rascunho 0.1</th><th style="text-align:left;padding:6px 8px;border-bottom:1.5px solid #15171C">Correção no 0.2</th></tr></thead>
+  <tbody>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">1</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Participação sem escopo valia como organização inteira (escalada silenciosa)</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Escopo explícito obrigatório; sem escopo = sem acesso; gatilho de verificação no commit</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">2</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Escopos sem organization_id podiam apontar para empresa de outra organização</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Chaves estrangeiras compostas (id, organization_id)</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">3</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Células podiam referenciar empresa ou estabelecimento de outra organização</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Chaves estrangeiras compostas em permission_overrides</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">4</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Unicidade das células por índice com coalesce de UUID fictício</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">UNIQUE NULLS NOT DISTINCT nomeada (PostgreSQL 15+)</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">5</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Papel como código global impedia papéis personalizados</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Tabela roles com id e organização; gatilho de pertencimento</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">6</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Administrador podia receber restrições</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Gatilho bloqueia células para papel irrestrito</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">7</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">has_permission aceitava estabelecimento de outra organização ou empresa incoerente</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Validação de pertencimento e coerência antes da resolução</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">8</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Administrador com escopo parcial ignorava o escopo</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Escopo verificado antes do Administrador; gestão exige escopo de organização</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">9</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Entidade suspensa ou inativa aceitava escrita</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Somente leitura para empresa inativa e estabelecimento suspenso</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">10</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Funções security definer com search_path = atlas</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">search_path vazio e nomes qualificados</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">11</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Inserção direta em companies por política; demais escritas indefinidas</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Sem políticas de escrita; escrita somente via RPC com auditoria</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">12</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Token de convite legível por quem lê convites</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Tabela separada, sem grant nem política</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">13</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Escopo do convite em JSON, sem integridade</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Tabela invitation_scopes com chaves compostas</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">14</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">CNPJ do estabelecimento sem vínculo com o CNPJ-base; CNPJ-base editável</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Gatilho de verificação; CNPJ-base bloqueado após o primeiro estabelecimento</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">15</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Funções internas executáveis por qualquer usuário; RLS ausente em várias tabelas</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">EXECUTE revogado por padrão; RLS ativo em todas as tabelas</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">16</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">updated_at nunca atualizado</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Gatilhos de atualização</td></tr>
+  </tbody>
+</table>
+<h2 style="font-size:16pt;font-weight:650;margin:26px 0 10px">10. Riscos</h2>
+<table style="width:100%;border-collapse:collapse;margin-bottom:14px">
+  <thead><tr><th style="text-align:left;padding:6px 8px;border-bottom:1.5px solid #15171C;width:30%">Risco</th><th style="text-align:left;padding:6px 8px;border-bottom:1.5px solid #15171C">Mitigação</th></tr></thead>
+  <tbody>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Coexistência com o Supabase do Visor360 (redes, profiles, modulos_permitidos)</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Projeto Supabase separado para o Atlas One; nenhuma escrita no projeto existente; integração só por leitura e contrato</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">PDV dependente de internet</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Arquitetura local-first para o caixa, fila de sincronização e contingência fiscal; especificação própria antes do PDV real</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Vazamento entre organizações</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">RLS em todas as tabelas, testes automatizados de isolamento, limpeza de cache ao trocar de organização</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Desempenho de RLS com funções por linha</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Índices por organization_id, funções <i>stable</i>, visões materializadas para leitura pesada (BI)</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Acesso de escritório contábil a dados de clientes (LGPD)</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Consentimento registrado, escopo por serviço, validade, auditoria de cada acesso</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Pagamentos e escopo PCI</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Nenhum dado de cartão no Atlas One; apenas NSU, autorização e valores; contrato da Boa Vista antes de qualquer modelagem</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Certificados digitais A1</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Armazenamento em cofre de segredos, nunca em tabela comum</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Mapeamento de dados do AutoSystem</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Tabela de correspondência de ids externos; importação idempotente via Atlas Integrations</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Protótipo tratado como código de produção</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">O protótipo é referência visual e funcional; o front de produção é reconstruído em React + TypeScript a partir dele</td></tr>
+  </tbody>
+</table>
+
+<h2 style="font-size:16pt;font-weight:650;margin:26px 0 10px">11. Dependências</h2>
+<ul style="margin:0 0 14px;padding-left:20px">
+  <li>Análise do banco do AutoSystem (pasta “Banco de analise” ainda não disponibilizada).</li>
+  <li>Especificação técnica da Boa Vista: autenticação, terminais, transações, estornos, conciliação.</li>
+  <li>Criação de um projeto Supabase de homologação dedicado.</li>
+  <li>Definição comercial de planos, licenças e regras de contratação.</li>
+  <li>Escolha da estratégia fiscal (emissão própria ou provedor) e da política de contingência.</li>
+</ul>
+
+<h2 style="font-size:16pt;font-weight:650;margin:26px 0 10px">12. Decisões restantes e bloqueios de migration</h2><p style="margin:0 0 10px">As quatro decisões estruturais estão aprovadas. Os itens abaixo são menores, mas afetam o esquema ou a segurança e precisam de resposta antes da primeira migration.</p>
+<h3 style="font-size:13pt;font-weight:650;margin:14px 0 8px">12.1 Decisões restantes</h3><table style="width:100%;border-collapse:collapse;margin-bottom:14px">
+  <thead><tr><th style="text-align:left;padding:6px 8px;border-bottom:1.5px solid #15171C;width:6%">Id</th><th style="text-align:left;padding:6px 8px;border-bottom:1.5px solid #15171C;width:40%">Questão</th><th style="text-align:left;padding:6px 8px;border-bottom:1.5px solid #15171C">Recomendação</th></tr></thead>
+  <tbody>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">R1</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Acesso da equipe da CCI (suporte da plataforma) a organizações clientes</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Acesso emergencial temporário, com justificativa, aprovação e auditoria; sem acesso permanente</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">R2</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Leitura da auditoria por papéis personalizados (hoje só Administrador e Auditor de sistema)</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Criar permissão específica “Auditoria · Visualizar” no Atlas Core</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">R3</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Comportamento de entidades suspensas ou inativas</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Somente leitura (já aplicado no rascunho); confirmar</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">R4</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Exposição da API: leitura direta das tabelas com RLS ou somente por views e RPC</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Views de leitura + RPC; tabelas fora da API pública</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">R5</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Limite de licenças: bloqueio rígido no aceite do convite ou apenas alerta</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Bloqueio rígido com mensagem ao administrador</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">R6</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Ambiente: projeto Supabase de homologação separado, região e versão do PostgreSQL</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Projeto novo, região São Paulo, PostgreSQL 15 ou superior</td></tr>
+  </tbody>
+</table>
+<h3 style="font-size:13pt;font-weight:650;margin:14px 0 8px">12.2 Itens de segurança abertos</h3><table style="width:100%;border-collapse:collapse;margin-bottom:14px">
+  <thead><tr><th style="text-align:left;padding:6px 8px;border-bottom:1.5px solid #15171C;width:6%">Id</th><th style="text-align:left;padding:6px 8px;border-bottom:1.5px solid #15171C">Item</th></tr></thead>
+  <tbody>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">S1</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Suíte automatizada de testes de RLS e autorização (isolamento entre organizações, herança por célula, escopos combinados, anti-escalada)</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">S2</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Exigência de MFA no banco (nível de autenticação do JWT) para organizações que tornarem o MFA obrigatório</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">S3</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Revisão de grants e default privileges para funções e tabelas futuras</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">S4</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Limite de tentativas e proteção contra enumeração nas Edge Functions de convite e aceite</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">S5</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0;vertical-align:top">Política de retenção e particionamento da auditoria</td></tr>
+  </tbody>
+</table>
+<h3 style="font-size:13pt;font-weight:650;margin:14px 0 8px">12.3 Condições para autorizar a primeira migration</h3><ol style="margin:0 0 14px;padding-left:22px">
+  <li>R1 a R6 respondidas e refletidas no rascunho.</li>
+  <li>S1 implementado e aprovado; S2 a S5 resolvidos ou formalmente aceitos com prazo.</li>
+  <li>Contratos de API aprovados.</li>
+  <li>Migration aplicada somente no projeto de homologação, nunca no Supabase do Visor360.</li>
+</ol>
+<h2 style="font-size:16pt;font-weight:650;margin:26px 0 10px">13. Sequência recomendada</h2>
+<table style="width:100%;border-collapse:collapse;margin-bottom:8px">
+  <thead><tr><th style="text-align:left;padding:6px 8px;border-bottom:1.5px solid #15171C;width:9%">Fase</th><th style="text-align:left;padding:6px 8px;border-bottom:1.5px solid #15171C">Entrega</th><th style="text-align:left;padding:6px 8px;border-bottom:1.5px solid #15171C;width:34%">Critério de saída</th></tr></thead>
+  <tbody>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">0</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Decisões restantes e itens de segurança do §12, contratos de API (OpenAPI), tipos compartilhados e testes de RLS</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">§12.3 atendido</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">1</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Projeto Supabase de homologação; schema de tenancy, identidade e catálogo; Auth com MFA</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Migrations revisadas e aplicadas só em homologação</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">2</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Funções de autorização e RLS; suíte de testes de isolamento e herança</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">100% dos testes de isolamento verdes</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">3</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Serviços do Core: organizações, empresas, estabelecimentos, membros, convites, auditoria</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Fluxos do §4 reproduzidos via API</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">4</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Front: camada de acesso com adaptador simulado e adaptador API, troca por configuração</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Regressão do §7 aprovada nos dois adaptadores</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">5</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Permissões por nível, contratação de módulos, relacionamentos e compartilhamentos</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Matriz efetiva idêntica entre UI e banco</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">6</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Atlas Integrations e modelos de leitura do Atlas Postos (após análise do AutoSystem)</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Dashboard Serra Azul alimentado por dados reais de homologação</td></tr>
+    <tr><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">7</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">PDV transacional, fiscal e conector Boa Vista (após especificações)</td><td style="padding:6px 8px;border-bottom:1px solid #E6E5E0">Homologação fiscal e de pagamentos concluída</td></tr>
+  </tbody>
+</table>
+<p style="margin:0">Até a fase 4, o protótipo continua usando apenas dados simulados.</p>
+</div>
+</doc-page>
+
+</x-dc>
+</body>
+</html>

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="display:flex;flex-direction:column;gap:18px;animation:a1in .2s ease">
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap">
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <div style="font-family:'Geist Mono',monospace;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--a1-text-3,#7A7D85)">{{ c.eyebrow }}</div>
+      <div style="font-size:28px;font-weight:600;letter-spacing:-.025em">{{ c.title }}</div>
+      <div style="font-size:13.5px;color:var(--a1-text-2,#62656D)">{{ sub }}</div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button onClick="{{ exportX }}" style="height:40px;padding:0 14px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:9px;background:var(--a1-surface,#fff);font-size:13px;font-weight:550;cursor:pointer;display:flex;align-items:center;gap:8px"><x-import component="Icon" from="./Icon.js" i="download" size="16" hint-size="16px,16px"></x-import>Exportar</button>
+      <button onClick="{{ primaryRun }}" style="height:40px;padding:0 16px;border:0;border-radius:9px;background:var(--a1-strong,#15171C);color:#fff;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px" style-hover="background:var(--a1-strong-hover,#2A2D35)"><x-import component="Icon" from="./Icon.js" i="{{ c.pIcon }}" size="16" hint-size="16px,16px"></x-import>{{ c.primary }}</button>
+    </div>
+  </div>
+
+  <sc-if value="{{ c.note }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:10px;background:var(--a1-info-bg2,#EEF2FC);border:1px solid var(--a1-info-border,#D6E0F8);font-size:13px;line-height:1.5">
+      <span style="color:var(--a1-accent-text,#2D5BD8);display:flex;margin-top:1px"><x-import component="Icon" from="./Icon.js" i="info" size="16" hint-size="16px,16px"></x-import></span><span>{{ c.note }}</span>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ hasKpis }}" hint-placeholder-val="{{ true }}">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px">
+      <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
+        <div style="background:var(--a1-surface,#fff);border:1px solid var(--a1-border,#E6E5E0);border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;justify-content:space-between;color:var(--a1-text-2,#62656D);font-size:13px"><span>{{ k.label }}</span><x-import component="Icon" from="./Icon.js" i="{{ k.icon }}" size="16" color="var(--a1-text-5,#9A9DA4)" hint-size="16px,16px"></x-import></div>
+          <div style="font-size:26px;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums">{{ k.value }}</div>
+          <div style="font-size:12.5px;color:{{ k.noteColor }}">{{ k.note }}</div>
+        </div>
+      </sc-for>
+    </div>
+  </sc-if>
+
+  <div style="display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start">
+    <div style="flex:3 1 640px;min-width:0;background:var(--a1-surface,#fff);border:1px solid var(--a1-border,#E6E5E0);border-radius:12px;overflow:hidden">
+      <div style="padding:14px 16px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--a1-divider,#EFEEEA)">
+        <div style="font-size:15px;font-weight:600;margin-right:6px">{{ c.tTitle }}</div>
+        <div style="display:flex;align-items:center;gap:8px;height:34px;flex:1 1 200px;max-width:300px;padding:0 10px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:8px;color:var(--a1-text-4,#8A8D95)"><x-import component="Icon" from="./Icon.js" i="search" size="15" hint-size="15px,15px"></x-import><input value="{{ q }}" onChange="{{ setQ }}" placeholder="Pesquisar" style="flex:1;min-width:0;border:0;outline:0;font-size:13px;background:transparent"></input></div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <sc-for list="{{ chips }}" as="ch" hint-placeholder-count="3">
+            <button onClick="{{ ch.pick }}" style="height:30px;padding:0 10px;border:1px solid {{ ch.border }};border-radius:999px;background:{{ ch.bg }};color:{{ ch.fg }};font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">{{ ch.label }}</button>
+          </sc-for>
+        </div>
+      </div>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:13px;min-width:760px">
+          <thead><tr style="background:var(--a1-surface-2,#FAFAF8);color:var(--a1-text-2,#62656D);font-size:12px"><sc-for list="{{ cols }}" as="h" hint-placeholder-count="6"><th style="padding:10px 14px;font-weight:550;text-align:{{ h.align }};white-space:nowrap">{{ h.label }}</th></sc-for></tr></thead>
+          <tbody>
+            <sc-for list="{{ rows }}" as="r" hint-placeholder-count="6">
+              <tr style="border-top:1px solid var(--a1-divider-2,#F2F1ED)" style-hover="background:var(--a1-surface-2,#FAFAF8)">
+                <sc-for list="{{ r }}" as="cl" hint-placeholder-count="6">
+                  <td style="padding:11px 14px;text-align:{{ cl.align }};white-space:{{ cl.ws }};min-width:{{ cl.minw }};font-family:{{ cl.font }};font-size:{{ cl.fs }};font-weight:{{ cl.w }};font-variant-numeric:tabular-nums">
+                    <sc-if value="{{ cl.badge }}" hint-placeholder-val="{{ false }}"><span style="font-size:11.5px;font-weight:600;padding:3px 8px;border-radius:999px;background:{{ cl.bBg }};color:{{ cl.bFg }};white-space:nowrap;font-family:'Geist',system-ui,sans-serif">{{ cl.t }}</span></sc-if>
+                    <sc-if value="{{ cl.plain }}" hint-placeholder-val="{{ true }}">{{ cl.t }}</sc-if>
+                  </td>
+                </sc-for>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+      <sc-if value="{{ empty }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:44px 16px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center">
+          <div style="width:44px;height:44px;border-radius:11px;background:var(--a1-muted,#F1F0EC);color:var(--a1-text-2,#62656D);display:flex;align-items:center;justify-content:center"><x-import component="Icon" from="./Icon.js" i="search-x" size="20" hint-size="20px,20px"></x-import></div>
+          <div style="font-size:14.5px;font-weight:600">Nada encontrado</div>
+          <div style="font-size:13px;color:var(--a1-text-3,#7A7D85)">Ajuste a pesquisa ou o filtro de situação.</div>
+          <button onClick="{{ clear }}" style="height:34px;padding:0 14px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:8px;background:var(--a1-surface,#fff);font-size:13px;font-weight:550;cursor:pointer">Limpar filtros</button>
+        </div>
+      </sc-if>
+      <div style="padding:10px 16px;border-top:1px solid var(--a1-divider,#EFEEEA);font-size:12.5px;color:var(--a1-text-3,#7A7D85)">{{ count }}</div>
+    </div>
+
+    <div style="flex:1 1 280px;min-width:0;background:var(--a1-surface,#fff);border:1px solid var(--a1-border,#E6E5E0);border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:15px;font-weight:600">Áreas do módulo</span><span style="font-size:12.5px;color:var(--a1-text-3,#7A7D85)">Estrutura funcional prevista</span></div>
+      <sc-for list="{{ areas }}" as="a" hint-placeholder-count="4">
+        <div style="display:flex;gap:12px;padding:12px;border:1px solid var(--a1-divider,#EFEEEA);border-radius:10px">
+          <div style="width:32px;height:32px;border-radius:8px;background:var(--a1-muted,#F1F0EC);color:var(--a1-text-2s,#4A4D55);display:flex;align-items:center;justify-content:center;flex:none"><x-import component="Icon" from="./Icon.js" i="{{ a.icon }}" size="16" hint-size="16px,16px"></x-import></div>
+          <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px">
+            <div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><span style="font-size:13.5px;font-weight:600">{{ a.t }}</span><span style="font-size:11px;font-weight:600;padding:2px 7px;border-radius:999px;background:{{ a.bBg }};color:{{ a.bFg }};white-space:nowrap">{{ a.st }}</span></div>
+            <span style="font-size:12.5px;line-height:1.45;color:var(--a1-text-2,#62656D)">{{ a.d }}</span>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const OK = ['Normal', 'Livre', 'Conferido', 'Baixado', 'Autorizada', 'Concluído', 'Sincronizado', 'Fechado', 'Ativo', 'Atualizado', 'Disponível', 'Recebida', 'Aplicado', 'Arquivado', 'Assinado', 'Em dia'];
+const WARN = ['Pendente', 'Atenção', 'Baixo', 'Divergente', 'Aguardando entrada', 'Em trânsito', 'Contingência', 'Aguardando conferência', 'Fechado com diferença', 'Em análise', 'Vencendo', 'Revisar taxas', 'Aguardando assinatura', 'Em especificação', 'Agendado', 'Novo'];
+const BAD = ['Crítico', 'Manutenção', 'Rejeitada', 'Falha', 'Ruptura', 'Vencido', 'Erro'];
+const INFO = ['Abastecendo', 'Aberto', 'Aferição', 'Pedido emitido', 'Processando'];
+const tone = (s) => OK.includes(s) ? ['var(--a1-ok-bg,#E6F4EC)', 'var(--a1-ok-fg,#1B6E4A)'] : WARN.includes(s) ? ['var(--a1-warn-bg,#FBF1DF)', 'var(--a1-warn-fg,#8A5A12)'] : BAD.includes(s) ? ['var(--a1-err-bg,#FBEAE8)', 'var(--a1-err-fg,#9E2F27)'] : INFO.includes(s) ? ['var(--a1-info-bg,#EAF0FD)', 'var(--a1-accent-text,#2D5BD8)'] : ['var(--a1-muted,#F1F0EC)', 'var(--a1-text-2s,#4A4D55)'];
+const AV = 'Disponível', SP = 'Em especificação';
+const CFG = {
+  cadastros: { eyebrow: 'Atlas Postos · Cadastros', title: 'Cadastros do posto', primary: 'Novo cadastro', pIcon: 'plus',
+    kpis: [['Produtos ativos', '1.284', '38 combustíveis e lubrificantes', 'package'], ['Clientes', '3.912', '412 com faturamento a prazo', 'users'], ['Fornecedores', '86', '7 distribuidoras de combustível', 'truck'], ['Funcionários', '42', '28 frentistas e operadores', 'id-card']],
+    tTitle: 'Cadastros', cols: ['Cadastro', 'Registros|r', 'Última alteração', 'Responsável', 'Situação'], st: 4,
+    rows: [['Clientes e frotas', '3.912', 'Hoje, 08:41', 'Juliana Alves', 'Atualizado'], ['Placas e veículos de frota', '618', '20/11, 15:02', 'Juliana Alves', 'Atualizado'], ['Fornecedores', '86', '19/11, 10:30', 'Paulo Nunes', 'Atualizado'], ['Funcionários e frentistas', '42', '18/11, 09:12', 'Juliana Alves', 'Atualizado'], ['Formas de pagamento', '14', '02/11, 17:45', 'Mariana Lopes', 'Atualizado'], ['Administradoras de cartão', '6', '30/10, 11:20', 'Paulo Nunes', 'Revisar taxas'], ['Tabelas de preço', '4', 'Hoje, 06:00', 'Carlos Mendes', 'Atualizado'], ['Grupos e subgrupos', '37', '12/10, 14:08', 'Mariana Lopes', 'Atualizado']],
+    areas: [['Clientes e frotas', 'Cadastro de clientes, limites de crédito, frotas e placas autorizadas.', 'users', AV], ['Fornecedores', 'Distribuidoras, fornecedores da loja e prestadores.', 'truck', AV], ['Funcionários', 'Frentistas, operadores, turnos e metas.', 'id-card', AV], ['Formas de pagamento', 'Formas aceitas, administradoras e taxas contratadas.', 'wallet', SP]] },
+  tanques: { eyebrow: 'Atlas Postos · Tanques e depósitos', title: 'Tanques e depósitos', primary: 'Registrar medição', pIcon: 'ruler',
+    kpis: [['Capacidade total', '90.000 L', '5 tanques · 1 depósito', 'cylinder'], ['Estoque atual', '46.320 L', '51% da capacidade', 'droplets'], ['Autonomia média', '3,3 dias', 'Base: média dos últimos 7 dias', 'timer'], ['Última medição', '09:30', 'Medidor eletrônico', 'gauge']],
+    tTitle: 'Tanques', cols: ['Tanque', 'Produto', 'Capacidade|r', 'Lastro|r', 'Estoque|r', 'Ocupação|r', 'Autonomia|r', 'Situação'], st: 7,
+    rows: [['T1', 'Gasolina comum', '30.000 L', '400 L', '18.600 L', '62%', '3,2 dias', 'Normal'], ['T2', 'Gasolina aditivada', '15.000 L', '300 L', '8.100 L', '54%', '4,1 dias', 'Normal'], ['T3', 'Etanol', '15.000 L', '300 L', '9.900 L', '66%', '2,8 dias', 'Normal'], ['T4', 'Diesel S10', '20.000 L', '400 L', '3.600 L', '18%', '1,4 dia', 'Crítico'], ['T5', 'Diesel S500', '10.000 L', '200 L', '6.120 L', '61%', '5,0 dias', 'Normal'], ['D1', 'Depósito da conveniência', '—', '—', '1.180 itens', '—', '—', 'Normal']],
+    areas: [['Tanques e compartimentos', 'Capacidade, lastro, produto e vínculo com bicos.', 'cylinder', AV], ['Medições e arqueação', 'Leituras manuais e do medidor eletrônico, tabela de arqueação.', 'ruler', AV], ['Depósitos', 'Estoque de produtos embalados e da loja.', 'warehouse', AV], ['LMC', 'Livro de Movimentação de Combustíveis por tanque e dia.', 'book-text', SP]] },
+  bombas: { eyebrow: 'Atlas Postos · Bombas e bicos', title: 'Bombas e bicos', primary: 'Nova bomba', pIcon: 'plus',
+    kpis: [['Bombas', '4', '2 ilhas', 'fuel'], ['Bicos', '8', '7 em operação', 'pipette'], ['Abastecendo agora', '3', 'Atualização em tempo real', 'activity'], ['Lacres a vencer', '2', 'Próximos 30 dias', 'shield-alert']],
+    tTitle: 'Bicos', cols: ['Bico', 'Bomba', 'Ilha', 'Produto', 'Tanque', 'Encerrante atual|r', 'Situação'], st: 6,
+    rows: [['01', 'B1', 'Ilha 1', 'Gasolina comum', 'T1', '1.284.552,310', 'Abastecendo'], ['02', 'B1', 'Ilha 1', 'Etanol', 'T3', '902.118,040', 'Livre'], ['03', 'B2', 'Ilha 1', 'Gasolina aditivada', 'T2', '655.902,880', 'Livre'], ['04', 'B2', 'Ilha 1', 'Gasolina comum', 'T1', '1.120.441,500', 'Abastecendo'], ['05', 'B3', 'Ilha 2', 'Diesel S10', 'T4', '2.004.117,220', 'Abastecendo'], ['06', 'B3', 'Ilha 2', 'Diesel S500', 'T5', '811.330,610', 'Livre'], ['07', 'B4', 'Ilha 2', 'Etanol', 'T3', '770.204,190', 'Livre'], ['08', 'B4', 'Ilha 2', 'Gasolina comum', 'T1', '988.016,450', 'Manutenção']],
+    areas: [['Bombas e ilhas', 'Fabricante, modelo, ilha e situação de cada bomba.', 'fuel', AV], ['Bicos', 'Vínculo bico × tanque × produto.', 'pipette', AV], ['Lacres e aferições', 'Controle de lacres INMETRO e aferições periódicas.', 'shield-check', AV], ['Automação de pista', 'Leitura em tempo real do concentrador.', 'radio-tower', SP]] },
+  encerrantes: { eyebrow: 'Atlas Postos · Encerrantes', title: 'Encerrantes', primary: 'Conferir turno', pIcon: 'list-checks',
+    kpis: [['Turno atual', 'Turno 2', '06:00 – 14:00', 'clock'], ['Litros no turno', '8.412 L', 'Pelo encerrante', 'droplets'], ['Diferença apurada', '−0,8 L', 'Dentro da tolerância', 'scale'], ['Bicos conferidos', '6 de 8', '2 pendentes', 'list-checks']],
+    tTitle: 'Leitura do turno', cols: ['Bico', 'Produto', 'Inicial|r', 'Atual|r', 'Pelo encerrante|r', 'Vendido|r', 'Diferença|r', 'Situação'], st: 7,
+    rows: [['01', 'Gasolina comum', '1.282.410,110', '1.284.552,310', '2.142,20 L', '2.142,20 L', '0,00 L', 'Conferido'], ['02', 'Etanol', '901.006,540', '902.118,040', '1.111,50 L', '1.111,50 L', '0,00 L', 'Conferido'], ['03', 'Gasolina aditivada', '655.221,380', '655.902,880', '681,50 L', '681,50 L', '0,00 L', 'Conferido'], ['04', 'Gasolina comum', '1.118.802,700', '1.120.441,500', '1.638,80 L', '1.639,60 L', '−0,80 L', 'Divergente'], ['05', 'Diesel S10', '2.002.284,020', '2.004.117,220', '1.833,20 L', '1.833,20 L', '0,00 L', 'Conferido'], ['06', 'Diesel S500', '810.846,610', '811.330,610', '484,00 L', '484,00 L', '0,00 L', 'Conferido'], ['07', 'Etanol', '769.683,390', '770.204,190', '520,80 L', '—', '—', 'Pendente'], ['08', 'Gasolina comum', '988.016,450', '988.016,450', '0,00 L', '—', '—', 'Pendente']],
+    areas: [['Leitura por turno', 'Encerrante inicial e final de cada bico, por turno.', 'clock', AV], ['Conferência com vendas', 'Litros pelo encerrante × litros vendidos no PDV.', 'scale', AV], ['Aferições', 'Volumes de aferição descontados da apuração.', 'beaker', AV], ['Histórico', 'Série histórica por bico para auditoria.', 'history', SP]] },
+  abastecimentos: { eyebrow: 'Atlas Postos · Abastecimentos', title: 'Abastecimentos', primary: 'Abrir Atlas PDV', pIcon: 'scan-barcode', route: 'pdv',
+    kpis: [['Abastecimentos hoje', '612', '+4,8% vs. sábado anterior', 'fuel'], ['Litros', '21.480 L', 'Todos os bicos', 'droplets'], ['Pendentes de baixa', '4', 'Aguardando no PDV', 'hourglass'], ['Aferições', '2', 'Bico 02 e bico 05', 'beaker']],
+    tTitle: 'Últimos abastecimentos', cols: ['Hora', 'Bico', 'Produto', 'Litros|r', 'Valor|r', 'Frentista', 'Placa', 'Situação'], st: 7,
+    rows: [['09:44', '05', 'Diesel S10', '182,40', 'R$ 1.112,64', 'Marcos', 'FRT-2B19', 'Pendente'], ['09:43', '01', 'Gasolina comum', '38,20', 'R$ 240,28', 'Beatriz', '—', 'Pendente'], ['09:41', '04', 'Gasolina comum', '25,00', 'R$ 157,25', 'Beatriz', '—', 'Baixado'], ['09:39', '02', 'Etanol', '42,10', 'R$ 172,19', 'Igor', 'GHT-8C44', 'Baixado'], ['09:36', '03', 'Gasolina aditivada', '31,60', 'R$ 208,24', 'Marcos', '—', 'Baixado'], ['09:30', '02', 'Etanol', '20,00', 'R$ 0,00', 'Diego', '—', 'Aferição'], ['09:28', '06', 'Diesel S500', '210,00', 'R$ 1.205,40', 'Igor', 'BRA-4E21', 'Baixado'], ['09:25', '01', 'Gasolina comum', '44,80', 'R$ 281,79', 'Beatriz', 'QWE-1A72', 'Baixado']],
+    areas: [['Fila de abastecimentos', 'Abastecimentos vindos da automação aguardando baixa no PDV.', 'list', AV], ['Identificação de frota', 'Placa, motorista e hodômetro para clientes a prazo.', 'truck', AV], ['Aferições', 'Registro e devolução ao tanque.', 'beaker', AV], ['Integração com concentrador', 'Leitura automática dos bicos.', 'radio-tower', SP]] },
+  compras: { eyebrow: 'Atlas Postos · Compras', title: 'Compras', primary: 'Novo pedido', pIcon: 'plus',
+    kpis: [['Pedidos em aberto', '5', 'R$ 312.480,00', 'clipboard-list'], ['Notas aguardando entrada', '3', '2 de combustível', 'file-text'], ['Compras no mês', 'R$ 1,84 mi', '62% combustíveis', 'shopping-cart'], ['Fornecedores ativos', '86', '7 distribuidoras', 'truck']],
+    tTitle: 'Pedidos e notas de entrada', cols: ['Documento', 'Fornecedor', 'Emissão', 'Itens', 'Valor|r', 'Previsão', 'Situação'], st: 6,
+    rows: [['NF-e 118.552', 'Distribuidora Rota Sul S.A.', '22/11', 'Gasolina comum · 15.000 L', 'R$ 88.950,00', 'Recebida', 'Aguardando entrada'], ['NF-e 77.019', 'Petrovale Distribuidora', '22/11', 'Diesel S10 · 10.000 L', 'R$ 58.700,00', 'Hoje, 14h', 'Em trânsito'], ['NF-e 4.411', 'Bebidas Paulista Ltda', '21/11', '42 itens', 'R$ 6.812,40', 'Recebida', 'Aguardando entrada'], ['PC 2026-311', 'Distribuidora Rota Sul S.A.', '23/11', 'Etanol · 10.000 L', 'R$ 38.900,00', '24/11', 'Pedido emitido'], ['PC 2026-310', 'Lubrificantes Ômega', '20/11', '18 itens', 'R$ 4.120,00', '25/11', 'Pedido emitido'], ['NF-e 118.301', 'Distribuidora Rota Sul S.A.', '18/11', 'Gasolina aditivada · 5.000 L', 'R$ 31.450,00', '—', 'Concluído'], ['NF-e 2.207', 'Snacks do Interior ME', '17/11', '26 itens', 'R$ 2.318,90', '—', 'Concluído']],
+    areas: [['Pedidos de compra', 'Pedidos por fornecedor, com aprovação por alçada.', 'clipboard-list', AV], ['Entrada de notas', 'Conferência da NF-e e lançamento no estoque e no tanque.', 'file-text', AV], ['Cotações', 'Comparativo de preços entre distribuidoras.', 'scale', SP], ['Fornecedores', 'Cadastro, condições de pagamento e histórico.', 'truck', AV]] },
+  caixa: { eyebrow: 'Atlas Postos · Caixa', title: 'Caixa', primary: 'Abrir Atlas PDV', pIcon: 'scan-barcode', route: 'pdv',
+    kpis: [['Caixas abertos', '2', 'Pista e loja', 'monitor'], ['Movimento do dia', 'R$ 48.920', 'Todas as formas', 'banknote'], ['Sangrias', '6', 'R$ 9.200,00 no dia', 'arrow-down-to-line'], ['Diferença apurada', '−R$ 12,40', 'Caixa 01 · turno 1', 'scale']],
+    tTitle: 'Caixas do dia', cols: ['Caixa', 'Operador', 'Turno', 'Abertura', 'Movimento|r', 'Sangrias|r', 'Diferença|r', 'Situação'], st: 7,
+    rows: [['Caixa 02 · Pista', 'Beatriz Campos', 'Turno 2', '06:00', 'R$ 18.402,10', 'R$ 4.500,00', '—', 'Aberto'], ['Caixa 03 · Loja', 'Igor Bastos', 'Turno 2', '06:00', 'R$ 3.112,80', 'R$ 700,00', '—', 'Aberto'], ['Caixa 01 · Pista', 'Rafael Souza', 'Turno 1', '22:00', 'R$ 21.840,30', 'R$ 3.500,00', '−R$ 12,40', 'Fechado com diferença'], ['Caixa 04 · Loja', 'Ana Ribeiro', 'Turno 1', '22:00', 'R$ 5.564,90', 'R$ 500,00', 'R$ 0,00', 'Aguardando conferência'], ['Caixa 02 · Pista', 'Lucas Prado', 'Turno 3', '14:00 (ontem)', 'R$ 24.118,00', 'R$ 5.000,00', 'R$ 0,00', 'Fechado']],
+    areas: [['Abertura e fechamento', 'Fundo de troco, turnos e encerramento por operador.', 'lock-open', AV], ['Sangria e suprimento', 'Retiradas e reforços com autorização do supervisor.', 'arrow-down-to-line', AV], ['Conferência', 'Apresentado × apurado × diferença por forma de pagamento.', 'scale', AV], ['Vales e diferenças', 'Falta ou sobra de caixa vinculada ao operador.', 'user-round', SP]] },
+  conveniencia: { eyebrow: 'Atlas Conveniência', title: 'Conveniência', primary: 'Abrir Atlas PDV', pIcon: 'scan-barcode', route: 'pdv',
+    kpis: [['Vendas da loja hoje', 'R$ 6.842', '+9,1% vs. sábado anterior', 'store'], ['Ticket médio', 'R$ 23,40', '292 cupons', 'receipt'], ['Itens vendidos', '1.120', '184 produtos distintos', 'shopping-basket'], ['Ruptura', '7 itens', 'Sem estoque na loja', 'package-x']],
+    tTitle: 'Mais vendidos hoje', cols: ['Produto', 'Categoria', 'Qtd|r', 'Receita|r', 'Margem|r', 'Estoque|r', 'Situação'], st: 6,
+    rows: [['Água mineral 500 ml', 'Bebidas', '146', 'R$ 584,00', '48%', '212', 'Normal'], ['Café expresso', 'Cafeteria', '118', 'R$ 708,00', '71%', '—', 'Normal'], ['Energético 473 ml', 'Bebidas', '64', 'R$ 767,36', '36%', '18', 'Baixo'], ['Salgado assado', 'Food service', '58', 'R$ 464,00', '62%', '22', 'Normal'], ['Refrigerante lata 350 ml', 'Bebidas', '52', 'R$ 286,00', '41%', '0', 'Ruptura'], ['Chocolate 90 g', 'Snacks', '37', 'R$ 296,00', '38%', '44', 'Normal'], ['Óleo lubrificante 1 L', 'Automotivo', '12', 'R$ 418,80', '33%', '9', 'Baixo'], ['Gelo 5 kg', 'Conveniência', '21', 'R$ 252,00', '55%', '30', 'Normal']],
+    areas: [['Mix e categorias', 'Categorias, curva ABC e planograma.', 'layout-grid', AV], ['Promoções', 'Combos, leve-pague e preços por horário.', 'badge-percent', SP], ['Inventário da loja', 'Contagens parciais e gerais com ajuste de estoque.', 'clipboard-check', AV], ['Integração com PDV', 'Venda da loja e da pista no mesmo cupom.', 'scan-barcode', AV]] },
+  fiscal: { eyebrow: 'Atlas Fiscal', title: 'Fiscal', primary: 'Nova apuração', pIcon: 'calculator',
+    note: 'Regras fiscais, comunicação com a SEFAZ e emissão real de documentos dependem da etapa de especificação. Os dados abaixo são demonstrativos.',
+    kpis: [['NFC-e emitidas hoje', '1.032', '2 rejeitadas', 'receipt'], ['NF-e de entrada no mês', '48', '3 sem lançamento', 'file-input'], ['Apuração 10/2026', 'Em análise', 'ICMS · PIS · COFINS', 'calculator'], ['Certificado A1', '9 dias', 'Vence em 02/12/2026', 'shield-alert']],
+    tTitle: 'Documentos fiscais recentes', cols: ['Documento', 'Modelo', 'Emissão', 'Destinatário', 'Valor|r', 'Situação'], st: 5,
+    rows: [['NFC-e 004.512', '65', 'Hoje, 09:41', 'Consumidor final', 'R$ 182,40', 'Autorizada'], ['NF-e 000.882', '55', 'Hoje, 08:10', 'Transportadora Vale Ltda', 'R$ 4.218,00', 'Autorizada'], ['NFC-e 004.498', '65', 'Hoje, 07:55', 'Consumidor final', 'R$ 46,00', 'Rejeitada'], ['NFC-e 004.497', '65', 'Hoje, 07:54', 'CPF 123.***.***-09', 'R$ 210,30', 'Contingência'], ['NFC-e 004.471', '65', 'Hoje, 07:20', 'Consumidor final', 'R$ 98,10', 'Rejeitada'], ['NF-e 000.881', '55', 'Ontem, 17:02', 'Agropecuária São José', 'R$ 12.940,00', 'Autorizada'], ['NFC-e 004.402', '65', 'Ontem, 16:44', 'Consumidor final', 'R$ 64,00', 'Cancelada']],
+    areas: [['Documentos fiscais', 'NFC-e, NF-e, contingência, cancelamento e inutilização.', 'receipt-text', SP], ['Apuração de impostos', 'ICMS, ICMS-ST monofásico, PIS e COFINS.', 'calculator', SP], ['Obrigações acessórias', 'EFD ICMS/IPI, EFD Contribuições e calendário.', 'calendar-check', SP], ['Certificados digitais', 'Validade e alertas de renovação por estabelecimento.', 'shield-check', AV]] },
+  relatorios: { eyebrow: 'Atlas Postos · Relatórios', title: 'Relatórios operacionais', primary: 'Agendar relatório', pIcon: 'calendar-clock',
+    kpis: [],
+    tTitle: 'Relatórios disponíveis', cols: ['Relatório', 'Categoria', 'Periodicidade', 'Última geração', 'Formato', 'Situação'], st: 5,
+    rows: [['Livro de Movimentação de Combustíveis (LMC)', 'Combustíveis', 'Diária', 'Hoje, 06:00', 'PDF', 'Disponível'], ['Vendas por bico e frentista', 'Pista', 'Diária', 'Hoje, 06:00', 'XLSX', 'Disponível'], ['Fechamento de caixa', 'Caixa', 'Por turno', 'Hoje, 06:02', 'PDF', 'Disponível'], ['Margem por produto', 'Comercial', 'Semanal', '18/11', 'XLSX', 'Disponível'], ['Estoque por tanque', 'Combustíveis', 'Diária', 'Hoje, 06:00', 'PDF', 'Disponível'], ['Compras por fornecedor', 'Compras', 'Mensal', '01/11', 'XLSX', 'Agendado'], ['Encerrantes e aferições', 'Pista', 'Por turno', 'Hoje, 06:02', 'PDF', 'Disponível']],
+    areas: [['Relatórios operacionais', 'Pista, caixa, estoque e compras.', 'file-bar-chart', AV], ['Agendamentos', 'Envio automático por e-mail aos gestores.', 'calendar-clock', AV], ['Relatórios regulatórios', 'LMC e documentos exigidos pela ANP.', 'landmark', SP], ['Atlas BI', 'Análises gerenciais e comparativos.', 'chart-column', AV]] },
+  ai: { eyebrow: 'Atlas AI', title: 'Assistente e insights', primary: 'Perguntar ao assistente', pIcon: 'sparkles',
+    note: 'O Atlas AI está representado conceitualmente. Modelos, fontes de dados e limites de uso serão definidos na especificação.',
+    kpis: [['Insights ativos', '8', '3 novos hoje', 'lightbulb'], ['Previsão de demanda · 7 dias', '148.200 L', 'Todos os combustíveis', 'trending-up'], ['Anomalias detectadas', '3', 'Caixa, cartões e estoque', 'radar']],
+    tTitle: 'Insights recentes', cols: ['Insight', 'Módulo', 'Impacto', 'Confiança|r', 'Situação'], st: 4, wrap0: true,
+    rows: [['Diesel S10 deve romper estoque em 1,4 dia — antecipar o pedido à distribuidora', 'Atlas Postos', 'Alto', '92%', 'Novo'], ['Diferença recorrente de R$ 12 a R$ 15 no caixa do turno 1', 'Atlas PDV', 'Médio', '81%', 'Em análise'], ['Taxa de crédito acima da contratada em 0,18 p.p. em uma administradora', 'Atlas Payments', 'Médio', '88%', 'Novo'], ['Pico de vendas de etanol às sextas, entre 17h e 19h', 'Atlas BI', 'Baixo', '95%', 'Aplicado'], ['3 notas de entrada sem lançamento há mais de 48 h', 'Atlas Fiscal', 'Médio', '99%', 'Novo'], ['Ruptura frequente de refrigerante lata aos sábados', 'Atlas Conveniência', 'Baixo', '84%', 'Em análise']],
+    areas: [['Assistente', 'Perguntas em linguagem natural sobre os dados da organização.', 'message-square', SP], ['Previsão de demanda', 'Volume por combustível e por loja.', 'trending-up', SP], ['Detecção de anomalias', 'Caixa, estoque, cartões e encerrantes.', 'radar', SP], ['Recomendações de preço', 'Sugestões com base em margem e concorrência.', 'tag', SP]] },
+  documents: { eyebrow: 'Atlas Documents', title: 'Repositório de documentos', primary: 'Enviar documento', pIcon: 'upload',
+    kpis: [['Documentos', '12.480', 'Todas as empresas', 'folder-open'], ['Enviados este mês', '412', 'Notas, contratos e laudos', 'upload'], ['Aguardando assinatura', '6', 'Assinatura eletrônica', 'pen-line'], ['Vencendo em 30 dias', '4', 'Licenças e certificados', 'calendar-x']],
+    tTitle: 'Documentos recentes', cols: ['Documento', 'Tipo', 'Empresa', 'Enviado por', 'Data', 'Situação'], st: 5,
+    rows: [['Contrato de fornecimento 2027 — Rota Sul.pdf', 'Contrato', 'Auto Posto Serra Azul', 'Mariana Lopes', 'Hoje', 'Aguardando assinatura'], ['Licença de operação ambiental.pdf', 'Licença', 'Auto Posto Serra Azul', 'Otávio Serra', '20/11', 'Vencendo'], ['Certificado de aferição — Bomba B3.pdf', 'Certificado', 'Auto Posto Serra Azul', 'Diego Martins', '19/11', 'Arquivado'], ['Alvará de funcionamento 2026.pdf', 'Licença', 'Auto Posto Serra Azul', 'Otávio Serra', '02/01', 'Em dia'], ['Folha de pagamento 10/2026.pdf', 'Departamento pessoal', 'Auto Posto Serra Azul', 'Rodrigo Teles', '05/11', 'Arquivado'], ['Guia DARF 10/2026.pdf', 'Tributo', 'CCI Consultoria Contábil', 'Fernanda Lima', '14/11', 'Arquivado'], ['AVCB — Corpo de Bombeiros.pdf', 'Licença', 'Auto Posto Serra Azul', 'Otávio Serra', '11/03', 'Vencido']],
+    areas: [['Repositório por empresa', 'Pastas por organização, empresa e estabelecimento.', 'folder-tree', AV], ['Vencimentos', 'Alertas de licenças, alvarás e certificados.', 'calendar-x', AV], ['Assinatura eletrônica', 'Fluxo de assinatura com trilha de auditoria.', 'pen-line', SP], ['Modelos', 'Contratos e termos padronizados.', 'file-stack', SP]] },
+  integrations: { eyebrow: 'Atlas Integrations', title: 'Monitoramento de integrações', primary: 'Nova importação', pIcon: 'upload',
+    note: 'Nenhuma integração real está conectada nesta etapa. Os estados abaixo representam como o monitoramento funcionará.',
+    kpis: [['Integrações ativas', '5', '2 em especificação', 'plug'], ['Execuções hoje', '1.284', '99,8% concluídas', 'activity'], ['Falhas em 24 h', '3', 'Medidor de tanques', 'triangle-alert'], ['Última sincronização', '09:40', 'Vendas do PDV', 'refresh-cw']],
+    tTitle: 'Integrações', cols: ['Integração', 'Tipo', 'Direção', 'Última execução', 'Registros|r', 'Situação'], st: 5,
+    rows: [['Boa Vista — conector de pagamentos', 'Pagamentos', 'Bidirecional', '—', '—', 'Em especificação'], ['AutoSystem — cadastros e histórico', 'Importação', 'Entrada', '—', '—', 'Em especificação'], ['WebPosto (Quality) — vendas', 'Importação', 'Entrada', 'Hoje, 09:40', '612', 'Sincronizado'], ['Extrato bancário OFX', 'Arquivo', 'Entrada', 'Hoje, 07:00', '148', 'Sincronizado'], ['Exportação contábil (lote)', 'Exportação', 'Saída', 'Ontem, 23:00', '3.912', 'Concluído'], ['Medidor eletrônico de tanques', 'Automação', 'Entrada', 'Hoje, 09:30', '0', 'Falha'], ['NF-e de entrada (consulta)', 'Fiscal', 'Entrada', 'Hoje, 08:00', '3', 'Processando']],
+    areas: [['Importação de dados', 'Arquivos e APIs com validação antes da carga.', 'file-input', AV], ['Exportação', 'Lotes para contabilidade e sistemas externos.', 'file-output', AV], ['Integrações externas', 'Conectores de pagamentos, bancos e automação.', 'plug', SP], ['Logs e erros', 'Histórico de execuções, erros e reprocessamento.', 'scroll-text', AV]] }
+};
+
+class Component extends DCLogic {
+  state = { q: '', st: 'Todos' };
+  renderVals() {
+    const s = this.state; const ctx = this.props.ctx || {}; const notify = this.props.notify || (() => {}); const nav = this.props.navigate || (() => {});
+    const c = CFG[this.props.view] || CFG.cadastros;
+    const place = ['ai', 'integrations', 'documents'].includes(this.props.view) ? (ctx.org || '') : (ctx.firstPosto || ctx.estab || '');
+    const sub = (place ? place + ' · ' : '') + 'dados demonstrativos · atualizado às 09:42';
+    const cols = c.cols.map((x) => { const [label, a] = x.split('|'); return { label, align: a === 'r' ? 'right' : 'left' }; });
+    const statuses = Array.from(new Set(c.rows.map((r) => r[c.st])));
+    const q = s.q.trim().toLowerCase();
+    const rows = c.rows.filter((r) => (s.st === 'Todos' || r[c.st] === s.st) && (!q || r.join(' ').toLowerCase().includes(q)));
+    return {
+      c, sub, hasKpis: c.kpis.length > 0,
+      kpis: c.kpis.map(([label, value, note, icon]) => ({ label, value, note, icon, noteColor: /crítico|rejeit|falha|ruptura|vence/i.test(note + value) ? 'var(--a1-err-fg,#9E2F27)' : 'var(--a1-text-2,#62656D)' })),
+      cols, q: s.q, setQ: (e) => this.setState({ q: e.target.value }),
+      chips: ['Todos'].concat(statuses).map((t) => { const on = s.st === t; return { label: t, bg: on ? 'var(--a1-strong,#15171C)' : 'var(--a1-surface,#fff)', fg: on ? '#fff' : 'var(--a1-text-2s,#4A4D55)', border: on ? 'var(--a1-text,#15171C)' : 'var(--a1-border-2,#E1E0DA)', pick: () => this.setState({ st: t }) }; }),
+      rows: rows.map((r) => r.map((v, i) => { const isSt = i === c.st; const [bBg, bFg] = tone(v); const mono = /^[\d.,−\- ]+$/.test(v) && v.length > 6;
+        return { t: v, badge: isSt, plain: !isSt, bBg, bFg, align: cols[i].align, ws: i === 0 && c.wrap0 ? 'normal' : 'nowrap', minw: i === 0 && c.wrap0 ? '320px' : '0', w: i === 0 ? 600 : 400, font: mono ? "'Geist Mono',monospace" : 'inherit', fs: mono ? '12.5px' : '13px' }; })),
+      empty: rows.length === 0, count: rows.length + ' de ' + c.rows.length + ' registros', clear: () => this.setState({ q: '', st: 'Todos' }),
+      areas: c.areas.map(([t, d, icon, st]) => { const [bBg, bFg] = tone(st); return { t, d, icon, st, bBg, bFg }; }),
+      exportX: () => notify('Exportação gerada: ' + c.title.toLowerCase().replace(/\s+/g, '_') + '.xlsx', 'success'),
+      primaryRun: () => { if (c.route) return nav(c.route); notify(c.primary + ': ação demonstrativa no protótipo.', 'info'); }
+    };
+  }
+}
+
+</script>
+</body>
+</html>

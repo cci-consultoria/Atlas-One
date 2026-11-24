@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="display:flex;flex-direction:column;gap:18px;animation:a1in .2s ease">
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap">
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <div style="font-family:'Geist Mono',monospace;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--a1-text-3,#7A7D85)">Atlas Core · Controle de acesso</div>
+      <div style="font-size:28px;font-weight:600;letter-spacing:-.025em">{{ title }}</div>
+      <div style="font-size:13.5px;color:var(--a1-text-2,#62656D)">{{ ctx.org }} · {{ userCount }} membros · {{ licenses }}</div>
+    </div>
+    <button onClick="{{ openInvite }}" style="height:40px;padding:0 16px;border:0;border-radius:9px;background:#2D5BD8;color:#fff;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px" style-hover="background:#2450C4"><x-import component="Icon" from="./Icon.js" i="user-plus" size="16" hint-size="16px,16px"></x-import>Convidar usuário</button>
+  </div>
+
+  <div style="display:flex;gap:4px;border-bottom:1px solid var(--a1-border-2,#E1E0DA);overflow-x:auto">
+    <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="3">
+      <button onClick="{{ t.pick }}" style="flex:none;height:44px;padding:0 14px;border:0;border-bottom:2px solid {{ t.line }};background:transparent;color:{{ t.fg }};font-size:14px;font-weight:600;cursor:pointer;margin-bottom:-1px;display:flex;align-items:center;gap:8px;white-space:nowrap">{{ t.label }}<sc-if value="{{ t.n }}" hint-placeholder-val="{{ false }}"><span style="font-size:11px;font-weight:600;padding:1px 7px;border-radius:999px;background:var(--a1-muted,#F1F0EC);color:var(--a1-text-2s,#4A4D55)">{{ t.n }}</span></sc-if></button>
+    </sc-for>
+  </div>
+
+  <sc-if value="{{ tabUsers }}" hint-placeholder-val="{{ true }}">
+    <div style="background:var(--a1-surface,#fff);border:1px solid var(--a1-border,#E6E5E0);border-radius:12px;overflow:hidden">
+      <div style="padding:14px 16px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--a1-divider,#EFEEEA)">
+        <div style="display:flex;align-items:center;gap:8px;height:36px;flex:1 1 240px;max-width:360px;padding:0 10px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:8px;color:var(--a1-text-4,#8A8D95)"><x-import component="Icon" from="./Icon.js" i="search" size="15" hint-size="15px,15px"></x-import><input value="{{ q }}" onChange="{{ setQ }}" placeholder="Nome ou e-mail" style="flex:1;min-width:0;border:0;outline:0;font-size:13px;background:transparent"></input></div>
+        <select value="{{ roleF }}" onChange="{{ setRoleF }}" style="height:36px;padding:0 10px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:8px;background:var(--a1-surface,#fff);font-size:13px"><option>Todos os papéis</option><sc-for list="{{ roleNames }}" as="rn" hint-placeholder-count="7"><option>{{ rn }}</option></sc-for></select>
+        <select value="{{ stF }}" onChange="{{ setStF }}" style="height:36px;padding:0 10px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:8px;background:var(--a1-surface,#fff);font-size:13px"><option>Todas as situações</option><option>Ativo</option><option>Bloqueado</option></select>
+        <span style="margin-left:auto;font-size:12.5px;color:var(--a1-text-3,#7A7D85)">Somente membros de {{ ctx.orgShort }}</span>
+      </div>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:13px;min-width:980px">
+          <thead><tr style="background:var(--a1-surface-2,#FAFAF8);color:var(--a1-text-2,#62656D);text-align:left;font-size:12px"><th style="padding:10px 16px;font-weight:550">Usuário</th><th style="padding:10px 14px;font-weight:550">Papel nesta organização</th><th style="padding:10px 14px;font-weight:550">Acesso autorizado</th><th style="padding:10px 14px;font-weight:550">Organizações</th><th style="padding:10px 14px;font-weight:550">Último acesso</th><th style="padding:10px 14px;font-weight:550">2FA</th><th style="padding:10px 14px;font-weight:550">Situação</th><th style="padding:10px 16px"></th></tr></thead>
+          <tbody>
+            <sc-for list="{{ users }}" as="u" hint-placeholder-count="8">
+              <tr onClick="{{ u.open }}" style="border-top:1px solid var(--a1-divider-2,#F2F1ED);cursor:pointer" style-hover="background:var(--a1-surface-2,#FAFAF8)">
+                <td style="padding:11px 16px"><div style="display:flex;align-items:center;gap:10px"><div style="width:32px;height:32px;border-radius:50%;background:{{ u.av }};color:#fff;font-size:11.5px;font-weight:600;display:flex;align-items:center;justify-content:center;flex:none">{{ u.ini }}</div><div style="display:flex;flex-direction:column;gap:1px"><span style="font-weight:550">{{ u.name }}</span><span style="font-size:12px;color:var(--a1-text-3,#7A7D85)">{{ u.email }}</span></div></div></td>
+                <td style="padding:11px 14px"><span style="font-size:12px;font-weight:600;padding:3px 8px;border-radius:6px;background:var(--a1-muted,#F1F0EC);color:var(--a1-text,#15171C);white-space:nowrap">{{ u.role }}</span></td>
+                <td style="padding:11px 14px;color:var(--a1-text-2s,#4A4D55)">{{ u.scope }}</td>
+                <td style="padding:11px 14px;color:var(--a1-text-2s,#4A4D55);white-space:nowrap">{{ u.orgs }}</td>
+                <td style="padding:11px 14px;color:var(--a1-text-2,#62656D);white-space:nowrap">{{ u.last }}</td>
+                <td style="padding:11px 14px"><x-import component="Icon" from="./Icon.js" i="{{ u.mfaIcon }}" size="16" color="{{ u.mfaColor }}" hint-size="16px,16px"></x-import></td>
+                <td style="padding:11px 14px"><span style="font-size:11.5px;font-weight:600;padding:3px 8px;border-radius:999px;background:{{ u.stBg }};color:{{ u.stFg }};white-space:nowrap">{{ u.st }}</span></td>
+                <td style="padding:11px 16px;color:var(--a1-text-6,#B4B6BC)"><x-import component="Icon" from="./Icon.js" i="chevron-right" size="15" hint-size="15px,15px"></x-import></td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+      <sc-if value="{{ usersEmpty }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:44px 16px;display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--a1-text-3,#7A7D85);font-size:13.5px"><x-import component="Icon" from="./Icon.js" i="users" size="22" hint-size="22px,22px"></x-import>Nenhum membro encontrado com esses filtros.</div>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ tabInvites }}" hint-placeholder-val="{{ false }}">
+    <div style="background:var(--a1-surface,#fff);border:1px solid var(--a1-border,#E6E5E0);border-radius:12px;overflow:hidden">
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:13px;min-width:820px">
+          <thead><tr style="background:var(--a1-surface-2,#FAFAF8);color:var(--a1-text-2,#62656D);text-align:left;font-size:12px"><th style="padding:10px 16px;font-weight:550">Convidado</th><th style="padding:10px 14px;font-weight:550">Papel</th><th style="padding:10px 14px;font-weight:550">Acesso autorizado</th><th style="padding:10px 14px;font-weight:550">Enviado por</th><th style="padding:10px 14px;font-weight:550">Expira</th><th style="padding:10px 14px;font-weight:550">Situação</th><th style="padding:10px 16px"></th></tr></thead>
+          <tbody>
+            <sc-for list="{{ invites }}" as="v" hint-placeholder-count="3">
+              <tr style="border-top:1px solid var(--a1-divider-2,#F2F1ED)">
+                <td style="padding:11px 16px;font-weight:550">{{ v.email }}</td>
+                <td style="padding:11px 14px"><span style="font-size:12px;font-weight:600;padding:3px 8px;border-radius:6px;background:var(--a1-muted,#F1F0EC)">{{ v.role }}</span></td>
+                <td style="padding:11px 14px;color:var(--a1-text-2s,#4A4D55)">{{ v.scope }}</td>
+                <td style="padding:11px 14px;color:var(--a1-text-2,#62656D)">{{ v.by }}</td>
+                <td style="padding:11px 14px;color:var(--a1-text-2,#62656D);white-space:nowrap">{{ v.exp }}</td>
+                <td style="padding:11px 14px"><span style="font-size:11.5px;font-weight:600;padding:3px 8px;border-radius:999px;background:{{ v.stBg }};color:{{ v.stFg }};white-space:nowrap">{{ v.st }}</span></td>
+                <td style="padding:11px 16px"><div style="display:flex;gap:6px;justify-content:flex-end"><button onClick="{{ v.resend }}" style="height:30px;padding:0 10px;border:1px solid var(--a1-border-2,#E1E0DA);border-radius:7px;background:var(--a1-surface,#fff);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">Reenviar</button><button onClick="{{ v.cancel }}" style="height:30px;padding:0 10px;border:1px solid var(--a1-err-border,#F0C4BF);border-radius:7px;background:var(--a1-err-bg,#FBEAE8);color:var(--a1-err-fg,#9E2F27);font-size:12px;font-weight:600;cursor:pointer">Cancelar</button></div></td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+      <sc-if value="{{ invitesEmpty }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:44px 16px;display:flex;flex-direction:column;align-items:center;gap:10px;color:var(--a1-text-3,#7A7D85);font-size:13.5px;text-align:center"><x-import component="Icon" from="./Icon.js" i="mail-check" size="22" hint-size="22px,22px"></x-import>Nenhum convite pendente em {{ ctx.orgShort }}.<button onClick="{{ openInvite }}" style="height:36px;padding:0 14px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:8px;background:var(--a1-surface,#fff);font-size:13px;font-weight:550;cursor:pointer;color:var(--a1-text,#15171C)">Convidar usuário</button></div>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ tabRoles }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:10px;background:var(--a1-warn-bg,#FBF1DF);border:1px solid var(--a1-warn-border,#F3D9A8);font-size:13px;line-height:1.5"><span style="color:var(--a1-warn-fg,#8A5A12);display:flex;margin-top:1px"><x-import component="Icon" from="./Icon.js" i="triangle-alert" size="16" hint-size="16px,16px"></x-import></span><span>Simulação visual. Esta tela demonstra a regra de permissões, mas não autoriza nem bloqueia acessos reais — a autorização efetiva será aplicada pelo backend em etapa futura. Contratação de módulos e permissão de usuário são verificadas de forma independente.</span></div>
+    <div style="display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start">
+      <div style="flex:0 1 270px;min-width:240px;background:var(--a1-surface,#fff);border:1px solid var(--a1-border,#E6E5E0);border-radius:12px;padding:8px;display:flex;flex-direction:column;gap:2px">
+        <div style="padding:10px 10px 8px;font-size:11.5px;font-weight:600;color:var(--a1-text-3,#7A7D85);letter-spacing:.06em;text-transform:uppercase">Papéis</div>
+        <sc-for list="{{ roles }}" as="r" hint-placeholder-count="7">
+          <button onClick="{{ r.pick }}" style="display:flex;align-items:center;gap:10px;padding:10px;border:0;border-radius:8px;background:{{ r.bg }};cursor:pointer;text-align:left">
+            <x-import component="Icon" from="./Icon.js" i="{{ r.icon }}" size="16" color="{{ r.ic }}" hint-size="16px,16px"></x-import>
+            <div style="flex:1;display:flex;flex-direction:column;gap:1px"><span style="font-size:13.5px;font-weight:{{ r.w }}">{{ r.name }}</span><span style="font-size:11.5px;color:var(--a1-text-3,#7A7D85)">{{ r.n }}</span></div>
+          </button>
+        </sc-for>
+      </div>
+      <div style="flex:1 1 600px;min-width:0;background:var(--a1-surface,#fff);border:1px solid var(--a1-border,#E6E5E0);border-radius:12px;overflow:hidden">
+        <div style="padding:16px 20px;border-bottom:1px solid var(--a1-divider,#EFEEEA);display:flex;flex-direction:column;gap:14px">
+          <div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:16px;font-weight:600">{{ cur.name }}</span><span style="font-size:12.5px;color:var(--a1-text-3,#7A7D85)">{{ cur.desc }}</span></div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <span style="font-size:12px;font-weight:600;color:var(--a1-text-2,#62656D)">Nível de aplicação</span>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+              <span style="display:flex;align-items:center;gap:6px;height:34px;padding:0 10px;border:1px solid var(--a1-border-2,#E1E0DA);border-radius:8px;background:var(--a1-surface-2,#FAFAF8);font-size:12.5px;font-weight:600"><x-import component="Icon" from="./Icon.js" i="network" size="14" color="var(--a1-text-4,#8A8D95)" hint-size="14px,14px"></x-import>{{ ctx.orgShort }}</span>
+              <x-import component="Icon" from="./Icon.js" i="chevron-right" size="14" color="var(--a1-text-6,#B4B6BC)" hint-size="14px,14px"></x-import>
+              <select value="{{ lvComp }}" onChange="{{ setLvComp }}" style="height:34px;padding:0 10px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:8px;background:var(--a1-surface,#fff);font-size:12.5px;font-weight:600;max-width:260px"><sc-for list="{{ compOpts }}" as="o" hint-placeholder-count="2"><option>{{ o }}</option></sc-for></select>
+              <x-import component="Icon" from="./Icon.js" i="chevron-right" size="14" color="var(--a1-text-6,#B4B6BC)" hint-size="14px,14px"></x-import>
+              <select value="{{ lvEst }}" onChange="{{ setLvEst }}" style="height:34px;padding:0 10px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:8px;background:var(--a1-surface,#fff);font-size:12.5px;font-weight:600;max-width:240px"><sc-for list="{{ estOpts }}" as="o" hint-placeholder-count="2"><option>{{ o }}</option></sc-for></select>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12.5px">
+              <span style="font-size:11.5px;font-weight:600;padding:3px 8px;border-radius:999px;background:{{ lvBadgeBg }};color:{{ lvBadgeFg }}">{{ lvBadge }}</span>
+              <span style="color:var(--a1-text-2,#62656D)">{{ lvHint }}</span>
+              <span style="flex-basis:100%;font-size:12px;color:var(--a1-text-3,#7A7D85)">{{ overrides }}</span>
+              <sc-if value="{{ canReset }}" hint-placeholder-val="{{ false }}"><button onClick="{{ resetLevel }}" style="border:0;background:transparent;color:var(--a1-accent-text,#2D5BD8);font-size:12.5px;font-weight:600;cursor:pointer;padding:0">Remover personalização</button></sc-if>
+            </div>
+          </div>
+        </div>
+        <div style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse;font-size:13px;min-width:660px">
+            <thead><tr style="background:var(--a1-surface-2,#FAFAF8);color:var(--a1-text-2,#62656D);font-size:12px"><th style="padding:10px 20px;font-weight:550;text-align:left">Módulo</th><sc-for list="{{ acts }}" as="a" hint-placeholder-count="5"><th style="padding:10px 8px;font-weight:550;text-align:center;width:84px">{{ a }}</th></sc-for></tr></thead>
+            <tbody>
+              <sc-for list="{{ matrix }}" as="m" hint-placeholder-count="10">
+                <tr style="border-top:1px solid var(--a1-divider-2,#F2F1ED);background:{{ m.rowBg }}">
+                  <td style="padding:9px 20px"><div style="display:flex;align-items:center;gap:10px"><x-import component="Icon" from="./Icon.js" i="{{ m.icon }}" size="16" color="var(--a1-text-2,#62656D)" hint-size="16px,16px"></x-import><div style="display:flex;flex-direction:column;gap:1px"><span style="font-weight:550">{{ m.name }}</span><sc-if value="{{ m.locked }}" hint-placeholder-val="{{ false }}"><span style="font-size:11.5px;color:var(--a1-warn-fg,#8A5A12)">Não contratado · permissão registrada, sem efeito até a contratação</span></sc-if></div></div></td>
+                  <sc-for list="{{ m.cells }}" as="c" hint-placeholder-count="5">
+                    <td style="padding:7px 8px;text-align:center"><button onClick="{{ c.toggle }}" style="width:24px;height:24px;border-radius:6px;border:1.5px solid {{ c.border }};background:{{ c.bg }};color:#fff;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:0;opacity:{{ c.op }}"><sc-if value="{{ c.on }}" hint-placeholder-val="{{ false }}"><x-import component="Icon" from="./Icon.js" i="check" size="14" stroke="3" hint-size="14px,14px"></x-import></sc-if></button></td>
+                  </sc-for>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+        </div>
+        <div style="padding:14px 20px;border-top:1px solid var(--a1-divider,#EFEEEA);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+          <span style="font-size:12.5px;color:{{ dirtyColor }}">{{ dirtyMsg }}</span>
+          <div style="display:flex;gap:8px">
+            <button onClick="{{ discard }}" style="height:38px;padding:0 14px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:9px;background:var(--a1-surface,#fff);font-size:13px;font-weight:550;cursor:pointer">Descartar</button>
+            <button onClick="{{ saveRole }}" style="height:38px;padding:0 16px;border:0;border-radius:9px;background:{{ saveBg }};color:#fff;font-size:13px;font-weight:600;cursor:pointer">Salvar alterações</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ member }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeMember }}" style="position:fixed;inset:0;background:rgba(15,17,21,.4);z-index:90"></div>
+    <div style="position:fixed;top:0;right:0;bottom:0;width:min(480px,100vw);background:var(--a1-surface,#fff);z-index:91;display:flex;flex-direction:column;box-shadow:-20px 0 50px rgba(15,17,21,.18);animation:a1in .2s ease">
+      <div style="padding:20px 24px;border-bottom:1px solid var(--a1-divider,#EFEEEA);display:flex;justify-content:space-between;gap:12px">
+        <div style="display:flex;align-items:center;gap:12px"><div style="width:44px;height:44px;border-radius:50%;background:{{ member.av }};color:#fff;font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:center">{{ member.ini }}</div><div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:18px;font-weight:600">{{ member.name }}</span><span style="font-size:12.5px;color:var(--a1-text-3,#7A7D85)">{{ member.email }}</span></div></div>
+        <button onClick="{{ closeMember }}" style="width:34px;height:34px;border:0;border-radius:8px;background:var(--a1-bg,#F5F5F2);cursor:pointer;display:flex;align-items:center;justify-content:center;flex:none"><x-import component="Icon" from="./Icon.js" i="x" size="16" hint-size="16px,16px"></x-import></button>
+      </div>
+      <div style="flex:1;overflow:auto;padding:18px 24px;display:flex;flex-direction:column;gap:20px">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px">
+          <div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:12px;color:var(--a1-text-3,#7A7D85)">Situação</span><span style="font-size:13.5px;font-weight:600">{{ member.st }}</span></div>
+          <div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:12px;color:var(--a1-text-3,#7A7D85)">Último acesso</span><span style="font-size:13.5px;font-weight:600">{{ member.last }}</span></div>
+          <div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:12px;color:var(--a1-text-3,#7A7D85)">2FA</span><span style="font-size:13.5px;font-weight:600">{{ member.mfa }}</span></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="font-size:11.5px;font-weight:600;color:var(--a1-text-3,#7A7D85);letter-spacing:.06em;text-transform:uppercase">Participação em organizações</div>
+          <sc-for list="{{ member.ms }}" as="x" hint-placeholder-count="2">
+            <div style="display:flex;align-items:center;gap:12px;padding:12px;border:1px solid {{ x.border }};border-radius:10px;background:{{ x.bg }}">
+              <div style="width:34px;height:34px;border-radius:9px;background:var(--a1-strong,#15171C);color:#E8A23A;font-size:11.5px;font-weight:600;display:flex;align-items:center;justify-content:center;flex:none">{{ x.ini }}</div>
+              <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:13.5px;font-weight:600">{{ x.org }}</span><span style="font-size:12px;color:var(--a1-text-2,#62656D)">{{ x.role }} · {{ x.scope }}</span></div>
+              <sc-if value="{{ x.cur }}" hint-placeholder-val="{{ false }}"><span style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;background:var(--a1-info-bg,#EAF0FD);color:var(--a1-accent-text,#2D5BD8);white-space:nowrap">Organização ativa</span></sc-if>
+            </div>
+          </sc-for>
+          <div style="font-size:12px;color:var(--a1-text-3,#7A7D85);line-height:1.5">Cada participação tem papel e escopo próprios. Alterações aqui valem apenas para {{ ctx.orgShort }}.</div>
+        </div>
+      </div>
+      <div style="padding:14px 24px;border-top:1px solid var(--a1-divider,#EFEEEA);display:flex;gap:8px;justify-content:flex-end">
+        <button onClick="{{ closeMember }}" style="height:40px;padding:0 16px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:9px;background:var(--a1-surface,#fff);font-size:13px;font-weight:550;cursor:pointer">Fechar</button>
+        <button onClick="{{ member.toggle }}" style="height:40px;padding:0 16px;border:1px solid {{ member.actBorder }};border-radius:9px;background:{{ member.actBg }};color:{{ member.actFg }};font-size:13px;font-weight:600;cursor:pointer">{{ member.action }}</button>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ invite }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeInvite }}" style="position:fixed;inset:0;background:rgba(15,17,21,.4);z-index:90"></div>
+    <div style="position:fixed;top:0;right:0;bottom:0;width:min(460px,100vw);background:var(--a1-surface,#fff);z-index:91;display:flex;flex-direction:column;box-shadow:-20px 0 50px rgba(15,17,21,.18);animation:a1in .2s ease">
+      <div style="padding:20px 24px;border-bottom:1px solid var(--a1-divider,#EFEEEA);display:flex;justify-content:space-between;gap:12px"><div style="display:flex;flex-direction:column;gap:4px"><span style="font-size:18px;font-weight:600">Convidar para {{ ctx.orgShort }}</span><span style="font-size:12.5px;color:var(--a1-text-3,#7A7D85)">O convite expira em 72 horas</span></div><button onClick="{{ closeInvite }}" style="width:34px;height:34px;border:0;border-radius:8px;background:var(--a1-bg,#F5F5F2);cursor:pointer;display:flex;align-items:center;justify-content:center"><x-import component="Icon" from="./Icon.js" i="x" size="16" hint-size="16px,16px"></x-import></button></div>
+      <div style="flex:1;overflow:auto;padding:20px 24px;display:flex;flex-direction:column;gap:14px">
+        <label style="display:flex;flex-direction:column;gap:6px;font-size:12.5px;font-weight:550">Nome completo<input value="{{ inv.name }}" onChange="{{ invName }}" style="height:40px;padding:0 12px;border:1px solid {{ nameBorder }};border-radius:8px;font-size:13.5px;font-weight:400"></input></label>
+        <label style="display:flex;flex-direction:column;gap:6px;font-size:12.5px;font-weight:550">E-mail corporativo<input value="{{ inv.email }}" onChange="{{ invEmail }}" style="height:40px;padding:0 12px;border:1px solid {{ emailBorder }};border-radius:8px;font-size:13.5px;font-weight:400"></input></label>
+        <label style="display:flex;flex-direction:column;gap:6px;font-size:12.5px;font-weight:550">Papel<select value="{{ inv.role }}" onChange="{{ invRole }}" style="height:40px;padding:0 10px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:8px;background:var(--a1-surface,#fff);font-size:13.5px"><sc-for list="{{ roleNames }}" as="rn" hint-placeholder-count="7"><option>{{ rn }}</option></sc-for></select></label>
+        <label style="display:flex;flex-direction:column;gap:6px;font-size:12.5px;font-weight:550">Empresa<select value="{{ inv.comp }}" onChange="{{ invComp }}" style="height:40px;padding:0 10px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:8px;background:var(--a1-surface,#fff);font-size:13.5px"><sc-for list="{{ compOpts }}" as="o" hint-placeholder-count="2"><option>{{ o }}</option></sc-for></select></label>
+        <div style="display:flex;flex-direction:column;gap:8px;font-size:12.5px;font-weight:550">Estabelecimentos autorizados
+          <sc-for list="{{ invEstabs }}" as="e" hint-placeholder-count="3">
+            <button onClick="{{ e.toggle }}" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid {{ e.border }};border-radius:9px;background:{{ e.bg }};cursor:pointer;font-size:13px;font-weight:500;text-align:left">
+              <span style="width:18px;height:18px;border-radius:5px;border:1.5px solid {{ e.cb }};background:{{ e.cbBg }};color:#fff;display:flex;align-items:center;justify-content:center;flex:none"><sc-if value="{{ e.on }}" hint-placeholder-val="{{ false }}"><x-import component="Icon" from="./Icon.js" i="check" size="12" stroke="3" hint-size="12px,12px"></x-import></sc-if></span><span style="flex:1">{{ e.name }}</span><span style="font-size:11.5px;color:var(--a1-text-4,#8A8D95)">{{ e.type }}</span>
+            </button>
+          </sc-for>
+          <span style="font-size:12px;font-weight:400;color:var(--a1-text-3,#7A7D85)">Nenhum marcado = acesso a todos os estabelecimentos da seleção.</span>
+        </div>
+      </div>
+      <div style="padding:14px 24px;border-top:1px solid var(--a1-divider,#EFEEEA);display:flex;gap:8px;justify-content:flex-end">
+        <button onClick="{{ closeInvite }}" style="height:40px;padding:0 16px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:9px;background:var(--a1-surface,#fff);font-size:13px;font-weight:550;cursor:pointer">Cancelar</button>
+        <button onClick="{{ sendInvite }}" style="height:40px;padding:0 18px;border:0;border-radius:9px;background:#2D5BD8;color:#fff;font-size:13px;font-weight:600;cursor:pointer">Enviar convite</button>
+      </div>
+    </div>
+  </sc-if>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const ROLES = [
+  ['Administrador', 'shield-check', 'Acesso total à organização: usuários, módulos, configurações e todos os dados.'],
+  ['Gerente', 'store', 'Gestão operacional e financeira dos estabelecimentos autorizados.'],
+  ['Operador', 'scan-barcode', 'Opera o PDV e a pista: vendas, abastecimentos, sangria e suprimento.'],
+  ['Financeiro', 'landmark', 'Contas a pagar e receber, conciliação, fluxo de caixa e recebíveis.'],
+  ['Fiscal', 'receipt-text', 'Documentos fiscais, apuração de impostos e obrigações acessórias.'],
+  ['Estoque', 'package', 'Compras, entrada de notas, tanques, estoque e inventário.'],
+  ['Auditor', 'eye', 'Somente leitura em todos os módulos, incluindo o log de auditoria.']
+];
+const MODS = [['core', 'Atlas Core', 'layout-grid'], ['postos', 'Atlas Postos', 'fuel'], ['pdv', 'Atlas PDV', 'scan-barcode'], ['conv', 'Atlas Conveniência', 'store'], ['payments', 'Atlas Payments', 'credit-card'], ['fin', 'Atlas Financeiro', 'landmark'], ['contabil', 'Atlas Contábil', 'book-open'], ['fiscal', 'Atlas Fiscal', 'receipt-text'], ['bi', 'Atlas BI', 'chart-column'], ['ai', 'Atlas AI', 'sparkles'], ['docs', 'Atlas Documents', 'folder-open'], ['int', 'Atlas Integrations', 'plug']];
+const ACTS = ['Visualizar', 'Criar', 'Editar', 'Excluir', 'Aprovar'];
+// one 5-char group per module, in MODS order: v c e x a
+const P = [
+  'vceca vcexa vcexa vcexa vcexa vcexa vcexa vcexa vcexa vcexa vcexa vcexa',
+  'v.... vce.a vce.a vce.a vce.a vce.a v.... v.... v.... v.... vce.. v....',
+  '..... vc... vc... vc... ..... ..... ..... ..... ..... ..... ..... .....',
+  '..... v.... ..... ..... vce.a vcexa v.... v.... v.... v.... vc... v....',
+  '..... v.... ..... ..... v.... v.... vce.. vceca v.... v.... vc... v....',
+  '..... vce.. ..... vce.. ..... ..... ..... v.... v.... v.... vc... vc...',
+  'v.... v.... v.... v.... v.... v.... v.... v.... v.... v.... v.... v....'
+].map((s) => s.split(' ').map((g) => g.split('').map((ch) => ch !== '.')));
+const USERS = [
+  ['Mariana Lopes', 'mariana.lopes@cci.app.br', [['cci', 'Administrador', '*'], ['gh', 'Administrador', '*'], ['vv', 'Auditor', '*']], 'Agora', true, 'Ativo'],
+  ['Fernanda Lima', 'fernanda.lima@cci.app.br', [['cci', 'Fiscal', 'cci-cont'], ['gh', 'Fiscal', 'gh-comb']], '18/11, 16:30', true, 'Ativo'],
+  ['Rodrigo Teles', 'rodrigo.teles@cci.app.br', [['cci', 'Financeiro', '*']], 'Hoje, 08:02', true, 'Ativo'],
+  ['Otávio Serra', 'otavio@postoserraazul.com.br', [['cci', 'Gerente', 'serra']], 'Hoje, 07:30', true, 'Ativo'],
+  ['Beatriz Campos', 'beatriz@postoserraazul.com.br', [['cci', 'Operador', 'serra']], 'Hoje, 06:02', false, 'Ativo'],
+  ['Diego Martins', 'diego@postoserraazul.com.br', [['cci', 'Estoque', 'serra']], 'Ontem, 18:40', false, 'Bloqueado'],
+  ['Paulo Nunes', 'paulo.nunes@grupohorizonte.com.br', [['gh', 'Financeiro', '*']], 'Hoje, 08:12', true, 'Ativo'],
+  ['Juliana Alves', 'juliana.alves@grupohorizonte.com.br', [['gh', 'Gerente', 'central']], 'Hoje, 09:12', true, 'Ativo'],
+  ['Carlos Mendes', 'carlos.mendes@grupohorizonte.com.br', [['gh', 'Gerente', 'central,avenida']], 'Hoje, 09:40', true, 'Ativo'],
+  ['Rafael Souza', 'rafael.souza@grupohorizonte.com.br', [['gh', 'Operador', 'central']], 'Hoje, 06:00', false, 'Ativo'],
+  ['Ana Ribeiro', 'ana.ribeiro@grupohorizonte.com.br', [['gh', 'Operador', 'central']], 'Ontem, 22:04', false, 'Ativo'],
+  ['Lucas Prado', 'lucas.prado@grupohorizonte.com.br', [['gh', 'Operador', 'avenida']], 'Hoje, 07:51', false, 'Ativo'],
+  ['Marcos Rocha', 'marcos.rocha@grupohorizonte.com.br', [['gh', 'Estoque', 'gh-comb']], 'Hoje, 05:48', true, 'Ativo'],
+  ['Roberto Dias', 'roberto.dias@grupohorizonte.com.br', [['gh', 'Gerente', 'saopedro']], '02/10, 11:15', true, 'Bloqueado'],
+  ['Helena Prates', 'helena@valeverde.com.br', [['vv', 'Administrador', '*']], 'Hoje, 10:01', true, 'Ativo'],
+  ['Igor Bastos', 'igor@valeverde.com.br', [['vv', 'Operador', 'trevo']], 'Hoje, 06:10', false, 'Ativo'],
+  ['Auditoria Externa', 'auditoria@parceiro.com.br', [['gh', 'Auditor', '*'], ['cci', 'Auditor', '*']], '20/11, 14:02', true, 'Ativo']
+];
+const INVITES = [
+  ['cci', 'novo.operador@postoserraazul.com.br', 'Operador', 'serra', 'Otávio Serra', 'em 3 dias', 'Pendente'],
+  ['gh', 'auditoria.fiscal@parceiro.com.br', 'Auditor', '*', 'Mariana Lopes', 'em 2 dias', 'Pendente'],
+  ['gh', 'frentista.rodovia@grupohorizonte.com.br', 'Operador', 'rodovia', 'Juliana Alves', 'em 1 dia', 'Pendente'],
+  ['vv', 'frentista.trevo@valeverde.com.br', 'Operador', 'trevo', 'Helena Prates', 'Expirado', 'Expirado']
+];
+const LIC = { cci: [24, 40], gh: [38, 50], vv: [6, 10] };
+const AV = ['#2D5BD8', '#15171C', 'var(--a1-purple-fg,#5B45A8)', 'var(--a1-ok-fg2,#1F8A5B)', 'var(--a1-warn-fg4,#9A6514)', 'var(--a1-text-2s,#4A4D55)'];
+const clone = (m) => m.map((r) => r.slice());
+
+class Component extends DCLogic {
+  state = { tab: (this.props && this.props.tab) || 'users', q: '', roleF: 'Todos os papéis', stF: 'Todas as situações', users: USERS, invites: INVITES, role: 1,
+    lvComp: null, lvEst: null, perms: {}, saved: {}, member: null, invite: false, inv: null, tried: false };
+  renderVals() {
+    const s = this.state; const ctx = this.props.ctx || { org: '', tree: [] }; const notify = this.props.notify || (() => {});
+    const org = (ctx.tree || []).find((o) => o.id === ctx.orgId) || { id: ctx.orgId, companies: [], mods: [] };
+    const comps = (org.companies || []).filter((c) => c.status !== 'Inativa');
+    const allEst = comps.flatMap((c) => c.estabs.map((e) => ({ ...e, comp: c })));
+    const orgName = (id) => ((ctx.tree || []).find((o) => o.id === id) || {}).short || id;
+    const scopeText = (oid, sc) => {
+      if (sc === '*') return 'Toda a organização';
+      const o = (ctx.tree || []).find((x) => x.id === oid) || { companies: [] };
+      return sc.split(',').map((id) => { const c = o.companies.find((x) => x.id === id); if (c) return c.fantasia + ' (empresa)'; const e = o.companies.flatMap((x) => x.estabs).find((x) => x.id === id); return e ? e.name : id; }).join(' · ');
+    };
+    const members = s.users.map((u, i) => ({ u, i, mm: u[2].find((x) => x[0] === org.id) })).filter((x) => x.mm);
+    const q = s.q.toLowerCase();
+    const list = members.filter(({ u, mm }) => (s.roleF === 'Todos os papéis' || mm[1] === s.roleF) && (s.stF === 'Todas as situações' || u[5] === s.stF) && (!q || (u[0] + u[1]).toLowerCase().includes(q)));
+    const stTone = (st) => st === 'Ativo' ? ['var(--a1-ok-bg,#E6F4EC)', 'var(--a1-ok-fg,#1B6E4A)'] : st === 'Bloqueado' || st === 'Expirado' ? ['var(--a1-err-bg,#FBEAE8)', 'var(--a1-err-fg,#9E2F27)'] : ['var(--a1-warn-bg,#FBF1DF)', 'var(--a1-warn-fg,#8A5A12)'];
+    const ini = (n) => n.split(' ').map((w) => w[0]).slice(0, 2).join('');
+    const invs = s.invites.map((v, i) => ({ v, i })).filter(({ v }) => v[0] === org.id);
+    // permissions by level
+    const compName = s.lvComp || 'Todas as empresas';
+    const selComp = comps.find((c) => c.fantasia === compName) || null;
+    const estPool = selComp ? selComp.estabs.filter((e) => e.status !== 'Suspenso') : [];
+    const estName = selComp ? (s.lvEst || 'Todos os estabelecimentos') : 'Todos os estabelecimentos';
+    const selEst = estPool.find((e) => e.name === estName) || null;
+    const keyOrg = org.id + '|' + s.role, keyComp = selComp ? keyOrg + '|' + selComp.id : null, keyEst = selEst ? keyComp + '|' + selEst.id : null;
+    const level = selEst ? 'est' : selComp ? 'comp' : 'org';
+    const curKey = keyEst || keyComp || keyOrg;
+    const get = (st, k) => st[k];
+    const effective = (st) => get(st, keyEst) || get(st, keyComp) || get(st, keyOrg) || P[s.role];
+    const matrixNow = effective(s.perms);
+    const matrixSaved = effective(s.saved);
+    const own = !!s.perms[curKey];
+    const src = own ? 'own' : level === 'est' && s.perms[keyComp] ? 'comp' : level !== 'org' && s.perms[keyOrg] ? 'org' : 'role';
+    const nOver = Object.keys(s.perms).filter((k) => k.startsWith(keyOrg + '|') || k === keyOrg).length;
+    const dirty = JSON.stringify(s.perms) !== JSON.stringify(s.saved);
+    const cur = ROLES[s.role];
+    const emailOk = s.inv && /^\S+@\S+\.\S+$/.test(s.inv.email);
+    const inv = s.inv || { name: '', email: '', role: 'Operador', comp: 'Todas as empresas', estabs: {} };
+    const invComp = comps.find((c) => c.fantasia === inv.comp);
+    const invPool = invComp ? invComp.estabs : allEst;
+    const tabDefs = [['users', 'Usuários e membros', members.length], ['invites', 'Convites', invs.filter(({ v }) => v[6] === 'Pendente').length], ['roles', 'Papéis e permissões', 0]];
+    const memberView = s.member != null ? (() => {
+      const u = s.users[s.member]; const st = u[5];
+      return { name: u[0], email: u[1], ini: ini(u[0]), av: AV[s.member % AV.length], st, last: u[3], mfa: u[4] ? 'Ativo' : 'Não configurado',
+        ms: u[2].map(([oid, role, sc]) => ({ org: (ctx.tree || []).find((o) => o.id === oid) ? ((ctx.tree || []).find((o) => o.id === oid).name) : oid, ini: (((ctx.tree || []).find((o) => o.id === oid) || {}).initials) || '··', role, scope: scopeText(oid, sc), cur: oid === org.id, bg: oid === org.id ? 'var(--a1-sel-bg,#F3F6FE)' : 'var(--a1-surface,#fff)', border: oid === org.id ? 'var(--a1-sel-border,#B9C9F2)' : 'var(--a1-border,#E6E5E0)' })),
+        action: st === 'Ativo' ? 'Bloquear nesta organização' : 'Desbloquear', actBg: st === 'Ativo' ? 'var(--a1-err-bg,#FBEAE8)' : '#2D5BD8', actFg: st === 'Ativo' ? 'var(--a1-err-fg,#9E2F27)' : '#fff', actBorder: st === 'Ativo' ? 'var(--a1-err-border,#F0C4BF)' : '#2D5BD8',
+        toggle: () => {
+          if (u[0] === 'Mariana Lopes') return notify('Você não pode bloquear o próprio acesso.', 'warn');
+          const ns = st === 'Ativo' ? 'Bloqueado' : 'Ativo';
+          this.setState({ users: s.users.map((x, j) => j === s.member ? [...x.slice(0, 5), ns] : x) });
+          notify((ns === 'Bloqueado' ? 'Acesso bloqueado: ' : 'Acesso restabelecido: ') + u[0], ns === 'Bloqueado' ? 'warn' : 'success');
+        } };
+    })() : null;
+    return {
+      ctx, title: s.tab === 'roles' ? 'Papéis e permissões' : 'Usuários e membros', userCount: members.length, licenses: (LIC[org.id] || [members.length, 10]).join(' de ') + ' licenças em uso',
+      tabs: tabDefs.map(([id, label, n]) => ({ label, n: n ? String(n) : '', line: s.tab === id ? 'var(--a1-text,#15171C)' : 'transparent', fg: s.tab === id ? 'var(--a1-text,#15171C)' : 'var(--a1-text-3,#7A7D85)', pick: () => this.setState({ tab: id }) })),
+      tabUsers: s.tab === 'users', tabInvites: s.tab === 'invites', tabRoles: s.tab === 'roles',
+      q: s.q, setQ: (e) => this.setState({ q: e.target.value }), roleF: s.roleF, setRoleF: (e) => this.setState({ roleF: e.target.value }), stF: s.stF, setStF: (e) => this.setState({ stF: e.target.value }),
+      roleNames: ROLES.map((r) => r[0]),
+      users: list.map(({ u, i, mm }) => {
+        const st = u[5]; const [stBg, stFg] = stTone(st); const others = u[2].length - 1;
+        return { name: u[0], email: u[1], role: mm[1], scope: scopeText(org.id, mm[2]), orgs: orgName(org.id) + (others ? ' +' + others : ''), last: u[3], ini: ini(u[0]), av: AV[i % AV.length],
+          mfaIcon: u[4] ? 'shield-check' : 'shield-off', mfaColor: u[4] ? 'var(--a1-ok-fg2,#1F8A5B)' : 'var(--a1-text-6,#B4B6BC)', st, stBg, stFg, open: () => this.setState({ member: i }) };
+      }),
+      usersEmpty: list.length === 0,
+      invites: invs.map(({ v, i }) => { const [stBg, stFg] = stTone(v[6]); return { email: v[1], role: v[2], scope: scopeText(org.id, v[3]), by: v[4], exp: v[5], st: v[6], stBg, stFg,
+        resend: () => { this.setState({ invites: s.invites.map((x, j) => j === i ? [...x.slice(0, 5), 'em 3 dias', 'Pendente'] : x) }); notify('Convite reenviado para ' + v[1], 'info'); },
+        cancel: () => { this.setState({ invites: s.invites.filter((_, j) => j !== i) }); notify('Convite cancelado: ' + v[1], 'warn'); } }; }),
+      invitesEmpty: invs.length === 0,
+      roles: ROLES.map((r, i) => { const n = members.filter(({ mm }) => mm[1] === r[0]).length; return { name: r[0], icon: r[1], n: n + (n === 1 ? ' membro' : ' membros'), bg: s.role === i ? 'var(--a1-sel-bg,#F3F6FE)' : 'transparent', ic: s.role === i ? 'var(--a1-accent-text,#2D5BD8)' : 'var(--a1-text-3,#7A7D85)', w: s.role === i ? 650 : 500, pick: () => this.setState({ role: i }) }; }),
+      cur: { name: cur[0], desc: cur[2] },
+      compOpts: ['Todas as empresas'].concat(comps.map((c) => c.fantasia)), lvComp: compName, setLvComp: (e) => this.setState({ lvComp: e.target.value, lvEst: null }),
+      estOpts: ['Todos os estabelecimentos'].concat(estPool.map((e) => e.name)), lvEst: estName, setLvEst: (e) => this.setState({ lvEst: e.target.value }),
+      lvBadge: { own: 'Personalizado neste nível', comp: 'Herdado da empresa', org: 'Herdado da organização', role: 'Padrão do papel' }[src],
+      overrides: nOver ? nOver + (nOver === 1 ? ' nível personalizado' : ' níveis personalizados') + ' para este papel em ' + ctx.orgShort : 'Nenhum nível personalizado — todos seguem o padrão do papel',
+      lvBadgeBg: own ? 'var(--a1-info-bg,#EAF0FD)' : 'var(--a1-muted,#F1F0EC)', lvBadgeFg: own ? 'var(--a1-accent-text,#2D5BD8)' : 'var(--a1-text-2s,#4A4D55)',
+      lvHint: (level === 'org' ? 'Vale para todas as empresas e estabelecimentos de ' + ctx.orgShort + ', exceto níveis personalizados.' : level === 'comp' ? 'Vale para ' + selComp.fantasia + ' e seus estabelecimentos, exceto os personalizados.' : 'Vale somente para ' + selEst.name + '.') + ' Ordem de herança: estabelecimento › empresa › organização › padrão do papel.',
+      canReset: own,
+      resetLevel: () => { const np = { ...s.perms }; delete np[curKey]; this.setState({ perms: np }); },
+      acts: ACTS,
+      matrix: MODS.map(([id, name, icon], mi) => { const locked = id !== 'core' && !(org.mods || []).includes(id);
+        return { name, icon, locked, rowBg: locked ? 'var(--a1-surface-2c,#FCFBF8)' : 'var(--a1-surface,#fff)', cells: ACTS.map((_, ai) => { const on = matrixNow[mi][ai]; return { on, op: locked ? 0.55 : 1, bg: on ? '#2D5BD8' : 'var(--a1-surface,#fff)', border: on ? '#2D5BD8' : 'var(--a1-border-strong,#C9C8C1)',
+          toggle: () => { if (s.role === 0) return notify('O papel Administrador não pode ser restringido.', 'warn'); const base = clone(matrixNow); base[mi][ai] = !base[mi][ai]; this.setState({ perms: { ...s.perms, [curKey]: base } }); } }; }) }; }),
+      dirtyMsg: dirty ? 'Alterações não salvas' : 'Permissões sincronizadas', dirtyColor: dirty ? 'var(--a1-warn-fg,#8A5A12)' : 'var(--a1-text-3,#7A7D85)', saveBg: dirty ? '#2D5BD8' : '#9DB4EE',
+      discard: () => this.setState({ perms: s.saved }),
+      saveRole: () => { if (!dirty) return; this.setState({ saved: s.perms }); notify('Permissões do papel ' + cur[0] + ' salvas para ' + (selEst ? selEst.name : selComp ? selComp.fantasia : ctx.orgShort) + '.', 'success'); },
+      member: memberView, closeMember: () => this.setState({ member: null }),
+      invite: s.invite, inv, compOpts2: null,
+      openInvite: () => this.setState({ invite: true, tried: false, inv: { name: '', email: '', role: 'Operador', comp: ctx.companyId && ctx.companyId !== 'all' ? (comps.find((c) => c.id === ctx.companyId) || {}).fantasia || 'Todas as empresas' : 'Todas as empresas', estabs: {} } }),
+      closeInvite: () => this.setState({ invite: false }),
+      invName: (e) => this.setState({ inv: { ...inv, name: e.target.value } }), invEmail: (e) => this.setState({ inv: { ...inv, email: e.target.value } }), invRole: (e) => this.setState({ inv: { ...inv, role: e.target.value } }),
+      invComp: (e) => this.setState({ inv: { ...inv, comp: e.target.value, estabs: {} } }),
+      nameBorder: s.tried && !inv.name.trim() ? 'var(--a1-err-border2,#E59A92)' : 'var(--a1-field-border,#DCDBD5)', emailBorder: s.tried && !emailOk ? 'var(--a1-err-border2,#E59A92)' : 'var(--a1-field-border,#DCDBD5)',
+      invEstabs: invPool.map((e) => { const on = !!inv.estabs[e.id]; return { name: e.name, type: e.type, on, bg: on ? 'var(--a1-sel-bg,#F3F6FE)' : 'var(--a1-surface,#fff)', border: on ? 'var(--a1-sel-border,#B9C9F2)' : 'var(--a1-border,#E6E5E0)', cb: on ? '#2D5BD8' : 'var(--a1-border-strong,#C9C8C1)', cbBg: on ? '#2D5BD8' : 'var(--a1-surface,#fff)', toggle: () => this.setState({ inv: { ...inv, estabs: { ...inv.estabs, [e.id]: !on } } }) }; }),
+      sendInvite: () => {
+        if (!inv.name.trim() || !emailOk) { this.setState({ tried: true }); return notify('Informe nome e e-mail válido.', 'danger'); }
+        const es = Object.keys(inv.estabs).filter((k) => inv.estabs[k]);
+        const sc = es.length ? es.join(',') : invComp ? invComp.id : '*';
+        this.setState({ invite: false, tab: 'invites', invites: s.invites.concat([[org.id, inv.email.trim(), inv.role, sc, 'Mariana Lopes', 'em 3 dias', 'Pendente']]) });
+        notify('Convite enviado para ' + inv.email.trim(), 'success');
+      }
+    };
+  }
+}
+
+</script>
+</body>
+</html>

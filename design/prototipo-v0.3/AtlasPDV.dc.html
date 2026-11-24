@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="height:100vh;display:flex;flex-direction:column;background:var(--a1-skeleton,#ECEBE6);overflow:hidden;font-family:'Geist',system-ui,sans-serif;color:var(--a1-text,#15171C)">
+  <div style="height:58px;flex:none;background:#0F1115;color:#E4E5E9;display:flex;align-items:center;gap:14px;padding:0 16px;overflow:hidden">
+    <div style="display:flex;align-items:center;gap:10px;flex:none">
+      <div style="position:relative;width:28px;height:28px;border-radius:7px;background:#E8A23A;display:flex;align-items:center;justify-content:center"><div style="width:14px;height:14px;border-radius:50%;border:2px solid #0F1115"></div><div style="position:absolute;left:5px;right:5px;top:13px;height:2px;background:#0F1115"></div></div>
+      <div style="font-size:15px"><span style="font-weight:650">Atlas</span> <span style="color:#8C9099">PDV</span></div>
+    </div>
+    <div style="width:1px;height:26px;background:#262A33;flex:none"></div>
+    <div style="display:flex;flex-direction:column;gap:1px;flex:none"><div style="font-size:13px;font-weight:600">Caixa 01 · {{ estab }}</div><div style="font-size:11.5px;color:#8C9099">Operador: Rafael Souza</div></div>
+    <span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:5px 10px;border-radius:999px;background:{{ cashChip.bg }};color:{{ cashChip.fg }};flex:none"><span style="width:7px;height:7px;border-radius:50%;background:{{ cashChip.dot }}"></span>{{ cashChip.label }}</span>
+    <div style="flex:1"></div>
+    <sc-if value="{{ wide }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex;gap:14px;font-size:12px;color:#A3A7B0;flex:none">
+        <span style="display:flex;align-items:center;gap:6px"><span style="width:7px;height:7px;border-radius:50%;background:#3CB27A"></span>Terminal POS-01 · Boa Vista</span>
+        <span style="display:flex;align-items:center;gap:6px"><span style="width:7px;height:7px;border-radius:50%;background:#3CB27A"></span>NFC-e online</span>
+      </div>
+    </sc-if>
+    <div style="font-family:'Geist Mono',monospace;font-size:15px;color:#F1F2F4;flex:none">{{ clock }}</div>
+    <button onClick="{{ exit }}" style="height:36px;padding:0 12px;border:1px solid #2A2E37;border-radius:8px;background:transparent;color:#C9CBD1;font-size:12.5px;font-weight:550;cursor:pointer;display:flex;align-items:center;gap:7px;flex:none" style-hover="background:#1A1D23"><x-import component="Icon" from="./Icon.js" i="log-out" size="15" hint-size="15px,15px"></x-import>Sair do PDV</button>
+  </div>
+
+  <div style="flex:1;min-height:0;display:flex;flex-wrap:{{ bodyWrap }};gap:10px;padding:10px;overflow:auto">
+    <div style="flex:1 1 320px;min-width:0;min-height:360px;display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;gap:8px">
+        <div style="flex:1;display:flex;align-items:center;gap:12px;height:60px;padding:0 10px 0 18px;background:var(--a1-surface,#fff);border:2px solid {{ searchBorder }};border-radius:12px;transition:border-color .2s">
+          <x-import component="Icon" from="./Icon.js" i="scan-barcode" size="24" color="var(--a1-text-2,#62656D)" hint-size="24px,24px"></x-import>
+          <input ref="{{ searchRef }}" value="{{ q }}" onChange="{{ setQ }}" onKeyDown="{{ searchKey }}" placeholder="Código de barras ou descrição do produto" style="flex:1;min-width:0;border:0;outline:0;font-size:19px;background:transparent"></input>
+          <span style="font-family:'Geist Mono',monospace;font-size:12px;padding:4px 8px;border-radius:6px;background:var(--a1-muted,#F1F0EC);color:var(--a1-text-2,#62656D)">F2</span>
+        </div>
+        <button onClick="{{ simScan }}" title="Simular leitura do leitor de código de barras" style="width:60px;height:60px;border:0;border-radius:12px;background:var(--a1-strong,#15171C);color:#E8A23A;cursor:pointer;display:flex;align-items:center;justify-content:center"><x-import component="Icon" from="./Icon.js" i="scan-line" size="24" hint-size="24px,24px"></x-import></button>
+      </div>
+      <div style="height:22px;display:flex;align-items:center;gap:8px;font-size:13px;color:{{ lastColor }};padding:0 4px">
+        <x-import component="Icon" from="./Icon.js" i="{{ lastIcon }}" size="15" hint-size="15px,15px"></x-import><span>{{ lastMsg }}</span>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <sc-for list="{{ cats }}" as="c" hint-placeholder-count="5">
+          <button onClick="{{ c.pick }}" style="height:44px;padding:0 16px;border:1px solid {{ c.border }};border-radius:10px;background:{{ c.bg }};color:{{ c.fg }};font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px"><x-import component="Icon" from="./Icon.js" i="{{ c.icon }}" size="17" hint-size="17px,17px"></x-import>{{ c.label }}<sc-if value="{{ c.badge }}" hint-placeholder-val="{{ false }}"><span style="min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:#E8A23A;color:#15171C;font-size:11.5px;display:flex;align-items:center;justify-content:center">{{ c.badge }}</span></sc-if></button>
+        </sc-for>
+      </div>
+      <sc-if value="{{ compactActions }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-wrap:nowrap;gap:6px;overflow-x:auto;scrollbar-width:none;flex:none">
+          <sc-for list="{{ actions }}" as="a" hint-placeholder-count="8">
+            <button onClick="{{ a.run }}" style="flex:none;height:40px;padding:0 10px;border:1px solid var(--a1-border-2,#E1E0DA);border-radius:9px;background:var(--a1-surface,#fff);color:{{ a.fg }};cursor:pointer;display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;white-space:nowrap">
+              <x-import component="Icon" from="./Icon.js" i="{{ a.icon }}" size="15" hint-size="15px,15px"></x-import>{{ a.label }}<sc-if value="{{ a.key }}" hint-placeholder-val="{{ false }}"><span style="font-family:'Geist Mono',monospace;font-size:10.5px;color:var(--a1-text-4,#8A8D95)">{{ a.key }}</span></sc-if>
+            </button>
+          </sc-for>
+        </div>
+      </sc-if>
+      <div style="flex:1;min-height:0;overflow:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));grid-auto-rows:min-content;gap:8px;align-content:start">
+        <sc-for list="{{ tiles }}" as="t" hint-placeholder-count="12">
+          <button onClick="{{ t.add }}" style="min-height:104px;padding:14px;border:1px solid var(--a1-border-2,#E1E0DA);border-radius:12px;background:var(--a1-surface,#fff);cursor:pointer;text-align:left;display:flex;flex-direction:column;justify-content:space-between;gap:10px;position:relative;overflow:hidden" style-hover="border-color:var(--a1-text,#15171C)" style-active="transform:scale(.98)">
+            <div style="position:absolute;left:0;top:0;right:0;height:4px;background:{{ t.color }}"></div>
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <span style="font-family:'Geist Mono',monospace;font-size:11px;color:var(--a1-text-4,#8A8D95)">{{ t.top }}</span>
+              <span style="font-size:15px;font-weight:600;line-height:1.25">{{ t.name }}</span>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:2px 6px"><span style="font-size:12px;color:var(--a1-text-2,#62656D);font-variant-numeric:tabular-nums">{{ t.sub }}</span><span style="font-size:17px;font-weight:650;font-variant-numeric:tabular-nums;white-space:nowrap;margin-left:auto">{{ t.price }}</span></div>
+          </button>
+        </sc-for>
+        <sc-if value="{{ noTiles }}" hint-placeholder-val="{{ false }}"><div style="grid-column:1/-1;padding:40px;text-align:center;color:var(--a1-text-3,#7A7D85);font-size:14px">{{ noTilesMsg }}</div></sc-if>
+      </div>
+    </div>
+
+    <div style="flex:0 1 450px;min-width:320px;min-height:0;display:flex;flex-direction:column;background:var(--a1-surface,#fff);border:1px solid var(--a1-border-2,#E1E0DA);border-radius:14px;overflow:hidden">
+      <div style="padding:14px 16px;border-bottom:1px solid var(--a1-divider,#EFEEEA);display:flex;justify-content:space-between;align-items:center;gap:10px">
+        <div style="display:flex;flex-direction:column;gap:2px"><div style="font-size:15px;font-weight:650">Venda nº {{ saleNo }}</div><div style="font-size:12px;color:var(--a1-text-3,#7A7D85)">{{ itemCount }}</div></div>
+        <button onClick="{{ openCustomer }}" style="height:40px;max-width:230px;padding:0 12px;border:1px solid {{ custBorder }};border-radius:9px;background:{{ custBg }};cursor:pointer;display:flex;align-items:center;gap:8px;font-size:13px">
+          <x-import component="Icon" from="./Icon.js" i="user-round" size="16" hint-size="16px,16px"></x-import>
+          <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:550">{{ custLabel }}</span>
+          <span style="font-family:'Geist Mono',monospace;font-size:11px;color:var(--a1-text-4,#8A8D95)">F4</span>
+        </button>
+      </div>
+      <div style="flex:1;min-height:0;overflow:auto">
+        <sc-for list="{{ lines }}" as="l" hint-placeholder-count="3">
+          <div onClick="{{ l.select }}" style="display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:10px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--a1-divider-2,#F2F1ED);background:{{ l.bg }};cursor:pointer;transition:background .3s">
+            <span style="font-family:'Geist Mono',monospace;font-size:12px;color:{{ l.numColor }};font-weight:600">{{ l.n }}</span>
+            <div style="display:flex;flex-direction:column;gap:3px;min-width:0">
+              <span style="font-size:14.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ l.name }}</span>
+              <span style="font-size:12.5px;color:var(--a1-text-2,#62656D);font-variant-numeric:tabular-nums">{{ l.detail }}<sc-if value="{{ l.disc }}" hint-placeholder-val="{{ false }}"> · <span style="color:var(--a1-ok-fg,#1B6E4A);font-weight:600">−{{ l.disc }}</span></sc-if></span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <sc-if value="{{ l.editable }}" hint-placeholder-val="{{ true }}">
+                <div style="display:flex;align-items:center;border:1px solid var(--a1-border-2,#E1E0DA);border-radius:8px;overflow:hidden">
+                  <button onClick="{{ l.dec }}" style="width:30px;height:30px;border:0;background:var(--a1-surface,#fff);cursor:pointer;display:flex;align-items:center;justify-content:center"><x-import component="Icon" from="./Icon.js" i="minus" size="14" hint-size="14px,14px"></x-import></button>
+                  <span style="min-width:28px;text-align:center;font-size:13px;font-weight:600;font-variant-numeric:tabular-nums">{{ l.qty }}</span>
+                  <button onClick="{{ l.inc }}" style="width:30px;height:30px;border:0;background:var(--a1-surface,#fff);cursor:pointer;display:flex;align-items:center;justify-content:center"><x-import component="Icon" from="./Icon.js" i="plus" size="14" hint-size="14px,14px"></x-import></button>
+                </div>
+              </sc-if>
+              <span style="min-width:86px;text-align:right;font-size:15px;font-weight:650;font-variant-numeric:tabular-nums">{{ l.total }}</span>
+            </div>
+          </div>
+        </sc-for>
+        <sc-if value="{{ emptyCart }}" hint-placeholder-val="{{ false }}">
+          <div style="height:100%;min-height:220px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--a1-text-4,#8A8D95);padding:24px;text-align:center">
+            <x-import component="Icon" from="./Icon.js" i="scan-barcode" size="34" color="var(--a1-border-strong,#C9C8C1)" hint-size="34px,34px"></x-import>
+            <div style="font-size:15px;font-weight:600;color:var(--a1-text-2s,#4A4D55)">Caixa livre</div>
+            <div style="font-size:13px;line-height:1.5">Leia um código de barras, busque um produto<br>ou selecione um abastecimento.</div>
+          </div>
+        </sc-if>
+      </div>
+      <div style="background:#0F1115;color:#E4E5E9;padding:16px 18px;display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;flex-direction:column;gap:5px;font-size:13px;color:#A3A7B0">
+          <div style="display:flex;justify-content:space-between"><span>Subtotal</span><span style="font-variant-numeric:tabular-nums;color:#E4E5E9">{{ subtotal }}</span></div>
+          <div style="display:flex;justify-content:space-between"><span>Descontos</span><span style="font-variant-numeric:tabular-nums;color:#5CC08E">{{ discTotal }}</span></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;border-top:1px solid #23262E;padding-top:12px">
+          <span style="font-size:14px;font-weight:600;color:#A3A7B0;letter-spacing:.06em;text-transform:uppercase">Total</span>
+          <span style="font-family:'Geist Mono',monospace;font-size:44px;font-weight:600;letter-spacing:-.03em;color:#FFFFFF;line-height:1">{{ total }}</span>
+        </div>
+        <button onClick="{{ finalize }}" style="height:64px;border:0;border-radius:12px;background:{{ finBg }};color:{{ finFg }};font-size:18px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:12px" style-active="transform:scale(.99)">Finalizar venda<span style="font-family:'Geist Mono',monospace;font-size:13px;padding:3px 8px;border-radius:6px;background:rgba(15,17,21,.14)">F10</span></button>
+      </div>
+    </div>
+
+    <sc-if value="{{ wideActions }}" hint-placeholder-val="{{ true }}">
+    <div style="flex:0 0 200px;min-width:200px;display:flex;flex-direction:column;gap:8px">
+      <sc-for list="{{ actions }}" as="a" hint-placeholder-count="9">
+        <button onClick="{{ a.run }}" style="min-height:52px;padding:0 14px;border:1px solid {{ a.border }};border-radius:11px;background:{{ a.bg }};color:{{ a.fg }};cursor:pointer;display:flex;align-items:center;gap:10px;font-size:13.5px;font-weight:600;text-align:left" style-hover="border-color:var(--a1-text,#15171C)">
+          <x-import component="Icon" from="./Icon.js" i="{{ a.icon }}" size="18" hint-size="18px,18px"></x-import>
+          <span style="flex:1">{{ a.label }}</span>
+          <span style="font-family:'Geist Mono',monospace;font-size:11px;color:var(--a1-text-4,#8A8D95)">{{ a.key }}</span>
+        </button>
+      </sc-for>
+      <div style="flex:1"></div>
+      <div style="padding:12px;border-radius:11px;background:var(--a1-surface,#fff);border:1px solid var(--a1-border-2,#E1E0DA);display:flex;flex-direction:column;gap:4px">
+        <span style="font-size:11.5px;color:var(--a1-text-3,#7A7D85)">Saldo em dinheiro</span>
+        <span style="font-size:18px;font-weight:650;font-variant-numeric:tabular-nums">{{ cashBal }}</span>
+      </div>
+    </div>
+    </sc-if>
+  </div>
+
+  <div style="flex:none;height:36px;background:#0F1115;border-top:1px solid #1C1F26;display:flex;align-items:center;gap:16px;padding:0 16px;overflow:hidden;white-space:nowrap">
+    <sc-for list="{{ keys }}" as="k" hint-placeholder-count="9">
+      <span style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:#8C9099"><span style="font-family:'Geist Mono',monospace;font-size:10.5px;padding:2px 6px;border-radius:4px;background:#1C1F26;color:#E4E5E9">{{ k.k }}</span>{{ k.l }}</span>
+    </sc-for>
+  </div>
+
+  <sc-if value="{{ m.pay }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;z-index:100;background:rgba(15,17,21,.6);display:flex;align-items:center;justify-content:center;padding:14px">
+      <div style="width:100%;max-width:1000px;max-height:calc(100vh - 28px);overflow:auto;background:var(--a1-surface,#fff);border-radius:18px;box-shadow:0 30px 80px rgba(0,0,0,.35);display:flex;flex-wrap:wrap;animation:a1in .2s ease">
+        <div style="flex:1 1 340px;background:#0F1115;color:#E4E5E9;padding:24px;display:flex;flex-direction:column;gap:18px">
+          <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;color:#8C9099">Venda nº {{ saleNo }}</span><span style="font-size:12px;color:#8C9099">{{ custLabel }}</span></div>
+          <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#8C9099">Total da venda</span><span style="font-family:'Geist Mono',monospace;font-size:38px;font-weight:600;letter-spacing:-.03em;color:#fff">{{ total }}</span></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div style="padding:12px;border-radius:10px;background:#161920;display:flex;flex-direction:column;gap:4px"><span style="font-size:11.5px;color:#8C9099">Pago</span><span style="font-family:'Geist Mono',monospace;font-size:18px;color:#5CC08E">{{ paid }}</span></div>
+            <div style="padding:12px;border-radius:10px;background:{{ remBg }};display:flex;flex-direction:column;gap:4px"><span style="font-size:11.5px;color:{{ remLbl }}">{{ remLabel }}</span><span style="font-family:'Geist Mono',monospace;font-size:18px;color:{{ remFg }};font-weight:600">{{ remaining }}</span></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <span style="font-size:12px;color:#8C9099">Pagamentos registrados</span>
+            <sc-for list="{{ payList }}" as="p" hint-placeholder-count="0">
+              <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:9px;background:#161920;border:1px solid #23262E">
+                <x-import component="Icon" from="./Icon.js" i="{{ p.icon }}" size="17" color="#E8A23A" hint-size="17px,17px"></x-import>
+                <div style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font-size:13.5px;font-weight:600">{{ p.label }}</span><span style="font-family:'Geist Mono',monospace;font-size:11px;color:#8C9099">{{ p.meta }}</span></div>
+                <span style="font-family:'Geist Mono',monospace;font-size:14px">{{ p.amount }}</span>
+                <sc-if value="{{ p.removable }}" hint-placeholder-val="{{ false }}"><button onClick="{{ p.remove }}" style="width:26px;height:26px;border:0;border-radius:6px;background:#23262E;color:#A3A7B0;cursor:pointer;display:flex;align-items:center;justify-content:center"><x-import component="Icon" from="./Icon.js" i="x" size="13" hint-size="13px,13px"></x-import></button></sc-if>
+              </div>
+            </sc-for>
+            <sc-if value="{{ noPays }}" hint-placeholder-val="{{ true }}"><div style="padding:14px;border:1px dashed #2A2E37;border-radius:9px;font-size:12.5px;color:#6E727B;text-align:center">Nenhum pagamento ainda. Combine formas para pagamento dividido.</div></sc-if>
+          </div>
+          <div style="flex:1"></div>
+          <div style="display:flex;gap:8px;align-items:flex-start;font-size:11.5px;color:#6E727B;line-height:1.45"><x-import component="Icon" from="./Icon.js" i="info" size="14" hint-size="14px,14px"></x-import><span>Integração Boa Vista representada conceitualmente. Fluxo técnico definido na etapa de especificação.</span></div>
+        </div>
+
+        <div style="flex:1.3 1 420px;padding:24px;display:flex;flex-direction:column;gap:18px;min-height:540px">
+          <sc-if value="{{ payIdle }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:18px;font-weight:650">Forma de pagamento</span><button onClick="{{ closeModal }}" style="width:36px;height:36px;border:0;border-radius:9px;background:var(--a1-bg,#F5F5F2);cursor:pointer;display:flex;align-items:center;justify-content:center"><x-import component="Icon" from="./Icon.js" i="x" size="17" hint-size="17px,17px"></x-import></button></div>
+            <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px">
+              <sc-for list="{{ methods }}" as="mt" hint-placeholder-count="4">
+                <button onClick="{{ mt.pick }}" style="height:84px;padding:0 16px;border:2px solid {{ mt.border }};border-radius:13px;background:{{ mt.bg }};cursor:pointer;display:flex;align-items:center;gap:14px;text-align:left">
+                  <div style="width:44px;height:44px;border-radius:11px;background:{{ mt.iconBg }};color:{{ mt.iconFg }};display:flex;align-items:center;justify-content:center"><x-import component="Icon" from="./Icon.js" i="{{ mt.icon }}" size="22" hint-size="22px,22px"></x-import></div>
+                  <div style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font-size:17px;font-weight:650">{{ mt.label }}</span><span style="font-size:12px;color:var(--a1-text-3,#7A7D85)">{{ mt.sub }}</span></div>
+                  <span style="font-family:'Geist Mono',monospace;font-size:12px;padding:3px 8px;border-radius:6px;background:var(--a1-muted,#F1F0EC);color:var(--a1-text-2,#62656D)">{{ mt.key }}</span>
+                </button>
+              </sc-for>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <span style="font-size:13px;font-weight:600">Valor em {{ methodLabel }}</span>
+              <div style="display:flex;align-items:center;gap:10px;height:62px;padding:0 16px;border:2px solid var(--a1-text,#15171C);border-radius:12px">
+                <span style="font-size:20px;color:var(--a1-text-3,#7A7D85);font-weight:600">R$</span>
+                <input ref="{{ amountRef }}" value="{{ amount }}" onChange="{{ setAmount }}" onKeyDown="{{ amountKey }}" inputMode="decimal" style="flex:1;min-width:0;border:0;outline:0;font-family:'Geist Mono',monospace;font-size:28px;font-weight:600"></input>
+                <button onClick="{{ fillRemaining }}" style="height:36px;padding:0 12px;border:1px solid var(--a1-border-2,#E1E0DA);border-radius:8px;background:var(--a1-surface,#fff);font-size:12.5px;font-weight:600;cursor:pointer;white-space:nowrap">Valor restante</button>
+              </div>
+              <sc-if value="{{ isCash }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;gap:6px;flex-wrap:wrap">
+                  <sc-for list="{{ notes }}" as="nt" hint-placeholder-count="4"><button onClick="{{ nt.pick }}" style="height:40px;padding:0 14px;border:1px solid var(--a1-border-2,#E1E0DA);border-radius:9px;background:var(--a1-surface-2,#FAFAF8);font-size:14px;font-weight:600;cursor:pointer;font-variant-numeric:tabular-nums">{{ nt.label }}</button></sc-for>
+                </div>
+              </sc-if>
+              <sc-if value="{{ isCredit }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;gap:6px;flex-wrap:wrap">
+                  <sc-for list="{{ insts }}" as="it" hint-placeholder-count="3"><button onClick="{{ it.pick }}" style="height:40px;padding:0 14px;border:1px solid {{ it.border }};border-radius:9px;background:{{ it.bg }};color:{{ it.fg }};font-size:13px;font-weight:600;cursor:pointer">{{ it.label }}</button></sc-for>
+                </div>
+              </sc-if>
+              <sc-if value="{{ payErr }}" hint-placeholder-val="{{ false }}"><span style="font-size:12.5px;color:var(--a1-err-fg2,#B23A31)">{{ payErr }}</span></sc-if>
+            </div>
+            <div style="flex:1"></div>
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 12px;border-radius:10px;background:var(--a1-surface-2,#FAFAF8);border:1px dashed var(--a1-field-border,#DCDBD5)">
+              <span style="font-size:12px;color:var(--a1-text-2,#62656D);font-weight:550">Simulação do protótipo</span>
+              <div style="display:flex;gap:4px">
+                <sc-for list="{{ sims }}" as="sm" hint-placeholder-count="3"><button onClick="{{ sm.pick }}" style="height:28px;padding:0 10px;border:1px solid {{ sm.border }};border-radius:7px;background:{{ sm.bg }};color:{{ sm.fg }};font-size:12px;font-weight:600;cursor:pointer">{{ sm.label }}</button></sc-for>
+              </div>
+            </div>
+            <button onClick="{{ sendPay }}" style="height:62px;border:0;border-radius:12px;background:var(--a1-strong,#15171C);color:#fff;font-size:17px;font-weight:650;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px" style-hover="background:var(--a1-strong-hover,#2A2D35)"><x-import component="Icon" from="./Icon.js" i="{{ sendIcon }}" size="20" color="#E8A23A" hint-size="20px,20px"></x-import>{{ sendLabel }}<span style="font-family:'Geist Mono',monospace;font-size:12px;padding:3px 8px;border-radius:6px;background:rgba(255,255,255,.12)">Enter</span></button>
+          </sc-if>
+
+          <sc-if value="{{ payProc }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;text-align:center;padding:12px">
+              <div style="font-family:'Geist Mono',monospace;font-size:12px;color:var(--a1-text-3,#7A7D85);letter-spacing:.06em;text-transform:uppercase">{{ proc.method }} · {{ proc.amount }}</div>
+              <sc-if value="{{ proc.showQr }}" hint-placeholder-val="{{ false }}">
+                <div style="width:200px;height:200px;border-radius:14px;border:1px solid var(--a1-border-2,#E1E0DA);background:repeating-linear-gradient(45deg,var(--a1-bg,#F5F5F2) 0 8px,var(--a1-skeleton,#ECEBE6) 8px 16px);display:flex;align-items:center;justify-content:center;font-family:'Geist Mono',monospace;font-size:11px;color:var(--a1-text-3,#7A7D85);padding:20px">QR Code PIX dinâmico</div>
+              </sc-if>
+              <sc-if value="{{ proc.showCard }}" hint-placeholder-val="{{ false }}">
+                <div style="width:96px;height:96px;border-radius:50%;background:var(--a1-info-bg,#EAF0FD);color:var(--a1-accent-text,#2D5BD8);display:flex;align-items:center;justify-content:center;animation:a1pulse 1.4s infinite"><x-import component="Icon" from="./Icon.js" i="nfc" size="40" hint-size="40px,40px"></x-import></div>
+              </sc-if>
+              <sc-if value="{{ proc.spin }}" hint-placeholder-val="{{ false }}">
+                <div style="width:64px;height:64px;border-radius:50%;border:4px solid var(--a1-divider,#EFEEEA);border-top-color:#2D5BD8;animation:a1spin .8s linear infinite"></div>
+              </sc-if>
+              <div style="display:flex;flex-direction:column;gap:6px"><div style="font-size:22px;font-weight:650">{{ proc.title }}</div><div style="font-size:14px;color:var(--a1-text-2,#62656D)">{{ proc.sub }}</div></div>
+              <div style="display:flex;gap:8px;align-items:center">
+                <sc-for list="{{ proc.steps }}" as="st" hint-placeholder-count="3">
+                  <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:{{ st.fg }};font-weight:550"><span style="width:20px;height:20px;border-radius:50%;background:{{ st.bg }};color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px">{{ st.n }}</span>{{ st.label }}</div>
+                </sc-for>
+              </div>
+              <button onClick="{{ abortProc }}" style="height:40px;padding:0 16px;border:1px solid var(--a1-border-2,#E1E0DA);border-radius:9px;background:var(--a1-surface,#fff);font-size:13px;font-weight:550;cursor:pointer">Cancelar operação no terminal</button>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ payResult }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;text-align:center;padding:12px">
+              <div style="width:96px;height:96px;border-radius:50%;background:{{ res.bg }};color:{{ res.fg }};display:flex;align-items:center;justify-content:center"><x-import component="Icon" from="./Icon.js" i="{{ res.icon }}" size="46" hint-size="46px,46px"></x-import></div>
+              <div style="display:flex;flex-direction:column;gap:6px"><div style="font-size:26px;font-weight:700;color:{{ res.fg }}">{{ res.title }}</div><div style="font-size:14px;color:var(--a1-text-2,#62656D);max-width:380px;line-height:1.5">{{ res.sub }}</div></div>
+              <sc-if value="{{ res.ok }}" hint-placeholder-val="{{ false }}">
+                <div style="display:grid;grid-template-columns:repeat(3,auto);gap:8px 22px;padding:14px 18px;border-radius:12px;background:var(--a1-surface-2,#FAFAF8);border:1px solid var(--a1-divider,#EFEEEA);text-align:left">
+                  <span style="font-size:11.5px;color:var(--a1-text-3,#7A7D85)">NSU</span><span style="font-size:11.5px;color:var(--a1-text-3,#7A7D85)">Autorização</span><span style="font-size:11.5px;color:var(--a1-text-3,#7A7D85)">Cartão / conta</span>
+                  <span style="font-family:'Geist Mono',monospace;font-size:14px;font-weight:600">{{ res.nsu }}</span><span style="font-family:'Geist Mono',monospace;font-size:14px;font-weight:600">{{ res.auth }}</span><span style="font-family:'Geist Mono',monospace;font-size:14px;font-weight:600">{{ res.card }}</span>
+                </div>
+              </sc-if>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
+                <sc-if value="{{ res.fail }}" hint-placeholder-val="{{ false }}"><button onClick="{{ retryPay }}" style="height:52px;padding:0 20px;border:0;border-radius:11px;background:var(--a1-strong,#15171C);color:#fff;font-size:15px;font-weight:650;cursor:pointer">Tentar novamente</button></sc-if>
+                <sc-if value="{{ res.fail }}" hint-placeholder-val="{{ false }}"><button onClick="{{ otherMethod }}" style="height:52px;padding:0 20px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:11px;background:var(--a1-surface,#fff);font-size:15px;font-weight:600;cursor:pointer">Outra forma de pagamento</button></sc-if>
+                <sc-if value="{{ res.ok }}" hint-placeholder-val="{{ false }}"><button onClick="{{ continuePay }}" style="height:52px;padding:0 26px;border:0;border-radius:11px;background:var(--a1-strong,#15171C);color:#fff;font-size:15px;font-weight:650;cursor:pointer;display:flex;align-items:center;gap:10px">Continuar<span style="font-family:'Geist Mono',monospace;font-size:12px;padding:3px 8px;border-radius:6px;background:rgba(255,255,255,.12)">Enter</span></button></sc-if>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ payDone }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;text-align:center;padding:12px">
+              <div style="width:104px;height:104px;border-radius:50%;background:var(--a1-ok-fg2,#1F8A5B);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 12px var(--a1-ok-bg,#E6F4EC)"><x-import component="Icon" from="./Icon.js" i="check" size="52" stroke="2.5" hint-size="52px,52px"></x-import></div>
+              <div style="display:flex;flex-direction:column;gap:6px"><div style="font-size:28px;font-weight:700">Venda concluída</div><div style="font-size:14px;color:var(--a1-text-2,#62656D)">{{ doneNfce }}</div></div>
+              <sc-if value="{{ hasChange }}" hint-placeholder-val="{{ false }}">
+                <div style="padding:16px 28px;border-radius:14px;background:var(--a1-warn-bg2,#FDF3E3);border:1px solid var(--a1-warn-border,#F3D9A8);display:flex;flex-direction:column;gap:4px"><span style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--a1-warn-fg,#8A5A12);font-weight:600">Troco</span><span style="font-family:'Geist Mono',monospace;font-size:40px;font-weight:600;color:var(--a1-text,#15171C)">{{ change }}</span></div>
+              </sc-if>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
+                <button onClick="{{ printReceipt }}" style="height:54px;padding:0 18px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:11px;background:var(--a1-surface,#fff);font-size:14.5px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px"><x-import component="Icon" from="./Icon.js" i="printer" size="18" hint-size="18px,18px"></x-import>Imprimir cupom</button>
+                <button onClick="{{ newSale }}" style="height:54px;padding:0 24px;border:0;border-radius:11px;background:#E8A23A;color:#15171C;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:10px">Nova venda<span style="font-family:'Geist Mono',monospace;font-size:12px;padding:3px 8px;border-radius:6px;background:rgba(15,17,21,.12)">Enter</span></button>
+              </div>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ m.small }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;z-index:100;background:rgba(15,17,21,.55);display:flex;align-items:center;justify-content:center;padding:14px">
+      <div style="width:100%;max-width:480px;max-height:calc(100vh - 28px);overflow:auto;background:var(--a1-surface,#fff);border-radius:16px;box-shadow:0 30px 80px rgba(0,0,0,.3);animation:a1in .18s ease;display:flex;flex-direction:column">
+        <div style="padding:20px 22px 14px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+          <div style="display:flex;gap:12px;align-items:center">
+            <div style="width:40px;height:40px;border-radius:10px;background:{{ sm.iconBg }};color:{{ sm.iconFg }};display:flex;align-items:center;justify-content:center"><x-import component="Icon" from="./Icon.js" i="{{ sm.icon }}" size="20" hint-size="20px,20px"></x-import></div>
+            <div style="display:flex;flex-direction:column;gap:2px"><div style="font-size:17px;font-weight:650">{{ sm.title }}</div><div style="font-size:12.5px;color:var(--a1-text-3,#7A7D85)">{{ sm.sub }}</div></div>
+          </div>
+          <sc-if value="{{ sm.closable }}" hint-placeholder-val="{{ true }}"><button onClick="{{ closeModal }}" style="width:34px;height:34px;border:0;border-radius:8px;background:var(--a1-bg,#F5F5F2);cursor:pointer;display:flex;align-items:center;justify-content:center;flex:none"><x-import component="Icon" from="./Icon.js" i="x" size="16" hint-size="16px,16px"></x-import></button></sc-if>
+        </div>
+
+        <div style="padding:4px 22px 18px;display:flex;flex-direction:column;gap:12px">
+          <sc-if value="{{ m.customer }}" hint-placeholder-val="{{ false }}">
+            <input ref="{{ docRef }}" value="{{ docQ }}" onChange="{{ setDocQ }}" onKeyDown="{{ docKey }}" placeholder="CPF, CNPJ ou nome" style="height:54px;padding:0 16px;border:2px solid var(--a1-text,#15171C);border-radius:11px;font-size:18px;font-family:'Geist Mono',monospace"></input>
+            <sc-for list="{{ custs }}" as="c" hint-placeholder-count="3">
+              <button onClick="{{ c.pick }}" style="display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--a1-border,#E6E5E0);border-radius:10px;background:var(--a1-surface,#fff);cursor:pointer;text-align:left" style-hover="border-color:var(--a1-text,#15171C)">
+                <div style="width:36px;height:36px;border-radius:50%;background:var(--a1-muted,#F1F0EC);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600">{{ c.ini }}</div>
+                <div style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font-size:14px;font-weight:600">{{ c.name }}</span><span style="font-family:'Geist Mono',monospace;font-size:12px;color:var(--a1-text-3,#7A7D85)">{{ c.doc }}</span></div>
+                <span style="font-size:11.5px;color:var(--a1-text-2,#62656D)">{{ c.tag }}</span>
+              </button>
+            </sc-for>
+            <div style="display:flex;gap:8px">
+              <button onClick="{{ clearCustomer }}" style="flex:1;height:48px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:10px;background:var(--a1-surface,#fff);font-size:14px;font-weight:600;cursor:pointer">Consumidor final</button>
+              <button onClick="{{ useDoc }}" style="flex:1;height:48px;border:0;border-radius:10px;background:var(--a1-strong,#15171C);color:#fff;font-size:14px;font-weight:600;cursor:pointer">CPF/CNPJ na nota</button>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ m.qty }}" hint-placeholder-val="{{ false }}">
+            <input ref="{{ qtyRef }}" value="{{ qtyVal }}" onChange="{{ setQtyVal }}" onKeyDown="{{ qtyKey }}" inputMode="numeric" style="height:64px;padding:0 16px;border:2px solid var(--a1-text,#15171C);border-radius:11px;font-size:30px;font-family:'Geist Mono',monospace;font-weight:600;text-align:center"></input>
+            <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px">
+              <sc-for list="{{ qtyQuick }}" as="qq" hint-placeholder-count="5"><button onClick="{{ qq.pick }}" style="height:48px;border:1px solid var(--a1-border-2,#E1E0DA);border-radius:10px;background:var(--a1-surface-2,#FAFAF8);font-size:16px;font-weight:600;cursor:pointer">{{ qq.n }}</button></sc-for>
+            </div>
+            <button onClick="{{ applyQty }}" style="height:52px;border:0;border-radius:11px;background:var(--a1-strong,#15171C);color:#fff;font-size:15px;font-weight:650;cursor:pointer">Aplicar quantidade</button>
+          </sc-if>
+
+          <sc-if value="{{ m.disc }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;align-items:center;gap:10px;height:64px;padding:0 16px;border:2px solid var(--a1-text,#15171C);border-radius:11px">
+              <input ref="{{ discRef }}" value="{{ discVal }}" onChange="{{ setDiscVal }}" onKeyDown="{{ discKey }}" inputMode="decimal" style="flex:1;min-width:0;border:0;outline:0;font-size:30px;font-family:'Geist Mono',monospace;font-weight:600"></input><span style="font-size:24px;color:var(--a1-text-3,#7A7D85);font-weight:600">%</span>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px">
+              <sc-for list="{{ discQuick }}" as="dq" hint-placeholder-count="4"><button onClick="{{ dq.pick }}" style="height:46px;border:1px solid var(--a1-border-2,#E1E0DA);border-radius:10px;background:var(--a1-surface-2,#FAFAF8);font-size:15px;font-weight:600;cursor:pointer">{{ dq.n }}</button></sc-for>
+            </div>
+            <div style="display:flex;gap:8px;padding:10px 12px;border-radius:9px;background:var(--a1-warn-bg,#FBF1DF);color:var(--a1-warn-fg2,#7A4E0F);font-size:12.5px"><x-import component="Icon" from="./Icon.js" i="lock" size="14" hint-size="14px,14px"></x-import>Descontos acima de 10% exigem autorização do supervisor.</div>
+            <button onClick="{{ applyDisc }}" style="height:52px;border:0;border-radius:11px;background:var(--a1-strong,#15171C);color:#fff;font-size:15px;font-weight:650;cursor:pointer">Aplicar desconto</button>
+          </sc-if>
+
+          <sc-if value="{{ m.auth }}" hint-placeholder-val="{{ false }}">
+            <select value="{{ authSup }}" onChange="{{ setAuthSup }}" style="height:46px;padding:0 12px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:10px;background:var(--a1-surface,#fff);font-size:14px"><option>Carlos Mendes · Supervisor de pista</option><option>Patrícia Gomes · Gerente</option></select>
+            <div style="display:flex;justify-content:center;gap:14px;padding:8px 0">
+              <sc-for list="{{ pinDots }}" as="pd" hint-placeholder-count="4"><span style="width:18px;height:18px;border-radius:50%;border:2px solid var(--a1-text,#15171C);background:{{ pd.bg }}"></span></sc-for>
+            </div>
+            <sc-if value="{{ authErr }}" hint-placeholder-val="{{ false }}"><div style="text-align:center;font-size:13px;color:var(--a1-err-fg2,#B23A31);font-weight:550">{{ authErr }}</div></sc-if>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+              <sc-for list="{{ keypad }}" as="kp" hint-placeholder-count="12"><button onClick="{{ kp.press }}" style="height:56px;border:1px solid var(--a1-border-2,#E1E0DA);border-radius:11px;background:var(--a1-surface-2,#FAFAF8);font-size:20px;font-weight:600;cursor:pointer;font-family:'Geist Mono',monospace" style-active="background:var(--a1-skeleton,#ECEBE6)">{{ kp.label }}</button></sc-for>
+            </div>
+            <div style="font-size:12px;color:var(--a1-text-4,#8A8D95);text-align:center">Demonstração: qualquer PIN de 4 dígitos, exceto 0000.</div>
+          </sc-if>
+
+          <sc-if value="{{ m.cash }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;align-items:center;gap:10px;height:62px;padding:0 16px;border:2px solid var(--a1-text,#15171C);border-radius:11px"><span style="font-size:20px;color:var(--a1-text-3,#7A7D85);font-weight:600">R$</span><input ref="{{ cashRef }}" value="{{ cashVal }}" onChange="{{ setCashVal }}" onKeyDown="{{ cashKey }}" inputMode="decimal" style="flex:1;min-width:0;border:0;outline:0;font-size:28px;font-family:'Geist Mono',monospace;font-weight:600"></input></div>
+            <select value="{{ cashReason }}" onChange="{{ setCashReason }}" style="height:46px;padding:0 12px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:10px;background:var(--a1-surface,#fff);font-size:14px"><sc-for list="{{ cashReasons }}" as="cr" hint-placeholder-count="3"><option>{{ cr }}</option></sc-for></select>
+            <sc-if value="{{ cashErr }}" hint-placeholder-val="{{ false }}"><span style="font-size:12.5px;color:var(--a1-err-fg2,#B23A31)">{{ cashErr }}</span></sc-if>
+            <button onClick="{{ applyCash }}" style="height:52px;border:0;border-radius:11px;background:var(--a1-strong,#15171C);color:#fff;font-size:15px;font-weight:650;cursor:pointer">{{ cashBtn }}</button>
+          </sc-if>
+
+          <sc-if value="{{ m.close }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;border:1px solid var(--a1-divider,#EFEEEA);border-radius:11px;overflow:hidden">
+              <sc-for list="{{ closeRows }}" as="cr" hint-placeholder-count="7">
+                <div style="display:flex;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--a1-divider-2,#F2F1ED);font-size:13.5px;background:{{ cr.bg }}"><span style="color:{{ cr.lc }};font-weight:{{ cr.w }}">{{ cr.label }}</span><span style="font-variant-numeric:tabular-nums;font-weight:{{ cr.w }}">{{ cr.val }}</span></div>
+              </sc-for>
+            </div>
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Dinheiro contado na gaveta
+              <div style="display:flex;align-items:center;gap:10px;height:56px;padding:0 14px;border:2px solid var(--a1-text,#15171C);border-radius:11px"><span style="font-size:18px;color:var(--a1-text-3,#7A7D85)">R$</span><input value="{{ countVal }}" onChange="{{ setCountVal }}" inputMode="decimal" style="flex:1;min-width:0;border:0;outline:0;font-size:24px;font-family:'Geist Mono',monospace;font-weight:600"></input></div>
+            </label>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-radius:10px;background:{{ diffBg }};color:{{ diffFg }};font-size:14px;font-weight:600"><span>Diferença</span><span style="font-family:'Geist Mono',monospace;font-size:17px">{{ diff }}</span></div>
+            <button onClick="{{ confirmClose }}" style="height:52px;border:0;border-radius:11px;background:var(--a1-strong,#15171C);color:#fff;font-size:15px;font-weight:650;cursor:pointer">Confirmar fechamento</button>
+          </sc-if>
+
+          <sc-if value="{{ m.open }}" hint-placeholder-val="{{ false }}">
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Fundo de troco
+              <div style="display:flex;align-items:center;gap:10px;height:62px;padding:0 16px;border:2px solid var(--a1-text,#15171C);border-radius:11px"><span style="font-size:20px;color:var(--a1-text-3,#7A7D85)">R$</span><input value="{{ openVal }}" onChange="{{ setOpenVal }}" inputMode="decimal" style="flex:1;min-width:0;border:0;outline:0;font-size:28px;font-family:'Geist Mono',monospace;font-weight:600"></input></div>
+            </label>
+            <div style="display:flex;gap:8px;font-size:12.5px;color:var(--a1-text-2,#62656D);line-height:1.5"><x-import component="Icon" from="./Icon.js" i="info" size="14" hint-size="14px,14px"></x-import>A abertura registra operador, horário e fundo inicial no histórico do caixa.</div>
+            <button onClick="{{ confirmOpen }}" style="height:56px;border:0;border-radius:11px;background:#E8A23A;color:#15171C;font-size:16px;font-weight:700;cursor:pointer">Abrir caixa</button>
+            <button onClick="{{ exit }}" style="height:44px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:11px;background:var(--a1-surface,#fff);font-size:14px;font-weight:550;cursor:pointer">Sair do PDV</button>
+          </sc-if>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ m.history }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeModal }}" style="position:fixed;inset:0;background:rgba(15,17,21,.45);z-index:100"></div>
+    <div style="position:fixed;top:0;right:0;bottom:0;width:min(440px,100vw);background:var(--a1-surface,#fff);z-index:101;display:flex;flex-direction:column;animation:a1in .2s ease">
+      <div style="padding:20px 22px;border-bottom:1px solid var(--a1-divider,#EFEEEA);display:flex;justify-content:space-between;align-items:center"><div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:17px;font-weight:650">Histórico do caixa</span><span style="font-size:12.5px;color:var(--a1-text-3,#7A7D85)">Caixa 01 · turno atual</span></div><button onClick="{{ closeModal }}" style="width:34px;height:34px;border:0;border-radius:8px;background:var(--a1-bg,#F5F5F2);cursor:pointer;display:flex;align-items:center;justify-content:center"><x-import component="Icon" from="./Icon.js" i="x" size="16" hint-size="16px,16px"></x-import></button></div>
+      <div style="flex:1;overflow:auto;padding:8px 22px">
+        <sc-for list="{{ hist }}" as="h" hint-placeholder-count="6">
+          <div style="display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--a1-divider-2,#F2F1ED);align-items:center">
+            <div style="width:34px;height:34px;border-radius:9px;background:{{ h.bg }};color:{{ h.fg }};display:flex;align-items:center;justify-content:center;flex:none"><x-import component="Icon" from="./Icon.js" i="{{ h.icon }}" size="16" hint-size="16px,16px"></x-import></div>
+            <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:13.5px;font-weight:600">{{ h.type }}</span><span style="font-size:12px;color:var(--a1-text-3,#7A7D85)">{{ h.time }} · {{ h.desc }}</span></div>
+            <span style="font-variant-numeric:tabular-nums;font-weight:600;font-size:13.5px;color:{{ h.ac }}">{{ h.amount }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </sc-if>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const CATALOG = [
+  ['Bebidas', 'cup-soda', '#2D5BD8', [['Água mineral 500 ml', 3.5, '7894512037010'], ['Refrigerante cola lata 350 ml', 5.9, '7894900011517'], ['Energético 473 ml', 11.9, '7898938890069'], ['Isotônico 500 ml', 6.9, '7892840814441'], ['Suco integral 300 ml', 7.5, '7896000599319'], ['Cerveja long neck 330 ml', 8.9, '7891149103102'], ['Café expresso 80 ml', 6.5, '2000000000107']]],
+  ['Alimentos', 'sandwich', '#E8A23A', [['Pão de queijo unidade', 4.9, '2000000000206'], ['Sanduíche natural', 14.9, '2000000000305'], ['Chocolate ao leite 90 g', 7.9, '7891000100103'], ['Salgadinho 96 g', 8.5, '7892840222949'], ['Biscoito recheado 130 g', 4.5, '7896004000156'], ['Goma de mascar', 2.5, '7895800304105']]],
+  ['Automotivo', 'wrench', 'var(--a1-purple-fg,#5B45A8)', [['Óleo 5W30 sintético 1 L', 54.9, '7891234560012'], ['Óleo 15W40 mineral 1 L', 32.9, '7891234560029'], ['Fluido de freio DOT4', 26.9, '7891234560036'], ['Aditivo para radiador 1 L', 22.9, '7891234560043'], ['Limpa para-brisa 500 ml', 11.9, '7891234560050'], ['Aromatizante automotivo', 12.9, '7891234560067']]],
+  ['Serviços', 'car', 'var(--a1-ok-fg2,#1F8A5B)', [['Lavagem simples', 40, 'SV001'], ['Lavagem completa', 75, 'SV002'], ['Calibragem com nitrogênio', 10, 'SV003']]]
+];
+const PRODUCTS = [];
+CATALOG.forEach(([cat, icon, color, items]) => items.forEach(([name, price, ean]) => PRODUCTS.push({ id: ean, name, price, ean, cat, color, un: 'UN' })));
+const PENDING = [
+  { id: 'b1', bico: '01', fuel: 'Gasolina comum', l: 32.31, price: 6.19, total: 200 },
+  { id: 'b4', bico: '04', fuel: 'Gasolina comum', l: 48.47, price: 6.19, total: 300 },
+  { id: 'b5', bico: '05', fuel: 'Diesel S10', l: 210.4, price: 6.09, total: 1281.34 },
+  { id: 'b7', bico: '07', fuel: 'Etanol hidratado', l: 23.31, price: 4.29, total: 100 },
+  { id: 'b3', bico: '03', fuel: 'Gasolina aditivada', l: 15.65, price: 6.39, total: 100 }
+];
+const FUELC = { 'Gasolina comum': '#E8A23A', 'Gasolina aditivada': 'var(--a1-purple-fg,#5B45A8)', 'Etanol hidratado': 'var(--a1-ok-fg2,#1F8A5B)', 'Diesel S10': 'var(--a1-text-2s,#4A4D55)' };
+const CUSTS = [{ name: 'Frota Agro Sertão Ltda', doc: '24.883.019/0001-42', tag: 'Frota · faturado', ini: 'FA' }, { name: 'Transportadora Veloz Ltda', doc: '11.204.556/0001-90', tag: 'Cliente PJ', ini: 'TV' }, { name: 'Marcos Antônio Pereira', doc: '318.482.917-05', tag: 'Fidelidade', ini: 'MP' }];
+const ML = { cash: ['Dinheiro', 'banknote', 'Troco calculado automaticamente', '1'], pix: ['PIX', 'qr-code', 'QR Code dinâmico', '2'], credit: ['Crédito', 'credit-card', 'À vista ou parcelado', '3'], debit: ['Débito', 'wallet-cards', 'Chip ou aproximação', '4'] };
+const brl = (v) => 'R$ ' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const num = (s) => { const t = String(s).trim(); if (!t) return 0; return parseFloat(t.includes(',') ? t.replace(/\./g, '').replace(',', '.') : t) || 0; };
+const fix = (v) => v.toFixed(2).replace('.', ',');
+const hhmm = () => { const d = new Date(); return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); };
+let K = 1;
+const fuelLine = (p) => ({ key: K++, name: p.fuel + ' · Bico ' + p.bico, fuel: true, qty: p.l, price: p.price, fixed: p.total, disc: 0, un: 'L', pid: p.id });
+const prodLine = (p) => ({ key: K++, name: p.name, fuel: false, qty: 1, price: p.price, disc: 0, un: 'UN', ean: p.ean });
+const INIT_HIST = [
+  { time: '06:00', type: 'Abertura de caixa', desc: 'Rafael Souza · fundo de troco', amount: 300, kind: 'open' },
+  { time: '07:42', type: 'Venda 118.398', desc: 'Crédito · NSU 400211', amount: 182.4, kind: 'sale', method: 'credit' },
+  { time: '08:15', type: 'Suprimento', desc: 'Troco adicional', amount: 100, kind: 'sup' },
+  { time: '08:51', type: 'Venda 118.400', desc: 'Dinheiro', amount: 95.5, kind: 'sale', method: 'cash' },
+  { time: '09:10', type: 'Sangria', desc: 'Depósito em cofre', amount: -500, kind: 'sang' },
+  { time: '09:22', type: 'Venda 118.402', desc: 'PIX', amount: 261.1, kind: 'sale', method: 'pix' }
+];
+
+class Component extends DCLogic {
+  state = {
+    items: [fuelLine(PENDING[0]), { ...prodLine(PRODUCTS.find((p) => p.name.startsWith('Pão'))), qty: 2 }],
+    pending: PENDING.slice(1), sel: 1, cat: 'Abastecimentos', q: '', customer: null, saleNo: 118403,
+    last: { msg: 'Pronto para registrar itens', tone: 'idle' }, flash: null,
+    modal: null, docQ: '', qtyVal: '1', discVal: '5', authSup: 'Carlos Mendes · Supervisor de pista', pin: '', authErr: '', authAction: null,
+    cashVal: '', cashReason: '', cashErr: '', countVal: '', openVal: '300,00',
+    cashOpen: true, cashBal: 487.6, hist: INIT_HIST,
+    pays: [], method: 'pix', amount: '', inst: '1x', sim: 'approve', proc: null, result: null, done: null, payErr: '',
+    now: new Date(), w: window.innerWidth
+  };
+  searchRef = React.createRef(); amountRef = React.createRef(); docRef = React.createRef(); qtyRef = React.createRef(); discRef = React.createRef(); cashRef = React.createRef();
+  timers = [];
+  componentDidMount() {
+    this.iv = setInterval(() => this.setState({ now: new Date() }), 1000);
+    this.onR = () => this.setState({ w: window.innerWidth });
+    window.addEventListener('resize', this.onR);
+    this.onKey = (e) => this.handleKey(e);
+    window.addEventListener('keydown', this.onKey);
+    setTimeout(() => this.focus(this.searchRef), 50);
+  }
+  componentWillUnmount() { clearInterval(this.iv); window.removeEventListener('resize', this.onR); window.removeEventListener('keydown', this.onKey); this.timers.forEach(clearTimeout); }
+  focus(ref) { setTimeout(() => ref.current && ref.current.focus && ref.current.focus(), 30); }
+  lineTotal(l) { const base = l.fixed != null ? l.fixed : l.qty * l.price; return base * (1 - l.disc / 100); }
+  totals() {
+    const sub = this.state.items.reduce((a, l) => a + (l.fixed != null ? l.fixed : l.qty * l.price), 0);
+    const tot = this.state.items.reduce((a, l) => a + this.lineTotal(l), 0);
+    const paid = this.state.pays.reduce((a, p) => a + p.amount, 0);
+    return { sub, tot: Math.round(tot * 100) / 100, disc: sub - tot, paid, rem: Math.round((tot - paid) * 100) / 100 };
+  }
+  setLast(msg, tone) { this.setState({ last: { msg, tone } }); }
+  addProduct(p) {
+    if (!this.state.cashOpen) return;
+    this.setState((s) => {
+      const i = s.items.findIndex((l) => l.ean === p.ean && l.disc === 0);
+      if (i >= 0) { const items = s.items.map((l, j) => j === i ? { ...l, qty: l.qty + 1 } : l); return { items, sel: i, flash: items[i].key, q: '' }; }
+      const nl = prodLine(p); return { items: s.items.concat([nl]), sel: s.items.length, flash: nl.key, q: '' };
+    });
+    this.setLast('Adicionado: ' + p.name + ' · ' + brl(p.price), 'ok');
+    this.clearFlash();
+  }
+  addFuel(p) {
+    const nl = fuelLine(p);
+    this.setState((s) => ({ items: s.items.concat([nl]), pending: s.pending.filter((x) => x.id !== p.id), sel: s.items.length, flash: nl.key }));
+    this.setLast('Abastecimento do bico ' + p.bico + ' vinculado à venda · ' + brl(p.total), 'ok');
+    this.clearFlash();
+  }
+  clearFlash() { this.timers.push(setTimeout(() => this.setState({ flash: null }), 700)); }
+  submitSearch() {
+    const q = this.state.q.trim(); if (!q) return;
+    const byEan = PRODUCTS.find((p) => p.ean === q);
+    if (byEan) return this.addProduct(byEan);
+    const m = PRODUCTS.filter((p) => p.name.toLowerCase().includes(q.toLowerCase()));
+    if (m.length === 1 || (m.length && /^\D/.test(q))) return this.addProduct(m[0]);
+    this.setLast('Produto não encontrado: ' + q, 'err');
+  }
+  openModal(modal, extra) {
+    if (!this.state.cashOpen && modal !== 'open') return;
+    this.setState({ modal, ...(extra || {}) });
+    const f = { customer: this.docRef, qty: this.qtyRef, disc: this.discRef, sangria: this.cashRef, suprimento: this.cashRef, pay: this.amountRef }[modal];
+    if (f) this.focus(f);
+  }
+  closeModal() {
+    if (this.state.proc) return;
+    if (this.state.done) return this.newSale();
+    this.setState({ modal: null, authErr: '', pin: '', payErr: '', result: null });
+    this.focus(this.searchRef);
+  }
+  needAuth(action, label) { this.openModal('auth', { authAction: { action, label }, pin: '', authErr: '' }); }
+  doAuthorized() {
+    const s = this.state; const a = s.authAction; const sup = s.authSup.split(' · ')[0];
+    if (a.action === 'item') {
+      const l = s.items[s.sel]; if (!l) return this.setState({ modal: null });
+      const pending = l.fuel ? s.pending.concat([PENDING.find((p) => p.id === l.pid)]).sort((x, y) => x.bico.localeCompare(y.bico)) : s.pending;
+      this.setState({ items: s.items.filter((_, i) => i !== s.sel), sel: Math.max(0, s.sel - 1), pending, modal: null, hist: s.hist.concat([{ time: hhmm(), type: 'Cancelamento de item', desc: l.name + ' · autorizado por ' + sup, amount: -this.lineTotal(l), kind: 'cancel' }]) });
+      this.setLast('Item cancelado com autorização de ' + sup, 'warn');
+    } else if (a.action === 'sale') {
+      const t = this.totals();
+      const back = s.items.filter((l) => l.fuel).map((l) => PENDING.find((p) => p.id === l.pid));
+      this.setState({ items: [], sel: 0, customer: null, pays: [], modal: null, pending: s.pending.concat(back).sort((x, y) => x.bico.localeCompare(y.bico)), hist: s.hist.concat([{ time: hhmm(), type: 'Venda ' + s.saleNo.toLocaleString('pt-BR') + ' cancelada', desc: 'Autorizado por ' + sup, amount: -t.tot, kind: 'cancel' }]), saleNo: s.saleNo + 1 });
+      this.setLast('Venda cancelada com autorização de ' + sup, 'warn');
+    } else if (a.action === 'disc') {
+      this.setState({ items: s.items.map((l, i) => i === s.sel ? { ...l, disc: a.pct } : l), modal: null });
+      this.setLast('Desconto de ' + a.pct + '% autorizado por ' + sup, 'ok');
+    }
+    this.focus(this.searchRef);
+  }
+  pressPin(d) {
+    const s = this.state;
+    if (d === 'del') return this.setState({ pin: s.pin.slice(0, -1), authErr: '' });
+    if (d === 'ok') {
+      if (s.pin.length < 4) return this.setState({ authErr: 'Digite os 4 dígitos do PIN.' });
+      if (s.pin === '0000') return this.setState({ authErr: 'PIN inválido. Tente novamente.', pin: '' });
+      return this.doAuthorized();
+    }
+    if (s.pin.length < 4) this.setState({ pin: s.pin + d, authErr: '' });
+  }
+  finalize() {
+    const t = this.totals();
+    if (!this.state.items.length) { this.setLast('Adicione itens antes de finalizar a venda.', 'err'); return; }
+    this.openModal('pay', { pays: [], method: 'pix', amount: fix(t.tot), proc: null, result: null, done: null, payErr: '' });
+  }
+  sendPay() {
+    const s = this.state; const t = this.totals(); const amt = num(s.amount);
+    if (!(amt > 0)) return this.setState({ payErr: 'Informe um valor maior que zero.' });
+    if (s.method !== 'cash' && amt > t.rem + 0.001) return this.setState({ payErr: 'Valor maior que o restante. Para troco, use Dinheiro.' });
+    if (s.method === 'cash') return this.addPay({ method: 'cash', amount: amt, meta: amt > t.rem ? 'Recebido ' + brl(amt) : 'Gaveta' });
+    const steps = s.method === 'pix' ? [0, 1, 2] : [0, 1, 2];
+    this.setState({ proc: { method: s.method, amount: amt, step: 0 }, payErr: '' });
+    this.timers.push(setTimeout(() => this.setState((st) => st.proc ? { proc: { ...st.proc, step: 1 } } : null), 900));
+    this.timers.push(setTimeout(() => this.setState((st) => st.proc ? { proc: { ...st.proc, step: 2 } } : null), s.method === 'pix' ? 3400 : 2800));
+    this.timers.push(setTimeout(() => {
+      const st = this.state; if (!st.proc) return;
+      const nsu = String(400300 + Math.floor(Math.random() * 600));
+      const auth = String(Math.floor(100000 + Math.random() * 899999));
+      const r = st.sim === 'approve' ? { kind: 'ok', nsu, auth: st.proc.method === 'pix' ? 'E2E' + auth : auth, card: st.proc.method === 'pix' ? 'PIX · Banco do cliente' : '•••• ' + (4000 + Math.floor(Math.random() * 5999)) }
+        : st.sim === 'decline' ? { kind: 'decline' } : { kind: 'error' };
+      this.setState({ result: { ...r, method: st.proc.method, amount: st.proc.amount }, proc: null });
+    }, s.method === 'pix' ? 4600 : 4000));
+  }
+  addPay(p) {
+    const t = this.totals();
+    const pays = this.state.pays.concat([p]);
+    const paid = pays.reduce((a, x) => a + x.amount, 0);
+    const rem = Math.round((t.tot - paid) * 100) / 100;
+    if (rem <= 0) this.setState({ pays, result: null, done: { change: -rem, nfce: 'NFC-e ' + this.state.saleNo.toLocaleString('pt-BR') + ' autorizada · série 1' } });
+    else { this.setState({ pays, result: null, amount: fix(rem), method: p.method === 'cash' ? 'pix' : this.state.method }); this.focus(this.amountRef); }
+  }
+  continuePay() { const r = this.state.result; this.addPay({ method: r.method, amount: r.amount, meta: 'NSU ' + r.nsu + ' · Aut. ' + r.auth + (r.method === 'credit' ? ' · ' + this.state.inst : '') }); }
+  newSale() {
+    const s = this.state; const d = s.done; if (!d) return;
+    const t = this.totals();
+    const cashIn = s.pays.filter((p) => p.method === 'cash').reduce((a, p) => a + p.amount, 0) - d.change;
+    const label = s.pays.length > 1 ? 'Dividido · ' + s.pays.map((p) => ML[p.method][0]).join(' + ') : ML[s.pays[0].method][0];
+    this.setState({
+      items: [], sel: 0, customer: null, pays: [], done: null, modal: null, saleNo: s.saleNo + 1, cashBal: s.cashBal + cashIn,
+      hist: s.hist.concat(s.pays.map((p) => ({ time: hhmm(), type: 'Venda ' + s.saleNo.toLocaleString('pt-BR'), desc: label, amount: p.method === 'cash' ? p.amount - d.change : p.amount, kind: 'sale', method: p.method }))),
+      cat: s.pending.length ? 'Abastecimentos' : s.cat
+    });
+    this.setLast('Venda ' + s.saleNo.toLocaleString('pt-BR') + ' concluída · ' + brl(t.tot), 'ok');
+    this.props.notify && this.props.notify('Venda ' + s.saleNo.toLocaleString('pt-BR') + ' concluída · ' + brl(t.tot), 'success');
+    this.focus(this.searchRef);
+  }
+  handleKey(e) {
+    const s = this.state; const k = e.key;
+    if (/^F\d+$/.test(k)) e.preventDefault();
+    if (s.modal) {
+      if (k === 'Escape') return this.closeModal();
+      if (s.modal === 'pay') {
+        if (s.done && k === 'Enter') { e.preventDefault(); return this.newSale(); }
+        if (s.result && s.result.kind === 'ok' && k === 'Enter') { e.preventDefault(); return this.continuePay(); }
+        if (!s.proc && !s.result && !s.done && ['1', '2', '3', '4'].includes(k) && document.activeElement !== this.amountRef.current) { const mm = Object.keys(ML).find((x) => ML[x][3] === k); this.pickMethod(mm); }
+      }
+      if (s.modal === 'auth') { if (/^\d$/.test(k)) this.pressPin(k); else if (k === 'Backspace') this.pressPin('del'); else if (k === 'Enter') this.pressPin('ok'); }
+      return;
+    }
+    if (!s.cashOpen) return;
+    const map = { F2: () => this.focus(this.searchRef), F3: () => this.openQty(), F4: () => this.openModal('customer', { docQ: '' }), F6: () => this.openDisc(), F8: () => this.cancelSale(), F9: () => this.cancelItem(), F10: () => this.finalize(), Delete: () => this.cancelItem() };
+    if (map[k]) return map[k]();
+    if (k === 'ArrowDown' || k === 'ArrowUp') { e.preventDefault(); const n = s.items.length; if (!n) return; this.setState({ sel: (s.sel + (k === 'ArrowDown' ? 1 : -1) + n) % n }); }
+  }
+  pickMethod(mm) { const t = this.totals(); this.setState({ method: mm, payErr: '', amount: fix(Math.max(t.rem, 0)) }); this.focus(this.amountRef); }
+  openQty() { const l = this.state.items[this.state.sel]; if (!l) return this.setLast('Selecione um item da venda.', 'err'); if (l.fuel) return this.setLast('Quantidade de combustível vem da bomba e não pode ser alterada.', 'warn'); this.openModal('qty', { qtyVal: String(l.qty) }); }
+  openDisc() { const l = this.state.items[this.state.sel]; if (!l) return this.setLast('Selecione um item da venda.', 'err'); this.openModal('disc', { discVal: String(l.disc || 5) }); }
+  cancelItem() { if (!this.state.items[this.state.sel]) return this.setLast('Nenhum item selecionado.', 'err'); this.needAuth('item', 'Cancelar item'); }
+  cancelSale() { if (!this.state.items.length) return this.setLast('Não há venda em andamento.', 'err'); this.needAuth('sale', 'Cancelar venda'); }
+
+  renderVals() {
+    const s = this.state; const t = this.totals(); const ctx = this.props.ctx || {};
+    const nav = this.props.navigate || (() => {});
+    const q = s.q.trim().toLowerCase();
+    let tiles;
+    if (q) tiles = PRODUCTS.filter((p) => p.name.toLowerCase().includes(q) || p.ean.includes(q)).map((p) => ({ top: p.ean, name: p.name, sub: p.cat, price: brl(p.price), color: p.color, add: () => this.addProduct(p) }));
+    else if (s.cat === 'Abastecimentos') tiles = s.pending.map((p) => ({ top: 'BICO ' + p.bico + ' · AGUARDANDO', name: p.fuel, sub: p.l.toLocaleString('pt-BR') + ' L × ' + brl(p.price), price: brl(p.total), color: FUELC[p.fuel] || 'var(--a1-text-2s,#4A4D55)', add: () => this.addFuel(p) }));
+    else tiles = PRODUCTS.filter((p) => p.cat === s.cat).map((p) => ({ top: p.ean, name: p.name, sub: 'UN', price: brl(p.price), color: p.color, add: () => this.addProduct(p) }));
+    const cats = [['Abastecimentos', 'fuel']].concat(CATALOG.map((c) => [c[0], c[1]])).map(([c, icon]) => { const on = !q && s.cat === c; return { label: c, icon, badge: c === 'Abastecimentos' && s.pending.length ? String(s.pending.length) : '', bg: on ? 'var(--a1-strong,#15171C)' : 'var(--a1-surface,#fff)', fg: on ? '#fff' : 'var(--a1-text,#15171C)', border: on ? 'var(--a1-text,#15171C)' : 'var(--a1-border-2,#E1E0DA)', pick: () => this.setState({ cat: c, q: '' }) }; });
+    const lastTone = { idle: ['var(--a1-text-3,#7A7D85)', 'circle-dot'], ok: ['var(--a1-ok-fg,#1B6E4A)', 'circle-check'], err: ['var(--a1-err-fg2,#B23A31)', 'circle-x'], warn: ['var(--a1-warn-fg,#8A5A12)', 'triangle-alert'] }[s.last.tone];
+    const lines = s.items.map((l, i) => ({
+      n: String(i + 1).padStart(2, '0'), name: l.name, editable: !l.fuel, qty: l.qty,
+      detail: l.fuel ? l.qty.toLocaleString('pt-BR') + ' L × ' + brl(l.price) : l.qty + ' × ' + brl(l.price),
+      disc: l.disc ? l.disc + '%' : '', total: brl(this.lineTotal(l)),
+      bg: s.flash === l.key ? 'var(--a1-warn-bg2,#FDF3E3)' : i === s.sel ? 'var(--a1-sel-bg,#F3F6FE)' : 'var(--a1-surface,#fff)', numColor: i === s.sel ? 'var(--a1-accent-text,#2D5BD8)' : 'var(--a1-text-5,#9A9DA4)',
+      select: () => this.setState({ sel: i }),
+      inc: (e) => { e.stopPropagation(); this.setState({ items: s.items.map((x, j) => j === i ? { ...x, qty: x.qty + 1 } : x), sel: i }); },
+      dec: (e) => { e.stopPropagation(); if (l.qty <= 1) { this.setState({ sel: i }); return this.needAuth('item', 'Cancelar item'); } this.setState({ items: s.items.map((x, j) => j === i ? { ...x, qty: x.qty - 1 } : x), sel: i }); }
+    }));
+    const modal = s.modal;
+    const small = { customer: ['Identificar cliente', 'CPF/CNPJ na NFC-e ou cliente cadastrado', 'user-round', 'var(--a1-info-bg,#EAF0FD)', 'var(--a1-accent-text,#2D5BD8)'], qty: ['Alterar quantidade', s.items[s.sel] ? s.items[s.sel].name : '', 'hash', 'var(--a1-muted,#F1F0EC)', 'var(--a1-text,#15171C)'], disc: ['Desconto no item', s.items[s.sel] ? s.items[s.sel].name : '', 'percent', 'var(--a1-ok-bg,#E6F4EC)', 'var(--a1-ok-fg,#1B6E4A)'], auth: ['Autorização do supervisor', s.authAction ? s.authAction.label + ' requer PIN' : '', 'shield-check', 'var(--a1-err-bg,#FBEAE8)', 'var(--a1-err-fg2,#B23A31)'], sangria: ['Sangria', 'Retirada de dinheiro da gaveta', 'arrow-up-from-line', 'var(--a1-warn-bg,#FBF1DF)', 'var(--a1-warn-fg,#8A5A12)'], suprimento: ['Suprimento', 'Entrada de dinheiro para troco', 'arrow-down-to-line', 'var(--a1-ok-bg,#E6F4EC)', 'var(--a1-ok-fg,#1B6E4A)'], close: ['Fechamento de caixa', 'Caixa 01 · Rafael Souza · turno 06:00–' + hhmm(), 'lock', 'var(--a1-muted,#F1F0EC)', 'var(--a1-text,#15171C)'], open: ['Caixa fechado', 'Informe o fundo de troco para abrir o Caixa 01', 'lock-open', 'var(--a1-warn-bg2,#FDF3E3)', 'var(--a1-warn-fg4,#9A6514)'] }[modal];
+    const sum = (f) => s.hist.filter(f).reduce((a, h) => a + h.amount, 0);
+    const expCash = sum((h) => h.kind === 'open' || h.kind === 'sup' || h.kind === 'sang' || (h.kind === 'sale' && h.method === 'cash'));
+    const counted = num(s.countVal); const diffV = counted - expCash;
+    const isCashM = modal === 'sangria' || modal === 'suprimento';
+    const res = s.result;
+    const procV = s.proc ? (() => {
+      const pm = s.proc.method; const st = s.proc.step;
+      const titles = pm === 'pix' ? [['Gerando cobrança PIX…', 'Comunicando com o terminal POS-01'], ['Aguardando pagamento', 'Peça ao cliente para escanear o QR Code'], ['Pagamento recebido', 'Confirmando com a Boa Vista…']]
+        : [['Conectando ao terminal POS-01…', 'Enviando valor para a maquininha'], ['Insira, aproxime ou passe o cartão', 'Aguardando o cliente no terminal'], ['Processando com a Boa Vista…', 'Aguardando resposta da autorizadora']];
+      return { method: ML[pm][0], amount: brl(s.proc.amount), title: titles[st][0], sub: titles[st][1], showQr: pm === 'pix' && st >= 1, showCard: pm !== 'pix' && st === 1, spin: st !== 1,
+        steps: ['Terminal', pm === 'pix' ? 'Cliente paga' : 'Cartão', 'Autorização'].map((label, i) => ({ n: i < st ? '✓' : String(i + 1), label, bg: i <= st ? '#2D5BD8' : 'var(--a1-track-off,#D3D2CC)', fg: i <= st ? 'var(--a1-text,#15171C)' : 'var(--a1-text-5,#9A9DA4)' })) };
+    })() : { steps: [] };
+    return {
+      estab: ctx.firstPosto || (!ctx.estab || ctx.estab.startsWith('Todos') ? 'Posto Central' : ctx.estab),
+      wide: s.w >= 1180, bodyWrap: s.w >= 700 ? 'nowrap' : 'wrap', wideActions: s.w >= 1200, compactActions: s.w < 1200,
+      cashChip: s.cashOpen ? { label: 'Caixa aberto · desde 06:00', bg: '#13301F', fg: '#7FD3A6', dot: '#3CB27A' } : { label: 'Caixa fechado', bg: '#3A1A17', fg: '#F2A79F', dot: '#E0645A' },
+      clock: s.now.toLocaleTimeString('pt-BR'),
+      exit: () => nav('postos'),
+      searchRef: this.searchRef, q: s.q, setQ: (e) => this.setState({ q: e.target.value }),
+      searchKey: (e) => { if (e.key === 'Enter') { e.preventDefault(); this.submitSearch(); } },
+      searchBorder: s.last.tone === 'err' ? 'var(--a1-err-border2,#E59A92)' : s.flash ? '#E8A23A' : 'var(--a1-text,#15171C)',
+      simScan: () => { const p = PRODUCTS[Math.floor(Math.random() * 19)]; this.addProduct(p); },
+      lastMsg: s.last.msg, lastColor: lastTone[0], lastIcon: lastTone[1],
+      cats, tiles, noTiles: tiles.length === 0, noTilesMsg: q ? 'Nenhum produto encontrado para “' + s.q + '”.' : 'Nenhum abastecimento aguardando pagamento.',
+      saleNo: s.saleNo.toLocaleString('pt-BR'), itemCount: s.items.length + (s.items.length === 1 ? ' item' : ' itens'),
+      custLabel: s.customer ? s.customer.name : 'Consumidor final', custBg: s.customer ? 'var(--a1-info-bg,#EAF0FD)' : 'var(--a1-surface,#fff)', custBorder: s.customer ? 'var(--a1-sel-border,#B9C9F2)' : 'var(--a1-border-2,#E1E0DA)',
+      openCustomer: () => this.openModal('customer', { docQ: '' }),
+      lines, emptyCart: s.items.length === 0,
+      subtotal: brl(t.sub), discTotal: t.disc > 0.004 ? '− ' + brl(t.disc) : brl(0), total: brl(t.tot),
+      finalize: () => this.finalize(), finBg: s.items.length ? '#E8A23A' : 'var(--a1-strong-hover,#2A2D35)', finFg: s.items.length ? '#15171C' : '#6E727B',
+      actions: [
+        ['Quantidade', 'hash', 'F3', () => this.openQty()], ['Desconto', 'percent', 'F6', () => this.openDisc()], ['Cancelar item', 'circle-minus', 'F9', () => this.cancelItem(), true],
+        ['Cancelar venda', 'ban', 'F8', () => this.cancelSale(), true], ['Sangria', 'arrow-up-from-line', '', () => this.openModal('sangria', { cashVal: '', cashReason: 'Depósito em cofre', cashErr: '' })],
+        ['Suprimento', 'arrow-down-to-line', '', () => this.openModal('suprimento', { cashVal: '', cashReason: 'Troco adicional', cashErr: '' })], ['Histórico', 'history', '', () => this.setState({ modal: 'history' })],
+        ['Fechar caixa', 'lock', '', () => this.openModal('close', { countVal: '' })]
+      ].map(([label, icon, key, run, danger]) => ({ label, icon, key, run, bg: 'var(--a1-surface,#fff)', fg: danger ? 'var(--a1-err-fg,#9E2F27)' : 'var(--a1-text,#15171C)', border: 'var(--a1-border-2,#E1E0DA)' })),
+      cashBal: brl(s.cashBal),
+      keys: [['F2', 'Buscar'], ['F3', 'Quantidade'], ['F4', 'Cliente'], ['F6', 'Desconto'], ['F8', 'Cancelar venda'], ['F9', 'Cancelar item'], ['F10', 'Finalizar'], ['↑ ↓', 'Navegar itens'], ['Esc', 'Fechar']].map(([k, l]) => ({ k, l })),
+      m: { pay: modal === 'pay', small: !!small || (!s.cashOpen && !modal), customer: modal === 'customer', qty: modal === 'qty', disc: modal === 'disc', auth: modal === 'auth', cash: isCashM, close: modal === 'close', open: modal === 'open' || (!s.cashOpen && !modal), history: modal === 'history' },
+      sm: small ? { title: small[0], sub: small[1], icon: small[2], iconBg: small[3], iconFg: small[4], closable: modal !== 'open' } : (!s.cashOpen ? { title: 'Caixa fechado', sub: 'Informe o fundo de troco para abrir o Caixa 01', icon: 'lock-open', iconBg: 'var(--a1-warn-bg2,#FDF3E3)', iconFg: 'var(--a1-warn-fg4,#9A6514)', closable: false } : {}),
+      closeModal: () => this.closeModal(),
+      paid: brl(t.paid), remaining: brl(Math.abs(t.rem)), remLabel: t.rem < 0 ? 'Troco' : 'Restante', remBg: t.rem <= 0 ? '#13301F' : '#2A2010', remFg: t.rem <= 0 ? '#7FD3A6' : '#F3C26B', remLbl: t.rem <= 0 ? '#7FD3A6' : '#C9A35E',
+      payList: s.pays.map((p, i) => ({ label: ML[p.method][0], icon: ML[p.method][1], meta: p.meta || '', amount: brl(p.amount), removable: p.method === 'cash' && !s.done, remove: () => this.setState({ pays: s.pays.filter((_, j) => j !== i) }) })), noPays: s.pays.length === 0,
+      payIdle: !s.proc && !s.result && !s.done, payProc: !!s.proc, payResult: !!res, payDone: !!s.done,
+      methods: Object.keys(ML).map((k) => { const on = s.method === k; return { label: ML[k][0], icon: ML[k][1], sub: ML[k][2], key: ML[k][3], border: on ? 'var(--a1-text,#15171C)' : 'var(--a1-border,#E6E5E0)', bg: on ? 'var(--a1-surface-2,#FAFAF8)' : 'var(--a1-surface,#fff)', iconBg: on ? 'var(--a1-strong,#15171C)' : 'var(--a1-muted,#F1F0EC)', iconFg: on ? '#E8A23A' : 'var(--a1-text-2s,#4A4D55)', pick: () => this.pickMethod(k) }; }),
+      methodLabel: ML[s.method][0].toLowerCase(), amountRef: this.amountRef, amount: s.amount,
+      setAmount: (e) => this.setState({ amount: e.target.value, payErr: '' }), amountKey: (e) => { if (e.key === 'Enter') { e.preventDefault(); this.sendPay(); } },
+      fillRemaining: () => this.setState({ amount: fix(Math.max(t.rem, 0)) }),
+      isCash: s.method === 'cash', isCredit: s.method === 'credit',
+      notes: [['Exato', t.rem], ['R$ 50', 50], ['R$ 100', 100], ['R$ 200', 200]].filter(([, v], i) => i === 0 || v > t.rem).map(([label, v]) => ({ label, pick: () => this.setState({ amount: fix(v) }) })),
+      insts: ['1x', '2x', '3x'].map((x) => ({ label: x === '1x' ? 'À vista' : x + ' sem juros', border: s.inst === x ? 'var(--a1-text,#15171C)' : 'var(--a1-border-2,#E1E0DA)', bg: s.inst === x ? 'var(--a1-strong,#15171C)' : 'var(--a1-surface,#fff)', fg: s.inst === x ? '#fff' : 'var(--a1-text,#15171C)', pick: () => this.setState({ inst: x }) })),
+      payErr: s.payErr,
+      sims: [['approve', 'Aprovar'], ['decline', 'Recusar'], ['error', 'Falha de comunicação']].map(([id, label]) => ({ label, border: s.sim === id ? 'var(--a1-text,#15171C)' : 'var(--a1-border-2,#E1E0DA)', bg: s.sim === id ? 'var(--a1-strong,#15171C)' : 'var(--a1-surface,#fff)', fg: s.sim === id ? '#fff' : 'var(--a1-text-2s,#4A4D55)', pick: () => this.setState({ sim: id }) })),
+      sendPay: () => this.sendPay(), sendLabel: s.method === 'cash' ? 'Registrar dinheiro' : s.method === 'pix' ? 'Gerar cobrança PIX' : 'Enviar ao terminal', sendIcon: s.method === 'cash' ? 'banknote' : s.method === 'pix' ? 'qr-code' : 'send',
+      proc: procV, abortProc: () => { this.timers.forEach(clearTimeout); this.timers = []; this.setState({ proc: null, payErr: 'Operação cancelada no terminal.' }); },
+      res: res ? (res.kind === 'ok' ? { ok: true, fail: false, icon: 'check', bg: 'var(--a1-ok-bg,#E6F4EC)', fg: 'var(--a1-ok-fg,#1B6E4A)', title: 'Aprovado', sub: ML[res.method][0] + ' · ' + brl(res.amount) + (res.method === 'credit' ? ' · ' + s.inst : ''), nsu: res.nsu, auth: res.auth, card: res.card }
+        : res.kind === 'decline' ? { ok: false, fail: true, icon: 'x', bg: 'var(--a1-err-bg,#FBEAE8)', fg: 'var(--a1-err-fg2,#B23A31)', title: 'Transação recusada', sub: 'O emissor não autorizou a operação. Oriente o cliente a usar outro cartão ou outra forma de pagamento.' }
+          : { ok: false, fail: true, icon: 'wifi-off', bg: 'var(--a1-warn-bg,#FBF1DF)', fg: 'var(--a1-warn-fg,#8A5A12)', title: 'Falha de comunicação', sub: 'Não foi possível obter resposta do terminal POS-01. Nenhum valor foi cobrado do cliente.' }) : {},
+      retryPay: () => { this.setState({ result: null }); this.timers.push(setTimeout(() => this.sendPay(), 10)); },
+      otherMethod: () => this.setState({ result: null, method: 'cash' }),
+      continuePay: () => this.continuePay(),
+      doneNfce: s.done ? s.done.nfce : '', hasChange: s.done && s.done.change > 0.004, change: s.done ? brl(s.done.change) : '',
+      printReceipt: () => this.props.notify && this.props.notify('Cupom enviado para a impressora do Caixa 01.', 'info'),
+      newSale: () => this.newSale(),
+      docRef: this.docRef, docQ: s.docQ, setDocQ: (e) => this.setState({ docQ: e.target.value }),
+      docKey: (e) => { if (e.key === 'Enter') { e.preventDefault(); this.setState({ customer: s.docQ.trim() ? { name: 'CPF/CNPJ ' + s.docQ.trim() } : null, modal: null }); this.focus(this.searchRef); } },
+      custs: CUSTS.filter((c) => !s.docQ || (c.name + c.doc).toLowerCase().includes(s.docQ.toLowerCase())).map((c) => ({ ...c, pick: () => { this.setState({ customer: c, modal: null }); this.setLast('Cliente identificado: ' + c.name, 'ok'); this.focus(this.searchRef); } })),
+      clearCustomer: () => { this.setState({ customer: null, modal: null }); this.focus(this.searchRef); },
+      useDoc: () => { const d = s.docQ.trim(); if (d.replace(/\D/g, '').length < 11) return this.setLast('Informe um CPF (11) ou CNPJ (14 dígitos).', 'err'); this.setState({ customer: { name: 'CPF/CNPJ ' + d }, modal: null }); this.focus(this.searchRef); },
+      qtyRef: this.qtyRef, qtyVal: s.qtyVal, setQtyVal: (e) => this.setState({ qtyVal: e.target.value.replace(/[^\d]/g, '') }),
+      qtyQuick: [1, 2, 3, 5, 10].map((n) => ({ n, pick: () => this.setState({ qtyVal: String(n) }) })),
+      applyQty: () => { const n = parseInt(s.qtyVal) || 0; if (n < 1) return; this.setState({ items: s.items.map((l, i) => i === s.sel ? { ...l, qty: n } : l), modal: null }); this.focus(this.searchRef); },
+      qtyKey: (e) => { if (e.key === 'Enter') { e.preventDefault(); const n = parseInt(s.qtyVal) || 0; if (n >= 1) { this.setState({ items: s.items.map((l, i) => i === s.sel ? { ...l, qty: n } : l), modal: null }); this.focus(this.searchRef); } } },
+      discRef: this.discRef, discVal: s.discVal, setDiscVal: (e) => this.setState({ discVal: e.target.value }),
+      discQuick: [2, 5, 10, 15].map((n) => ({ n: n + '%', pick: () => this.setState({ discVal: String(n) }) })),
+      applyDisc: () => this.applyDisc(), discKey: (e) => { if (e.key === 'Enter') { e.preventDefault(); this.applyDisc(); } },
+      authSup: s.authSup, setAuthSup: (e) => this.setState({ authSup: e.target.value }), authErr: s.authErr,
+      pinDots: [0, 1, 2, 3].map((i) => ({ bg: i < s.pin.length ? 'var(--a1-strong,#15171C)' : 'transparent' })),
+      keypad: ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'del', '0', 'ok'].map((d) => ({ label: d === 'del' ? '⌫' : d === 'ok' ? 'OK' : d, press: () => this.pressPin(d) })),
+      cashRef: this.cashRef, cashVal: s.cashVal, setCashVal: (e) => this.setState({ cashVal: e.target.value, cashErr: '' }),
+      cashReason: s.cashReason, setCashReason: (e) => this.setState({ cashReason: e.target.value }),
+      cashReasons: modal === 'sangria' ? ['Depósito em cofre', 'Recolhimento para banco', 'Pagamento de despesa'] : ['Troco adicional', 'Reforço de caixa', 'Devolução do cofre'],
+      cashErr: s.cashErr, cashBtn: modal === 'sangria' ? 'Registrar sangria' : 'Registrar suprimento',
+      applyCash: () => this.applyCash(), cashKey: (e) => { if (e.key === 'Enter') { e.preventDefault(); this.applyCash(); } },
+      closeRows: [
+        ['Fundo de troco', sum((h) => h.kind === 'open')], ['Vendas em dinheiro', sum((h) => h.kind === 'sale' && h.method === 'cash')], ['Suprimentos', sum((h) => h.kind === 'sup')], ['Sangrias', sum((h) => h.kind === 'sang')],
+        ['Vendas PIX', sum((h) => h.kind === 'sale' && h.method === 'pix')], ['Vendas crédito', sum((h) => h.kind === 'sale' && h.method === 'credit')], ['Vendas débito', sum((h) => h.kind === 'sale' && h.method === 'debit')]
+      ].map(([label, v]) => ({ label, val: brl(v), bg: 'var(--a1-surface,#fff)', lc: 'var(--a1-text-2,#62656D)', w: 450 })).concat([{ label: 'Esperado em dinheiro', val: brl(expCash), bg: 'var(--a1-surface-2,#FAFAF8)', lc: 'var(--a1-text,#15171C)', w: 650 }]),
+      countVal: s.countVal, setCountVal: (e) => this.setState({ countVal: e.target.value }),
+      diff: s.countVal ? (diffV >= 0 ? '+ ' : '− ') + brl(Math.abs(diffV)) : '—',
+      diffBg: !s.countVal ? 'var(--a1-bg,#F5F5F2)' : Math.abs(diffV) < 0.01 ? 'var(--a1-ok-bg,#E6F4EC)' : 'var(--a1-err-bg,#FBEAE8)', diffFg: !s.countVal ? 'var(--a1-text-3,#7A7D85)' : Math.abs(diffV) < 0.01 ? 'var(--a1-ok-fg,#1B6E4A)' : 'var(--a1-err-fg,#9E2F27)',
+      confirmClose: () => { if (!s.countVal) return; this.setState({ cashOpen: false, modal: null, items: [], cashBal: 0, hist: s.hist.concat([{ time: hhmm(), type: 'Fechamento de caixa', desc: 'Contado ' + brl(counted) + ' · diferença ' + brl(diffV), amount: -counted, kind: 'close' }]) }); this.props.notify && this.props.notify('Caixa 01 fechado. Diferença: ' + brl(diffV), Math.abs(diffV) < 0.01 ? 'success' : 'warn'); },
+      openVal: s.openVal, setOpenVal: (e) => this.setState({ openVal: e.target.value }),
+      confirmOpen: () => { const v = num(s.openVal); this.setState({ cashOpen: true, modal: null, cashBal: v, hist: [{ time: hhmm(), type: 'Abertura de caixa', desc: 'Rafael Souza · fundo de troco', amount: v, kind: 'open' }], last: { msg: 'Caixa aberto com fundo de ' + brl(v), tone: 'ok' } }); this.focus(this.searchRef); },
+      hist: s.hist.slice().reverse().map((h) => { const m = { open: ['lock-open', 'var(--a1-ok-bg,#E6F4EC)', 'var(--a1-ok-fg,#1B6E4A)'], sale: ['receipt', 'var(--a1-info-bg,#EAF0FD)', 'var(--a1-accent-text,#2D5BD8)'], sup: ['arrow-down-to-line', 'var(--a1-ok-bg,#E6F4EC)', 'var(--a1-ok-fg,#1B6E4A)'], sang: ['arrow-up-from-line', 'var(--a1-warn-bg,#FBF1DF)', 'var(--a1-warn-fg,#8A5A12)'], cancel: ['ban', 'var(--a1-err-bg,#FBEAE8)', 'var(--a1-err-fg,#9E2F27)'], close: ['lock', 'var(--a1-muted,#F1F0EC)', 'var(--a1-text,#15171C)'] }[h.kind]; return { ...h, icon: m[0], bg: m[1], fg: m[2], amount: (h.amount < 0 ? '− ' : '') + brl(Math.abs(h.amount)), ac: h.amount < 0 ? 'var(--a1-err-fg,#9E2F27)' : 'var(--a1-text,#15171C)' }; })
+    };
+  }
+  applyDisc() {
+    const s = this.state; const p = num(s.discVal);
+    if (!(p > 0) || p >= 100) return;
+    if (p > 10) return this.needAuth('disc', 'Desconto de ' + p + '%') || this.setState({ authAction: { action: 'disc', pct: p, label: 'Desconto de ' + p + '%' } });
+    this.setState({ items: s.items.map((l, i) => i === s.sel ? { ...l, disc: p } : l), modal: null });
+    this.setLast('Desconto de ' + p + '% aplicado', 'ok'); this.focus(this.searchRef);
+  }
+  applyCash() {
+    const s = this.state; const v = num(s.cashVal);
+    if (!(v > 0)) return this.setState({ cashErr: 'Informe um valor válido.' });
+    const sang = s.modal === 'sangria';
+    if (sang && v > s.cashBal) return this.setState({ cashErr: 'Valor maior que o saldo em dinheiro (' + brl(s.cashBal) + ').' });
+    this.setState({ modal: null, cashBal: s.cashBal + (sang ? -v : v), hist: s.hist.concat([{ time: hhmm(), type: sang ? 'Sangria' : 'Suprimento', desc: s.cashReason, amount: sang ? -v : v, kind: sang ? 'sang' : 'sup' }]) });
+    this.setLast((sang ? 'Sangria' : 'Suprimento') + ' de ' + brl(v) + ' registrado', 'ok');
+    this.focus(this.searchRef);
+  }
+}
+
+</script>
+</body>
+</html>

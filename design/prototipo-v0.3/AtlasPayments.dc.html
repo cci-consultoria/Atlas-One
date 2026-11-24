@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="display:flex;flex-direction:column;gap:18px;animation:a1in .2s ease">
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap">
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <div style="font-family:'Geist Mono',monospace;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--a1-text-3,#7A7D85)">Atlas Payments · Integrações e transações</div>
+      <div style="font-size:28px;font-weight:600;letter-spacing:-.025em">Pagamentos integrados</div>
+      <div style="font-size:13.5px;color:var(--a1-text-2,#62656D)">{{ ctx.org }} · conector principal: Boa Vista</div>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:10px;background:var(--a1-warn-bg,#FBF1DF);color:var(--a1-warn-fg3,#6E460C);font-size:13px;line-height:1.5">
+    <x-import component="Icon" from="./Icon.js" i="info" size="16" hint-size="16px,16px"></x-import>
+    <span>Representação conceitual da integração com a Boa Vista. APIs, credenciais, fluxos de autorização e capacidades técnicas serão definidos na etapa de especificação com o parceiro. Dados de transações são fictícios.</span>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px">
+    <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
+      <div style="background:var(--a1-surface,#fff);border:1px solid var(--a1-border,#E6E5E0);border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;justify-content:space-between;color:var(--a1-text-2,#62656D);font-size:13px"><span>{{ k.label }}</span><x-import component="Icon" from="./Icon.js" i="{{ k.icon }}" size="16" color="{{ k.ic }}" hint-size="16px,16px"></x-import></div>
+        <div style="font-size:26px;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums">{{ k.value }}</div>
+        <div style="font-size:12.5px;color:var(--a1-text-2,#62656D)">{{ k.foot }}</div>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="background:var(--a1-surface,#fff);border:1px solid var(--a1-border,#E6E5E0);border-radius:12px;overflow:hidden">
+    <div style="padding:0 16px;display:flex;gap:2px;border-bottom:1px solid var(--a1-divider,#EFEEEA);overflow-x:auto">
+      <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="5">
+        <button onClick="{{ t.pick }}" style="height:48px;padding:0 12px;border:0;border-bottom:2px solid {{ t.line }};background:transparent;color:{{ t.fg }};font-size:13.5px;font-weight:600;cursor:pointer;margin-bottom:-1px;white-space:nowrap;display:flex;align-items:center;gap:7px"><x-import component="Icon" from="./Icon.js" i="{{ t.icon }}" size="15" hint-size="15px,15px"></x-import>{{ t.label }}</button>
+      </sc-for>
+    </div>
+
+    <sc-if value="{{ is.conn }}" hint-placeholder-val="{{ true }}">
+      <div style="padding:20px;display:flex;flex-wrap:wrap;gap:16px">
+        <div style="flex:1.3 1 440px;min-width:0;display:flex;flex-direction:column;gap:16px">
+          <div style="border:1px solid var(--a1-border,#E6E5E0);border-radius:12px;padding:18px;display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap">
+            <div style="width:52px;height:52px;border-radius:12px;background:repeating-linear-gradient(45deg,var(--a1-bg,#F5F5F2) 0 6px,var(--a1-skeleton,#ECEBE6) 6px 12px);border:1px solid var(--a1-border-2,#E1E0DA);display:flex;align-items:center;justify-content:center;font-family:'Geist Mono',monospace;font-size:9px;color:var(--a1-text-3,#7A7D85);text-align:center;flex:none">logo<br>parceiro</div>
+            <div style="flex:1;min-width:200px;display:flex;flex-direction:column;gap:6px">
+              <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span style="font-size:17px;font-weight:650">Boa Vista</span><span style="font-size:11.5px;font-weight:600;padding:3px 9px;border-radius:999px;background:var(--a1-warn-bg,#FBF1DF);color:var(--a1-warn-fg,#8A5A12)">Em especificação</span><span style="font-size:11.5px;font-weight:600;padding:3px 9px;border-radius:999px;background:var(--a1-muted,#F1F0EC);color:var(--a1-text-2s,#4A4D55)">Conector 01</span></div>
+              <div style="font-size:13px;color:var(--a1-text-2,#62656D);line-height:1.55">Primeiro conector de pagamentos do Atlas One, para integração com adquirentes e soluções de pagamento por meio da parceria com a Boa Vista.</div>
+            </div>
+            <button onClick="{{ testConn }}" style="height:38px;padding:0 14px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:9px;background:var(--a1-surface,#fff);font-size:13px;font-weight:550;cursor:pointer;display:flex;align-items:center;gap:8px"><x-import component="Icon" from="./Icon.js" i="{{ testIcon }}" size="15" hint-size="15px,15px"></x-import>{{ testLabel }}</button>
+          </div>
+          <div style="border:1px solid var(--a1-border,#E6E5E0);border-radius:12px;display:flex;flex-direction:column">
+            <div style="padding:14px 18px;border-bottom:1px solid var(--a1-divider,#EFEEEA);font-size:14px;font-weight:600">Etapas de configuração</div>
+            <sc-for list="{{ steps }}" as="st" hint-placeholder-count="4">
+              <div style="display:flex;gap:14px;padding:14px 18px;border-bottom:1px solid var(--a1-divider-2,#F2F1ED);align-items:flex-start">
+                <span style="width:26px;height:26px;border-radius:50%;background:{{ st.bg }};color:{{ st.fg }};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:650;flex:none">{{ st.n }}</span>
+                <div style="flex:1;display:flex;flex-direction:column;gap:3px"><span style="font-size:13.5px;font-weight:600">{{ st.t }}</span><span style="font-size:12.5px;color:var(--a1-text-3,#7A7D85);line-height:1.45">{{ st.d }}</span></div>
+                <span style="font-size:11.5px;font-weight:600;color:{{ st.sc }};white-space:nowrap">{{ st.s }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <div style="border:1px solid var(--a1-border,#E6E5E0);border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:12px">
+            <div style="font-size:14px;font-weight:600">Ambiente e credenciais</div>
+            <div style="display:flex;padding:3px;border:1px solid var(--a1-border-2,#E1E0DA);border-radius:9px;gap:2px;align-self:flex-start">
+              <sc-for list="{{ envs }}" as="e" hint-placeholder-count="2"><button onClick="{{ e.pick }}" style="height:32px;padding:0 14px;border:0;border-radius:6px;background:{{ e.bg }};color:{{ e.fg }};font-size:12.5px;font-weight:600;cursor:pointer">{{ e.label }}</button></sc-for>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
+              <label style="display:flex;flex-direction:column;gap:6px;font-size:12.5px;font-weight:550">Identificação do cliente<input disabled="{{ true }}" placeholder="Definido na especificação técnica" style="height:40px;padding:0 12px;border:1px dashed var(--a1-track-off,#D3D2CC);border-radius:8px;background:var(--a1-surface-2,#FAFAF8);font-size:13px"></input></label>
+              <label style="display:flex;flex-direction:column;gap:6px;font-size:12.5px;font-weight:550">Credencial de acesso<input disabled="{{ true }}" placeholder="Definido na especificação técnica" style="height:40px;padding:0 12px;border:1px dashed var(--a1-track-off,#D3D2CC);border-radius:8px;background:var(--a1-surface-2,#FAFAF8);font-size:13px"></input></label>
+            </div>
+          </div>
+        </div>
+        <div style="flex:1 1 300px;min-width:0;display:flex;flex-direction:column;gap:16px">
+          <div style="border:1px solid var(--a1-border,#E6E5E0);border-radius:12px;display:flex;flex-direction:column">
+            <div style="padding:14px 18px;border-bottom:1px solid var(--a1-divider,#EFEEEA);font-size:14px;font-weight:600">Estabelecimentos habilitados</div>
+            <sc-for list="{{ estabT }}" as="e" hint-placeholder-count="4">
+              <button onClick="{{ e.toggle }}" style="display:flex;align-items:center;gap:12px;padding:12px 18px;border:0;border-bottom:1px solid var(--a1-divider-2,#F2F1ED);background:var(--a1-surface,#fff);cursor:pointer;text-align:left">
+                <div style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font-size:13.5px;font-weight:550">{{ e.name }}</span><span style="font-size:12px;color:var(--a1-text-3,#7A7D85)">{{ e.sub }}</span></div>
+                <span style="width:36px;height:20px;border-radius:999px;background:{{ e.sw }};position:relative;display:block;flex:none"><span style="position:absolute;top:2px;left:{{ e.left }};width:16px;height:16px;border-radius:50%;background:var(--a1-surface,#fff);transition:left .15s"></span></span>
+              </button>
+            </sc-for>
+          </div>
+          <div style="border:1px solid var(--a1-border,#E6E5E0);border-radius:12px;display:flex;flex-direction:column">
+            <div style="padding:14px 18px;border-bottom:1px solid var(--a1-divider,#EFEEEA);font-size:14px;font-weight:600">Meios de pagamento</div>
+            <sc-for list="{{ methodsT }}" as="m" hint-placeholder-count="3">
+              <button onClick="{{ m.toggle }}" style="display:flex;align-items:center;gap:12px;padding:12px 18px;border:0;border-bottom:1px solid var(--a1-divider-2,#F2F1ED);background:var(--a1-surface,#fff);cursor:pointer;text-align:left">
+                <x-import component="Icon" from="./Icon.js" i="{{ m.icon }}" size="17" color="var(--a1-text-2,#62656D)" hint-size="17px,17px"></x-import>
+                <span style="flex:1;font-size:13.5px;font-weight:550">{{ m.name }}</span>
+                <span style="width:36px;height:20px;border-radius:999px;background:{{ m.sw }};position:relative;display:block;flex:none"><span style="position:absolute;top:2px;left:{{ m.left }};width:16px;height:16px;border-radius:50%;background:var(--a1-surface,#fff);transition:left .15s"></span></span>
+              </button>
+            </sc-for>
+          </div>
+          <div style="border:1px dashed var(--a1-track-off,#D3D2CC);border-radius:12px;padding:16px 18px;display:flex;gap:12px;align-items:center;color:var(--a1-text-3,#7A7D85)">
+            <x-import component="Icon" from="./Icon.js" i="plus" size="18" hint-size="18px,18px"></x-import>
+            <div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:13.5px;font-weight:600;color:var(--a1-text-2s,#4A4D55)">Novos conectores</span><span style="font-size:12px">Arquitetura preparada para adquirentes adicionais.</span></div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ is.term }}" hint-placeholder-val="{{ false }}">
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:13px;min-width:760px">
+          <thead><tr style="background:var(--a1-surface-2,#FAFAF8);color:var(--a1-text-2,#62656D);text-align:left;font-size:12px"><th style="padding:10px 16px;font-weight:550">Terminal</th><th style="padding:10px 14px;font-weight:550">Estabelecimento</th><th style="padding:10px 14px;font-weight:550">Vínculo</th><th style="padding:10px 14px;font-weight:550">Status</th><th style="padding:10px 14px;font-weight:550">Última transação</th><th style="padding:10px 16px;font-weight:550;text-align:right">Hoje</th></tr></thead>
+          <tbody>
+            <sc-for list="{{ terms }}" as="t" hint-placeholder-count="6">
+              <tr style="border-top:1px solid var(--a1-divider-2,#F2F1ED)">
+                <td style="padding:12px 16px;font-family:'Geist Mono',monospace;font-size:12.5px;font-weight:500">{{ t.id }}</td>
+                <td style="padding:12px 14px">{{ t.estab }}</td>
+                <td style="padding:12px 14px;color:var(--a1-text-2,#62656D)">{{ t.link }}</td>
+                <td style="padding:12px 14px"><span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:{{ t.fg }}"><span style="width:7px;height:7px;border-radius:50%;background:{{ t.dot }}"></span>{{ t.st }}</span></td>
+                <td style="padding:12px 14px;color:var(--a1-text-2,#62656D);font-variant-numeric:tabular-nums">{{ t.last }}</td>
+                <td style="padding:12px 16px;text-align:right;font-variant-numeric:tabular-nums;font-weight:600">{{ t.vol }}</td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ is.tx }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:12px 16px;display:flex;gap:6px;flex-wrap:wrap;border-bottom:1px solid var(--a1-divider,#EFEEEA)">
+        <sc-for list="{{ txFilters }}" as="f" hint-placeholder-count="5"><button onClick="{{ f.pick }}" style="height:32px;padding:0 12px;border:1px solid {{ f.border }};border-radius:999px;background:{{ f.bg }};color:{{ f.fg }};font-size:12.5px;font-weight:550;cursor:pointer;display:flex;align-items:center;gap:6px">{{ f.label }}<span style="opacity:.7;font-size:11px">{{ f.n }}</span></button></sc-for>
+      </div>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:13px;min-width:900px">
+          <thead><tr style="background:var(--a1-surface-2,#FAFAF8);color:var(--a1-text-2,#62656D);text-align:left;font-size:12px"><th style="padding:10px 16px;font-weight:550">Data/hora</th><th style="padding:10px 14px;font-weight:550">NSU</th><th style="padding:10px 14px;font-weight:550">Autorização</th><th style="padding:10px 14px;font-weight:550">Meio</th><th style="padding:10px 14px;font-weight:550">Terminal</th><th style="padding:10px 14px;font-weight:550;text-align:right">Valor</th><th style="padding:10px 14px;font-weight:550">Status</th><th style="padding:10px 16px"></th></tr></thead>
+          <tbody>
+            <sc-for list="{{ txs }}" as="x" hint-placeholder-count="10">
+              <tr style="border-top:1px solid var(--a1-divider-2,#F2F1ED)">
+                <td style="padding:11px 16px;color:var(--a1-text-2,#62656D);font-variant-numeric:tabular-nums">{{ x.when }}</td>
+                <td style="padding:11px 14px;font-family:'Geist Mono',monospace;font-size:12px">{{ x.nsu }}</td>
+                <td style="padding:11px 14px;font-family:'Geist Mono',monospace;font-size:12px">{{ x.auth }}</td>
+                <td style="padding:11px 14px"><span style="display:inline-flex;align-items:center;gap:6px"><x-import component="Icon" from="./Icon.js" i="{{ x.icon }}" size="14" color="var(--a1-text-2,#62656D)" hint-size="14px,14px"></x-import>{{ x.method }}<span style="font-family:'Geist Mono',monospace;font-size:11.5px;color:var(--a1-text-5,#9A9DA4)">{{ x.card }}</span></span></td>
+                <td style="padding:11px 14px;font-family:'Geist Mono',monospace;font-size:12px;color:var(--a1-text-2,#62656D)">{{ x.term }}</td>
+                <td style="padding:11px 14px;text-align:right;font-variant-numeric:tabular-nums;font-weight:600">{{ x.val }}</td>
+                <td style="padding:11px 14px"><span style="font-size:11.5px;font-weight:600;padding:3px 8px;border-radius:999px;background:{{ x.stBg }};color:{{ x.stFg }}">{{ x.st }}</span><sc-if value="{{ x.reason }}" hint-placeholder-val="{{ false }}"><div style="font-size:11.5px;color:var(--a1-text-5,#9A9DA4);margin-top:3px">{{ x.reason }}</div></sc-if></td>
+                <td style="padding:11px 16px;text-align:right"><sc-if value="{{ x.canRefund }}" hint-placeholder-val="{{ false }}"><button onClick="{{ x.refund }}" style="height:30px;padding:0 10px;border:1px solid var(--a1-border-2,#E1E0DA);border-radius:7px;background:var(--a1-surface,#fff);font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;margin-left:auto"><x-import component="Icon" from="./Icon.js" i="undo-2" size="13" hint-size="13px,13px"></x-import>Estornar</button></sc-if></td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ is.conc }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:20px;display:flex;flex-direction:column;gap:16px">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px">
+          <sc-for list="{{ concCards }}" as="c" hint-placeholder-count="4">
+            <div style="padding:14px 16px;border-radius:11px;background:{{ c.bg }};display:flex;flex-direction:column;gap:6px"><span style="font-size:12.5px;color:var(--a1-text-2,#62656D)">{{ c.label }}</span><span style="font-size:22px;font-weight:600;font-variant-numeric:tabular-nums;color:{{ c.fg }}">{{ c.v }}</span><span style="font-size:12px;color:var(--a1-text-3,#7A7D85)">{{ c.s }}</span></div>
+          </sc-for>
+        </div>
+        <div style="border:1px solid var(--a1-border,#E6E5E0);border-radius:12px;display:flex;flex-direction:column">
+          <div style="padding:14px 18px;border-bottom:1px solid var(--a1-divider,#EFEEEA);display:flex;justify-content:space-between;align-items:center"><span style="font-size:14px;font-weight:600">Divergências · 19/11</span><span style="font-size:12px;color:var(--a1-text-3,#7A7D85)">Venda no ERP × transação do conector</span></div>
+          <sc-for list="{{ divs }}" as="d" hint-placeholder-count="3">
+            <div style="display:flex;gap:14px;padding:14px 18px;border-bottom:1px solid var(--a1-divider-2,#F2F1ED);align-items:center;flex-wrap:wrap">
+              <div style="width:34px;height:34px;border-radius:9px;background:{{ d.bg }};color:{{ d.fg }};display:flex;align-items:center;justify-content:center;flex:none"><x-import component="Icon" from="./Icon.js" i="{{ d.icon }}" size="16" hint-size="16px,16px"></x-import></div>
+              <div style="flex:1;min-width:220px;display:flex;flex-direction:column;gap:3px"><span style="font-size:13.5px;font-weight:600">{{ d.t }}</span><span style="font-size:12.5px;color:var(--a1-text-3,#7A7D85)">{{ d.s }}</span></div>
+              <span style="font-variant-numeric:tabular-nums;font-weight:650;font-size:14px">{{ d.v }}</span>
+              <sc-if value="{{ d.open }}" hint-placeholder-val="{{ true }}"><button onClick="{{ d.fix }}" style="height:32px;padding:0 12px;border:0;border-radius:8px;background:var(--a1-strong,#15171C);color:#fff;font-size:12.5px;font-weight:600;cursor:pointer">{{ d.cta }}</button></sc-if>
+              <sc-if value="{{ d.done }}" hint-placeholder-val="{{ false }}"><span style="display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:var(--a1-ok-fg,#1B6E4A)"><x-import component="Icon" from="./Icon.js" i="circle-check" size="15" hint-size="15px,15px"></x-import>Conciliado</span></sc-if>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ is.fees }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:14px 16px;font-size:12.5px;color:var(--a1-text-3,#7A7D85);border-bottom:1px solid var(--a1-divider,#EFEEEA)">Agenda de recebíveis · taxas ilustrativas, sujeitas às condições contratuais.</div>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:13px;min-width:720px">
+          <thead><tr style="background:var(--a1-surface-2,#FAFAF8);color:var(--a1-text-2,#62656D);text-align:left;font-size:12px"><th style="padding:10px 16px;font-weight:550">Previsão</th><th style="padding:10px 14px;font-weight:550">Meio</th><th style="padding:10px 14px;font-weight:550;text-align:right">Bruto</th><th style="padding:10px 14px;font-weight:550;text-align:right">Taxa</th><th style="padding:10px 14px;font-weight:550;text-align:right">Líquido</th><th style="padding:10px 16px;font-weight:550">Situação</th></tr></thead>
+          <tbody>
+            <sc-for list="{{ fees }}" as="f" hint-placeholder-count="6">
+              <tr style="border-top:1px solid var(--a1-divider-2,#F2F1ED)">
+                <td style="padding:11px 16px;font-variant-numeric:tabular-nums;font-weight:550">{{ f.d }}</td><td style="padding:11px 14px">{{ f.m }}</td>
+                <td style="padding:11px 14px;text-align:right;font-variant-numeric:tabular-nums">{{ f.g }}</td><td style="padding:11px 14px;text-align:right;font-variant-numeric:tabular-nums;color:var(--a1-err-fg,#9E2F27)">{{ f.t }}</td>
+                <td style="padding:11px 14px;text-align:right;font-variant-numeric:tabular-nums;font-weight:600">{{ f.n }}</td>
+                <td style="padding:11px 16px"><span style="font-size:11.5px;font-weight:600;padding:3px 8px;border-radius:999px;background:{{ f.bg }};color:{{ f.fg }}">{{ f.s }}</span></td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+    </sc-if>
+  </div>
+
+  <sc-if value="{{ refundOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;background:rgba(15,17,21,.45);z-index:90;display:flex;align-items:center;justify-content:center;padding:16px">
+      <div style="width:100%;max-width:440px;background:var(--a1-surface,#fff);border-radius:14px;box-shadow:0 24px 60px rgba(15,17,21,.25);animation:a1in .2s ease;display:flex;flex-direction:column">
+        <div style="padding:20px 22px 0;display:flex;gap:12px;align-items:center"><div style="width:40px;height:40px;border-radius:10px;background:var(--a1-err-bg,#FBEAE8);color:var(--a1-err-fg2,#B23A31);display:flex;align-items:center;justify-content:center"><x-import component="Icon" from="./Icon.js" i="undo-2" size="19" hint-size="19px,19px"></x-import></div><div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:17px;font-weight:650">Solicitar estorno</span><span style="font-size:12.5px;color:var(--a1-text-3,#7A7D85)">NSU {{ rf.nsu }} · {{ rf.val }}</span></div></div>
+        <div style="padding:18px 22px;display:flex;flex-direction:column;gap:12px">
+          <label style="display:flex;flex-direction:column;gap:6px;font-size:12.5px;font-weight:550">Motivo<select style="height:40px;padding:0 10px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:8px;background:var(--a1-surface,#fff);font-size:13.5px"><option>Desistência do cliente</option><option>Valor cobrado incorreto</option><option>Cobrança em duplicidade</option></select></label>
+          <div style="font-size:12.5px;color:var(--a1-text-2,#62656D);line-height:1.5">O estorno será registrado no Atlas One e refletido na conciliação. Regras e prazos do parceiro serão definidos na especificação.</div>
+        </div>
+        <div style="padding:14px 22px;border-top:1px solid var(--a1-divider,#EFEEEA);display:flex;gap:8px;justify-content:flex-end">
+          <button onClick="{{ closeRefund }}" style="height:38px;padding:0 14px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:9px;background:var(--a1-surface,#fff);font-size:13px;font-weight:550;cursor:pointer">Voltar</button>
+          <button onClick="{{ confirmRefund }}" style="height:38px;padding:0 16px;border:0;border-radius:9px;background:var(--a1-err-fg2,#B23A31);color:#fff;font-size:13px;font-weight:600;cursor:pointer">Confirmar estorno</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const brl = (v) => 'R$ ' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+function rnd(seed) { let x = seed; return () => { x = (x * 9301 + 49297) % 233280; return x / 233280; }; }
+const r = rnd(21);
+const MI = { 'Crédito': 'credit-card', 'Débito': 'wallet-cards', 'PIX': 'qr-code' };
+const REASONS = ['Saldo insuficiente', 'Cartão expirado', 'Transação não permitida', 'Falha de comunicação'];
+const TXS = Array.from({ length: 22 }, (_, i) => {
+  const m = ['Crédito', 'Débito', 'PIX', 'Crédito', 'Débito'][i % 5];
+  const st = i === 3 || i === 11 || i === 17 ? 'Recusada' : i === 8 ? 'Estornada' : i === 1 ? 'Pendente' : 'Aprovada';
+  return { id: i, when: '20/11 ' + String(9 - Math.floor(i / 4)).padStart(2, '0') + ':' + String((57 - i * 7 % 60 + 60) % 60).padStart(2, '0'), nsu: String(400420 - i * 13), auth: st === 'Recusada' ? '—' : m === 'PIX' ? 'E2E…' + Math.floor(1000 + r() * 8999) : String(Math.floor(100000 + r() * 899999)), method: m, card: m === 'PIX' ? '' : '•••• ' + Math.floor(1000 + r() * 8999), term: 'POS-0' + ((i % 3) + 1), val: Math.round((40 + r() * 420) * 100) / 100, st, reason: st === 'Recusada' ? REASONS[i % 4] : '' };
+});
+const SST = { 'Aprovada': ['var(--a1-ok-bg,#E6F4EC)', 'var(--a1-ok-fg,#1B6E4A)'], 'Recusada': ['var(--a1-err-bg,#FBEAE8)', 'var(--a1-err-fg,#9E2F27)'], 'Estornada': ['var(--a1-purple-bg,#F1EEFB)', 'var(--a1-purple-fg,#5B45A8)'], 'Pendente': ['var(--a1-warn-bg,#FBF1DF)', 'var(--a1-warn-fg,#8A5A12)'] };
+class Component extends DCLogic {
+  state = { tab: 'conn', env: 'hom', estabs: { central: true, avenida: true, saopedro: true, rodovia: false }, meios: { c: true, d: true, p: true }, test: 'idle', txs: TXS, txf: 'Todas', refund: null, divs: [false, false, false] };
+  renderVals() {
+    const s = this.state; const ctx = this.props.ctx || { org: '' }; const notify = this.props.notify || (() => {});
+    const tabs = [['conn', 'Conector', 'plug-zap'], ['term', 'Terminais', 'monitor-smartphone'], ['tx', 'Transações', 'arrow-left-right'], ['conc', 'Conciliação', 'git-compare-arrows'], ['fees', 'Taxas e recebíveis', 'calendar-clock']];
+    const is = {}; tabs.forEach(([id]) => (is[id] = s.tab === id));
+    const sw = (on) => ({ sw: on ? '#2D5BD8' : 'var(--a1-track-off,#D3D2CC)', left: on ? '18px' : '2px' });
+    const txList = s.txs.filter((x) => s.txf === 'Todas' || x.st === s.txf.replace(/s$/, ''));
+    const rf = s.refund != null ? s.txs.find((x) => x.id === s.refund) : null;
+    return {
+      ctx, is,
+      kpis: [
+        { label: 'Transações hoje', icon: 'activity', ic: 'var(--a1-text-5,#9A9DA4)', value: '1.284', foot: 'Crédito 41% · Débito 27% · PIX 32%' },
+        { label: 'Taxa de aprovação', icon: 'circle-check', ic: 'var(--a1-ok-fg2,#1F8A5B)', value: '97,6%', foot: '31 recusadas · 4 por falha de comunicação' },
+        { label: 'Volume processado', icon: 'circle-dollar-sign', ic: 'var(--a1-text-5,#9A9DA4)', value: 'R$ 186.420', foot: 'Ticket médio de R$ 145,19' },
+        { label: 'Divergências abertas', icon: 'triangle-alert', ic: '#C98A1E', value: String(s.divs.filter((d) => !d).length), foot: 'Conciliação de 19/11' }
+      ],
+      tabs: tabs.map(([id, label, icon]) => ({ label, icon, line: s.tab === id ? 'var(--a1-text,#15171C)' : 'transparent', fg: s.tab === id ? 'var(--a1-text,#15171C)' : 'var(--a1-text-3,#7A7D85)', pick: () => this.setState({ tab: id }) })),
+      testLabel: s.test === 'run' ? 'Testando…' : s.test === 'ok' ? 'Conexão simulada OK' : 'Testar conexão', testIcon: s.test === 'ok' ? 'circle-check' : s.test === 'run' ? 'loader' : 'activity',
+      testConn: () => { this.setState({ test: 'run' }); setTimeout(() => { this.setState({ test: 'ok' }); notify('Teste simulado concluído · ambiente de homologação.', 'success'); }, 1200); },
+      steps: [
+        ['Parceria e escopo', 'Definição comercial e escopo do conector com a Boa Vista.', 'Concluído', 'done'],
+        ['Especificação técnica', 'APIs, autenticação, fluxos de autorização, estorno e conciliação.', 'Em andamento', 'cur'],
+        ['Homologação', 'Testes ponta a ponta com terminais e transações de teste.', 'Pendente', 'next'],
+        ['Produção', 'Ativação gradual por estabelecimento.', 'Pendente', 'next']
+      ].map(([t, d, st, k], i) => ({ n: k === 'done' ? '✓' : String(i + 1), t, d, s: st, bg: k === 'done' ? 'var(--a1-ok-fg2,#1F8A5B)' : k === 'cur' ? '#2D5BD8' : 'var(--a1-muted,#F1F0EC)', fg: k === 'next' ? 'var(--a1-text-3,#7A7D85)' : '#fff', sc: k === 'done' ? 'var(--a1-ok-fg,#1B6E4A)' : k === 'cur' ? 'var(--a1-info-fg,#23459F)' : 'var(--a1-text-5,#9A9DA4)' })),
+      envs: [['hom', 'Homologação'], ['prod', 'Produção']].map(([id, label]) => ({ label, bg: s.env === id ? 'var(--a1-strong,#15171C)' : 'transparent', fg: s.env === id ? '#fff' : 'var(--a1-text-2s,#4A4D55)', pick: () => id === 'prod' ? notify('Produção disponível após a homologação.', 'warn') : this.setState({ env: id }) })),
+      estabT: [['central', 'Posto Central', '2 terminais'], ['avenida', 'Posto Avenida', '2 terminais'], ['saopedro', 'Posto São Pedro', '1 terminal'], ['rodovia', 'Posto Rodovia 330', 'Em implantação']].map(([id, name, sub]) => ({ name, sub, ...sw(s.estabs[id]), toggle: () => this.setState({ estabs: { ...s.estabs, [id]: !s.estabs[id] } }) })),
+      methodsT: [['c', 'Cartão de crédito', 'credit-card'], ['d', 'Cartão de débito', 'wallet-cards'], ['p', 'PIX', 'qr-code']].map(([id, name, icon]) => ({ name, icon, ...sw(s.meios[id]), toggle: () => this.setState({ meios: { ...s.meios, [id]: !s.meios[id] } }) })),
+      terms: [['POS-01', 'Posto Central', 'Caixa 01', true, '09:41', 'R$ 38.212'], ['POS-02', 'Posto Central', 'Caixa 02', true, '09:39', 'R$ 22.940'], ['POS-03', 'Posto Avenida', 'Caixa 01', true, '09:40', 'R$ 41.003'], ['POS-04', 'Posto Avenida', 'Pista · móvel', false, '08:12', 'R$ 9.880'], ['POS-05', 'Posto São Pedro', 'Caixa 01', true, '09:35', 'R$ 18.410']]
+        .map(([id, estab, link, on, last, vol]) => ({ id, estab, link, last, vol, st: on ? 'Online' : 'Offline há 1h29', fg: on ? 'var(--a1-ok-fg,#1B6E4A)' : 'var(--a1-err-fg,#9E2F27)', dot: on ? 'var(--a1-ok-fg2,#1F8A5B)' : '#C8433A' })),
+      txFilters: ['Todas', 'Aprovadas', 'Recusadas', 'Estornadas', 'Pendentes'].map((f) => ({ label: f, n: f === 'Todas' ? s.txs.length : s.txs.filter((x) => x.st === f.replace(/s$/, '')).length, bg: s.txf === f ? 'var(--a1-strong,#15171C)' : 'var(--a1-surface,#fff)', fg: s.txf === f ? '#fff' : 'var(--a1-text-2s,#4A4D55)', border: s.txf === f ? 'var(--a1-text,#15171C)' : 'var(--a1-border-2,#E1E0DA)', pick: () => this.setState({ txf: f }) })),
+      txs: txList.map((x) => ({ ...x, icon: MI[x.method], val: brl(x.val), stBg: SST[x.st][0], stFg: SST[x.st][1], canRefund: x.st === 'Aprovada', refund: () => this.setState({ refund: x.id }) })),
+      refundOpen: !!rf, rf: rf ? { nsu: rf.nsu, val: brl(rf.val) } : {},
+      closeRefund: () => this.setState({ refund: null }),
+      confirmRefund: () => { this.setState({ txs: s.txs.map((x) => x.id === s.refund ? { ...x, st: 'Estornada' } : x), refund: null }); notify('Estorno registrado · NSU ' + rf.nsu, 'success'); },
+      concCards: [
+        { label: 'Vendas no ERP', v: 'R$ 192.884,10', s: '1.302 vendas com cartão/PIX', bg: 'var(--a1-surface-2,#FAFAF8)', fg: 'var(--a1-text,#15171C)' },
+        { label: 'Transações do conector', v: 'R$ 192.741,80', s: '1.299 transações', bg: 'var(--a1-surface-2,#FAFAF8)', fg: 'var(--a1-text,#15171C)' },
+        { label: 'Conciliadas', v: '99,8%', s: '1.296 correspondências automáticas', bg: 'var(--a1-ok-bg,#E6F4EC)', fg: 'var(--a1-ok-fg,#1B6E4A)' },
+        { label: 'A identificar', v: 'R$ 142,30', s: '3 divergências', bg: 'var(--a1-warn-bg,#FBF1DF)', fg: 'var(--a1-warn-fg,#8A5A12)' }
+      ],
+      divs: [
+        ['Venda sem transação correspondente', 'NFC-e 117.904 · Caixa 02 · Crédito · 19/11 18:22', 'R$ 89,90', 'Vincular', 'link', 'var(--a1-warn-bg,#FBF1DF)', 'var(--a1-warn-fg,#8A5A12)'],
+        ['Valor divergente', 'NSU 399812 · ERP R$ 120,00 × conector R$ 100,00', 'R$ 20,00', 'Ajustar venda', 'not-equal', 'var(--a1-err-bg,#FBEAE8)', 'var(--a1-err-fg,#9E2F27)'],
+        ['Transação sem venda no ERP', 'NSU 399877 · POS-04 · Débito · 19/11 21:05', 'R$ 32,40', 'Criar venda', 'file-question', 'var(--a1-info-bg,#EAF0FD)', 'var(--a1-accent-text,#2D5BD8)']
+      ].map(([t, sub, v, cta, icon, bg, fg], i) => ({ t, s: sub, v, cta, icon, bg, fg, open: !s.divs[i], done: s.divs[i], fix: () => { this.setState({ divs: s.divs.map((d, j) => j === i ? true : d) }); notify('Divergência conciliada: ' + t, 'success'); } })),
+      fees: [['21/11', 'Débito', 62118.9, 1.1, 'Previsto'], ['21/11', 'PIX', 0, 0, '—'], ['20/12', 'Crédito à vista', 148302.4, 2.4, 'Previsto'], ['20/12', 'Crédito 2–3x', 21490.6, 3.1, 'Previsto'], ['20/11', 'Débito', 58910.2, 1.1, 'Liquidado'], ['20/11', 'Crédito à vista', 139442.7, 2.4, 'Liquidado']]
+        .filter((f) => f[2] > 0).map(([d, m, g, t, st]) => ({ d, m, g: brl(g), t: t.toFixed(1).replace('.', ',') + '% · ' + brl(g * t / 100), n: brl(g * (1 - t / 100)), s: st, bg: st === 'Liquidado' ? 'var(--a1-ok-bg,#E6F4EC)' : 'var(--a1-info-bg,#EAF0FD)', fg: st === 'Liquidado' ? 'var(--a1-ok-fg,#1B6E4A)' : 'var(--a1-info-fg,#23459F)' }))
+    };
+  }
+}
+
+</script>
+</body>
+</html>

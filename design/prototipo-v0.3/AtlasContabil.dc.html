@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="display:flex;flex-direction:column;gap:18px;animation:a1in .2s ease">
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap">
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <div style="font-family:'Geist Mono',monospace;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--a1-text-3,#7A7D85)">Atlas Contábil · Visão da carteira</div>
+      <div style="font-size:28px;font-weight:600;letter-spacing:-.025em">Carteira de clientes</div>
+      <div style="font-size:13.5px;color:var(--a1-text-2,#62656D)">CCI Consultoria · competência {{ comp }}</div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <select value="{{ comp }}" onChange="{{ setComp }}" style="height:40px;padding:0 12px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:9px;background:var(--a1-surface,#fff);font-size:13px;font-weight:550"><option>Outubro/2026</option><option>Setembro/2026</option><option>Agosto/2026</option></select>
+      <button onClick="{{ newClient }}" style="height:40px;padding:0 16px;border:0;border-radius:9px;background:#2D5BD8;color:#fff;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px" style-hover="background:#2450C4"><x-import component="Icon" from="./Icon.js" i="plus" size="16" hint-size="16px,16px"></x-import>Novo cliente</button>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px">
+    <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
+      <div style="background:var(--a1-surface,#fff);border:1px solid var(--a1-border,#E6E5E0);border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;justify-content:space-between;color:var(--a1-text-2,#62656D);font-size:13px"><span>{{ k.label }}</span><x-import component="Icon" from="./Icon.js" i="{{ k.icon }}" size="16" color="var(--a1-text-5,#9A9DA4)" hint-size="16px,16px"></x-import></div>
+        <div style="display:flex;align-items:baseline;gap:6px"><span style="font-size:26px;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums">{{ k.value }}</span><span style="font-size:13px;color:var(--a1-text-5,#9A9DA4)">{{ k.of }}</span></div>
+        <div style="font-size:12.5px;color:var(--a1-text-2,#62656D)">{{ k.foot }}</div>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;gap:14px">
+    <div style="flex:1 1 380px;min-width:0;display:flex;flex-direction:column;gap:14px">
+      <sc-for list="{{ depts }}" as="d" hint-placeholder-count="3">
+        <div style="background:var(--a1-surface,#fff);border:1px solid var(--a1-border,#E6E5E0);border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div style="width:36px;height:36px;border-radius:9px;background:{{ d.bg }};color:{{ d.fg }};display:flex;align-items:center;justify-content:center"><x-import component="Icon" from="./Icon.js" i="{{ d.icon }}" size="18" hint-size="18px,18px"></x-import></div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font-size:14.5px;font-weight:600">{{ d.name }}</span><span style="font-size:12px;color:var(--a1-text-3,#7A7D85)">{{ d.sub }}</span></div>
+            <span style="font-size:22px;font-weight:600;font-variant-numeric:tabular-nums">{{ d.pct }}</span>
+          </div>
+          <div style="height:8px;border-radius:6px;background:var(--a1-muted,#F1F0EC);overflow:hidden"><div style="height:100%;width:{{ d.pct }};background:{{ d.fg }};border-radius:6px"></div></div>
+          <div style="display:flex;gap:16px;font-size:12px;color:var(--a1-text-2,#62656D);flex-wrap:wrap"><span><b style="color:var(--a1-text,#15171C)">{{ d.done }}</b> concluídas</span><span><b style="color:var(--a1-text,#15171C)">{{ d.prog }}</b> em andamento</span><span style="color:{{ d.lateColor }}"><b>{{ d.late }}</b> em atraso</span></div>
+        </div>
+      </sc-for>
+    </div>
+    <div style="flex:1.4 1 460px;min-width:0;background:var(--a1-surface,#fff);border:1px solid var(--a1-border,#E6E5E0);border-radius:12px;display:flex;flex-direction:column">
+      <div style="padding:16px 20px;border-bottom:1px solid var(--a1-divider,#EFEEEA);display:flex;justify-content:space-between;align-items:center"><div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:15px;font-weight:600">Calendário de obrigações</span><span style="font-size:12.5px;color:var(--a1-text-3,#7A7D85)">Próximos 30 dias · prazos ilustrativos</span></div></div>
+      <sc-for list="{{ obligs }}" as="o" hint-placeholder-count="7">
+        <div style="display:flex;align-items:center;gap:14px;padding:12px 20px;border-bottom:1px solid var(--a1-divider-2,#F2F1ED)">
+          <div style="width:48px;flex:none;display:flex;flex-direction:column;align-items:center;padding:6px 0;border-radius:9px;background:{{ o.dBg }};color:{{ o.dFg }}"><span style="font-size:17px;font-weight:650;line-height:1">{{ o.day }}</span><span style="font-size:10.5px;text-transform:uppercase;letter-spacing:.04em">{{ o.mon }}</span></div>
+          <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px"><span style="font-size:13.5px;font-weight:600">{{ o.name }}</span><span style="font-size:12px;color:var(--a1-text-3,#7A7D85)">{{ o.dept }} · {{ o.n }} clientes · resp. {{ o.resp }}</span></div>
+          <div style="width:110px;display:flex;flex-direction:column;gap:4px;align-items:flex-end"><span style="font-size:12px;font-weight:600;font-variant-numeric:tabular-nums">{{ o.done }}</span><div style="width:100%;height:5px;border-radius:4px;background:var(--a1-muted,#F1F0EC)"><div style="height:100%;width:{{ o.pct }};border-radius:4px;background:{{ o.bar }}"></div></div></div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="background:var(--a1-surface,#fff);border:1px solid var(--a1-border,#E6E5E0);border-radius:12px;overflow:hidden">
+    <div style="padding:14px 16px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--a1-divider,#EFEEEA)">
+      <div style="font-size:15px;font-weight:600;margin-right:6px">Clientes contábeis</div>
+      <div style="display:flex;align-items:center;gap:8px;height:36px;flex:1 1 220px;max-width:320px;padding:0 10px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:8px;color:var(--a1-text-4,#8A8D95)"><x-import component="Icon" from="./Icon.js" i="search" size="15" hint-size="15px,15px"></x-import><input value="{{ q }}" onChange="{{ setQ }}" placeholder="Empresa ou CNPJ" style="flex:1;min-width:0;border:0;outline:0;font-size:13px;background:transparent"></input></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <sc-for list="{{ regimes }}" as="r" hint-placeholder-count="4"><button onClick="{{ r.pick }}" style="height:32px;padding:0 12px;border:1px solid {{ r.border }};border-radius:999px;background:{{ r.bg }};color:{{ r.fg }};font-size:12.5px;font-weight:550;cursor:pointer">{{ r.label }}</button></sc-for>
+      </div>
+    </div>
+    <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:13px;min-width:900px">
+        <thead><tr style="background:var(--a1-surface-2,#FAFAF8);color:var(--a1-text-2,#62656D);text-align:left;font-size:12px"><th style="padding:10px 16px;font-weight:550">Empresa</th><th style="padding:10px 14px;font-weight:550">Regime</th><th style="padding:10px 14px;font-weight:550">Segmento</th><th style="padding:10px 14px;font-weight:550">Fiscal</th><th style="padding:10px 14px;font-weight:550">Contábil</th><th style="padding:10px 14px;font-weight:550">Pessoal</th><th style="padding:10px 14px;font-weight:550">Responsável</th><th style="padding:10px 16px;font-weight:550;text-align:right">Pendências</th></tr></thead>
+        <tbody>
+          <sc-for list="{{ clients }}" as="c" hint-placeholder-count="8">
+            <tr style="border-top:1px solid var(--a1-divider-2,#F2F1ED)" style-hover="background:var(--a1-surface-2,#FAFAF8)">
+              <td style="padding:11px 16px"><div style="display:flex;flex-direction:column;gap:2px"><span style="font-weight:550">{{ c.name }}</span><span style="font-family:'Geist Mono',monospace;font-size:11px;color:var(--a1-text-5,#9A9DA4)">{{ c.cnpj }}</span></div></td>
+              <td style="padding:11px 14px"><span style="font-size:11.5px;font-weight:600;padding:3px 8px;border-radius:6px;background:{{ c.rBg }};color:{{ c.rFg }};white-space:nowrap">{{ c.regime }}</span></td>
+              <td style="padding:11px 14px;color:var(--a1-text-2,#62656D)">{{ c.seg }}</td>
+              <td style="padding:11px 14px"><span style="display:inline-flex;align-items:center;gap:5px;font-size:12px;color:{{ c.f.fg }};font-weight:550"><x-import component="Icon" from="./Icon.js" i="{{ c.f.icon }}" size="14" hint-size="14px,14px"></x-import>{{ c.f.l }}</span></td>
+              <td style="padding:11px 14px"><span style="display:inline-flex;align-items:center;gap:5px;font-size:12px;color:{{ c.c.fg }};font-weight:550"><x-import component="Icon" from="./Icon.js" i="{{ c.c.icon }}" size="14" hint-size="14px,14px"></x-import>{{ c.c.l }}</span></td>
+              <td style="padding:11px 14px"><span style="display:inline-flex;align-items:center;gap:5px;font-size:12px;color:{{ c.p.fg }};font-weight:550"><x-import component="Icon" from="./Icon.js" i="{{ c.p.icon }}" size="14" hint-size="14px,14px"></x-import>{{ c.p.l }}</span></td>
+              <td style="padding:11px 14px;color:var(--a1-text-2s,#4A4D55)">{{ c.resp }}</td>
+              <td style="padding:11px 16px;text-align:right;font-variant-numeric:tabular-nums;font-weight:600;color:{{ c.pendColor }}">{{ c.pend }}</td>
+            </tr>
+          </sc-for>
+        </tbody>
+      </table>
+    </div>
+    <div style="padding:12px 16px;border-top:1px solid var(--a1-divider,#EFEEEA);font-size:12.5px;color:var(--a1-text-2,#62656D)">{{ count }} de 148 clientes exibidos</div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const S = { ok: ['circle-check', 'Concluído', 'var(--a1-ok-fg,#1B6E4A)'], prog: ['circle-dashed', 'Em andamento', 'var(--a1-info-fg,#23459F)'], late: ['circle-alert', 'Em atraso', 'var(--a1-err-fg2,#B23A31)'], na: ['minus', 'Não se aplica', 'var(--a1-text-5,#9A9DA4)'] };
+const CLIENTS = [
+  ['Grupo Horizonte Combustíveis Ltda', '12.418.330/0001-07', 'Lucro Real', 'Posto de combustível', 'ok', 'prog', 'ok', 'Fernanda Lima', 2],
+  ['Auto Posto Serra Azul Ltda', '33.902.114/0001-58', 'Lucro Presumido', 'Posto de combustível', 'prog', 'prog', 'ok', 'Fernanda Lima', 4],
+  ['Padaria Pão Dourado ME', '18.442.071/0001-30', 'Simples Nacional', 'Comércio', 'ok', 'ok', 'ok', 'Rodrigo Teles', 0],
+  ['Clínica Vida Plena S/S', '27.115.803/0001-09', 'Lucro Presumido', 'Serviços', 'ok', 'late', 'prog', 'Rodrigo Teles', 3],
+  ['Transportadora Veloz Ltda', '11.204.556/0001-90', 'Lucro Real', 'Transporte', 'late', 'prog', 'ok', 'Aline Duarte', 6],
+  ['Mercado Bom Preço Ltda', '40.218.665/0001-12', 'Simples Nacional', 'Comércio', 'ok', 'ok', 'prog', 'Aline Duarte', 1],
+  ['Auto Posto Rio Pardo Ltda', '09.774.219/0001-81', 'Lucro Presumido', 'Posto de combustível', 'prog', 'ok', 'ok', 'Fernanda Lima', 1],
+  ['Studio Arq Projetos ME', '36.551.930/0001-44', 'Simples Nacional', 'Serviços', 'ok', 'ok', 'na', 'Rodrigo Teles', 0],
+  ['Agropecuária Sertão Verde S.A.', '05.338.102/0001-75', 'Lucro Real', 'Agronegócio', 'prog', 'late', 'prog', 'Aline Duarte', 5],
+  ['Farmácia Saúde Já Ltda', '22.904.448/0001-63', 'Simples Nacional', 'Comércio', 'ok', 'prog', 'ok', 'Rodrigo Teles', 1]
+];
+const RC = { 'Simples Nacional': ['var(--a1-ok-bg,#E6F4EC)', 'var(--a1-ok-fg,#1B6E4A)'], 'Lucro Presumido': ['var(--a1-info-bg,#EAF0FD)', 'var(--a1-info-fg,#23459F)'], 'Lucro Real': ['var(--a1-purple-bg,#F1EEFB)', 'var(--a1-purple-fg,#5B45A8)'] };
+class Component extends DCLogic {
+  state = { q: '', regime: 'Todos', comp: 'Outubro/2026' };
+  renderVals() {
+    const s = this.state; const notify = this.props.notify || (() => {});
+    const q = s.q.toLowerCase();
+    const list = CLIENTS.filter((c) => (s.regime === 'Todos' || c[2] === s.regime) && (!q || (c[0] + c[1]).toLowerCase().includes(q)));
+    const st = (k) => ({ icon: S[k][0], l: S[k][1], fg: S[k][2] });
+    return {
+      comp: s.comp, setComp: (e) => this.setState({ comp: e.target.value }),
+      kpis: [
+        { label: 'Clientes ativos', icon: 'briefcase', value: '148', of: '', foot: '+6 no trimestre · 3 em onboarding' },
+        { label: 'Obrigações da competência', icon: 'calendar-check', value: '434', of: 'de 612', foot: '71% entregues dentro do prazo' },
+        { label: 'Guias emitidas', icon: 'file-text', value: '384', of: '', foot: 'R$ 2,41 mi em tributos apurados' },
+        { label: 'Folhas processadas', icon: 'users', value: '96', of: 'de 112', foot: '1.842 colaboradores na carteira' }
+      ],
+      depts: [
+        { name: 'Fiscal', sub: 'Escrituração, apuração e obrigações acessórias', icon: 'receipt-text', bg: 'var(--a1-info-bg,#EAF0FD)', fg: 'var(--a1-accent-text,#2D5BD8)', pct: '78%', done: 214, prog: 48, late: 12 },
+        { name: 'Contábil', sub: 'Lançamentos, conciliações e balancetes', icon: 'book-open', bg: 'var(--a1-purple-bg,#F1EEFB)', fg: 'var(--a1-purple-fg,#5B45A8)', pct: '64%', done: 95, prog: 46, late: 7 },
+        { name: 'Departamento pessoal', sub: 'Folha, eSocial e encargos', icon: 'id-card', bg: 'var(--a1-ok-bg,#E6F4EC)', fg: 'var(--a1-ok-fg,#1B6E4A)', pct: '86%', done: 96, prog: 14, late: 2 }
+      ].map((d) => ({ ...d, lateColor: d.late > 5 ? 'var(--a1-err-fg2,#B23A31)' : 'var(--a1-text-2,#62656D)' })),
+      obligs: [
+        ['20', 'nov', 'DCTFWeb · outubro', 'Pessoal', 82, 74, 'Aline Duarte'], ['20', 'nov', 'DAS · Simples Nacional', 'Fiscal', 64, 61, 'Rodrigo Teles'],
+        ['25', 'nov', 'EFD-Contribuições', 'Fiscal', 41, 22, 'Fernanda Lima'], ['28', 'nov', 'DCTF mensal', 'Fiscal', 38, 9, 'Fernanda Lima'],
+        ['05', 'dez', 'Folha de pagamento · novembro', 'Pessoal', 112, 0, 'Aline Duarte'], ['10', 'dez', 'SPED Fiscal · EFD ICMS/IPI', 'Fiscal', 47, 0, 'Fernanda Lima'], ['15', 'dez', 'Balancetes mensais', 'Contábil', 96, 0, 'Rodrigo Teles']
+      ].map(([day, mon, name, dept, n, d, resp]) => { const p = d / n; const urgent = day === '20'; return { day, mon, name, dept, n, resp, done: d + '/' + n, pct: Math.round(p * 100) + '%', bar: p >= .9 ? 'var(--a1-ok-fg2,#1F8A5B)' : urgent ? '#C8433A' : '#2D5BD8', dBg: urgent ? 'var(--a1-err-bg,#FBEAE8)' : 'var(--a1-muted,#F1F0EC)', dFg: urgent ? 'var(--a1-err-fg,#9E2F27)' : 'var(--a1-text,#15171C)' }; }),
+      q: s.q, setQ: (e) => this.setState({ q: e.target.value }),
+      regimes: ['Todos', 'Simples Nacional', 'Lucro Presumido', 'Lucro Real'].map((r) => ({ label: r, bg: s.regime === r ? 'var(--a1-strong,#15171C)' : 'var(--a1-surface,#fff)', fg: s.regime === r ? '#fff' : 'var(--a1-text-2s,#4A4D55)', border: s.regime === r ? 'var(--a1-text,#15171C)' : 'var(--a1-border-2,#E1E0DA)', pick: () => this.setState({ regime: r }) })),
+      clients: list.map((c) => ({ name: c[0], cnpj: c[1], regime: c[2], seg: c[3], f: st(c[4]), c: st(c[5]), p: st(c[6]), resp: c[7], pend: c[8], pendColor: c[8] >= 4 ? 'var(--a1-err-fg2,#B23A31)' : c[8] ? 'var(--a1-text,#15171C)' : 'var(--a1-text-5,#9A9DA4)', rBg: RC[c[2]][0], rFg: RC[c[2]][1] })),
+      count: list.length,
+      newClient: () => notify('Cadastro de cliente contábil será detalhado na próxima etapa.', 'info')
+    };
+  }
+}
+
+</script>
+</body>
+</html>

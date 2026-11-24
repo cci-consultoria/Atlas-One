@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="display:flex;flex-direction:column;gap:18px;animation:a1in .2s ease">
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap">
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <div style="font-family:'Geist Mono',monospace;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--a1-text-3,#7A7D85)">Atlas Postos · Cadastros</div>
+      <div style="font-size:28px;font-weight:600;letter-spacing:-.025em">Produtos</div>
+      <div style="font-size:13.5px;color:var(--a1-text-2,#62656D)">{{ total }} produtos cadastrados · catálogo compartilhado entre os estabelecimentos da rede</div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button onClick="{{ exportCsv }}" style="height:40px;padding:0 14px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:9px;background:var(--a1-surface,#fff);font-size:13px;font-weight:550;cursor:pointer;display:flex;align-items:center;gap:8px"><x-import component="Icon" from="./Icon.js" i="download" size="16" hint-size="16px,16px"></x-import>Exportar</button>
+      <button onClick="{{ openNew }}" style="height:40px;padding:0 16px;border:0;border-radius:9px;background:#2D5BD8;color:#fff;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px" style-hover="background:#2450C4"><x-import component="Icon" from="./Icon.js" i="plus" size="16" hint-size="16px,16px"></x-import>Novo produto</button>
+    </div>
+  </div>
+
+  <div style="background:var(--a1-surface,#fff);border:1px solid var(--a1-border,#E6E5E0);border-radius:12px;overflow:hidden">
+    <div style="padding:14px 16px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--a1-divider,#EFEEEA)">
+      <div style="display:flex;align-items:center;gap:8px;height:38px;flex:1 1 280px;max-width:420px;padding:0 12px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:9px;color:var(--a1-text-4,#8A8D95)">
+        <x-import component="Icon" from="./Icon.js" i="search" size="16" hint-size="16px,16px"></x-import>
+        <input value="{{ q }}" onChange="{{ setQ }}" placeholder="Buscar por descrição, código ou EAN" style="flex:1;min-width:0;border:0;outline:0;font-size:13.5px;background:transparent"></input>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <sc-for list="{{ cats }}" as="c" hint-placeholder-count="6">
+          <button onClick="{{ c.pick }}" style="height:32px;padding:0 12px;border:1px solid {{ c.border }};border-radius:999px;background:{{ c.bg }};color:{{ c.fg }};font-size:12.5px;font-weight:550;cursor:pointer;display:flex;align-items:center;gap:6px">{{ c.label }}<span style="font-size:11px;opacity:.7;font-variant-numeric:tabular-nums">{{ c.n }}</span></button>
+        </sc-for>
+      </div>
+      <div style="flex:1"></div>
+      <label style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--a1-text-2s,#4A4D55)"><input type="checkbox" checked="{{ onlyActive }}" onChange="{{ toggleActive }}" style="width:15px;height:15px;accent-color:#2D5BD8"></input>Somente ativos</label>
+    </div>
+    <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:13px;min-width:920px">
+        <thead>
+          <tr style="background:var(--a1-surface-2,#FAFAF8);color:var(--a1-text-2,#62656D);text-align:left">
+            <sc-for list="{{ cols }}" as="h" hint-placeholder-count="9">
+              <th onClick="{{ h.sort }}" style="padding:10px 14px;font-weight:550;font-size:12px;border-bottom:1px solid var(--a1-divider,#EFEEEA);cursor:{{ h.cursor }};white-space:nowrap;text-align:{{ h.align }}">
+                <span style="display:inline-flex;align-items:center;gap:4px">{{ h.label }}<x-import component="Icon" from="./Icon.js" i="{{ h.icon }}" size="12" color="{{ h.iconColor }}" hint-size="12px,12px"></x-import></span>
+              </th>
+            </sc-for>
+            <th style="border-bottom:1px solid var(--a1-divider,#EFEEEA);width:44px"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <sc-for list="{{ rows }}" as="p" hint-placeholder-count="10">
+            <tr onClick="{{ p.edit }}" style="cursor:pointer;border-bottom:1px solid var(--a1-divider-2,#F2F1ED)" style-hover="background:var(--a1-surface-2,#FAFAF8)">
+              <td style="padding:11px 14px;font-family:'Geist Mono',monospace;font-size:12px;color:var(--a1-text-2,#62656D)">{{ p.code }}</td>
+              <td style="padding:11px 14px"><div style="display:flex;align-items:center;gap:10px"><div style="width:30px;height:30px;border-radius:8px;background:{{ p.catBg }};color:{{ p.catFg }};display:flex;align-items:center;justify-content:center;flex:none"><x-import component="Icon" from="./Icon.js" i="{{ p.icon }}" size="15" hint-size="15px,15px"></x-import></div><div style="display:flex;flex-direction:column;gap:1px"><span style="font-weight:550">{{ p.desc }}</span><span style="font-family:'Geist Mono',monospace;font-size:11px;color:var(--a1-text-5,#9A9DA4)">{{ p.ean }}</span></div></div></td>
+              <td style="padding:11px 14px;color:var(--a1-text-2s,#4A4D55)">{{ p.cat }}</td>
+              <td style="padding:11px 14px;color:var(--a1-text-2,#62656D)">{{ p.un }}</td>
+              <td style="padding:11px 14px;text-align:right;font-variant-numeric:tabular-nums;color:var(--a1-text-2,#62656D)">{{ p.costL }}</td>
+              <td style="padding:11px 14px;text-align:right;font-variant-numeric:tabular-nums;font-weight:600">{{ p.priceL }}</td>
+              <td style="padding:11px 14px;text-align:right;font-variant-numeric:tabular-nums;color:{{ p.mColor }}">{{ p.marginL }}</td>
+              <td style="padding:11px 14px;text-align:right;font-variant-numeric:tabular-nums">{{ p.stockL }}</td>
+              <td style="padding:11px 14px"><span style="font-size:11.5px;font-weight:600;padding:3px 8px;border-radius:999px;background:{{ p.stBg }};color:{{ p.stFg }};white-space:nowrap">{{ p.status }}</span></td>
+              <td style="padding:11px 10px;color:var(--a1-text-5,#9A9DA4)"><x-import component="Icon" from="./Icon.js" i="pencil" size="15" hint-size="15px,15px"></x-import></td>
+            </tr>
+          </sc-for>
+        </tbody>
+      </table>
+      <sc-if value="{{ empty }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:48px 16px;display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--a1-text-3,#7A7D85);font-size:13.5px"><x-import component="Icon" from="./Icon.js" i="search-x" size="22" hint-size="22px,22px"></x-import>Nenhum produto encontrado para “{{ q }}”.</div>
+      </sc-if>
+    </div>
+    <div style="padding:12px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;border-top:1px solid var(--a1-divider,#EFEEEA);font-size:12.5px;color:var(--a1-text-2,#62656D)">
+      <span>Mostrando {{ range }} de {{ count }}</span>
+      <div style="display:flex;gap:4px;align-items:center">
+        <button onClick="{{ prev }}" style="width:32px;height:32px;border:1px solid var(--a1-border-2,#E1E0DA);border-radius:8px;background:var(--a1-surface,#fff);cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:{{ prevOp }}"><x-import component="Icon" from="./Icon.js" i="chevron-left" size="15" hint-size="15px,15px"></x-import></button>
+        <sc-for list="{{ pages }}" as="pg" hint-placeholder-count="4">
+          <button onClick="{{ pg.go }}" style="min-width:32px;height:32px;padding:0 8px;border:1px solid {{ pg.border }};border-radius:8px;background:{{ pg.bg }};color:{{ pg.fg }};font-size:12.5px;font-weight:600;cursor:pointer">{{ pg.n }}</button>
+        </sc-for>
+        <button onClick="{{ next }}" style="width:32px;height:32px;border:1px solid var(--a1-border-2,#E1E0DA);border-radius:8px;background:var(--a1-surface,#fff);cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:{{ nextOp }}"><x-import component="Icon" from="./Icon.js" i="chevron-right" size="15" hint-size="15px,15px"></x-import></button>
+      </div>
+    </div>
+  </div>
+
+  <sc-if value="{{ drawer }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ close }}" style="position:fixed;inset:0;background:rgba(15,17,21,.4);z-index:90"></div>
+    <div style="position:fixed;top:0;right:0;bottom:0;width:min(520px,100vw);background:var(--a1-surface,#fff);z-index:91;display:flex;flex-direction:column;box-shadow:-20px 0 50px rgba(15,17,21,.18);animation:a1in .2s ease">
+      <div style="padding:20px 24px;border-bottom:1px solid var(--a1-divider,#EFEEEA);display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+        <div style="display:flex;flex-direction:column;gap:4px"><div style="font-size:18px;font-weight:600">{{ drawerTitle }}</div><div style="font-size:12.5px;color:var(--a1-text-3,#7A7D85)">Campos com * são obrigatórios</div></div>
+        <button onClick="{{ close }}" style="width:34px;height:34px;border:0;border-radius:8px;background:var(--a1-bg,#F5F5F2);cursor:pointer;display:flex;align-items:center;justify-content:center"><x-import component="Icon" from="./Icon.js" i="x" size="16" hint-size="16px,16px"></x-import></button>
+      </div>
+      <div style="flex:1;overflow:auto;padding:20px 24px;display:flex;flex-direction:column;gap:22px">
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div style="font-size:12px;font-weight:600;color:var(--a1-text-3,#7A7D85);letter-spacing:.06em;text-transform:uppercase">Identificação</div>
+          <label style="display:flex;flex-direction:column;gap:6px;font-size:12.5px;font-weight:550">Descrição *
+            <input value="{{ f.desc }}" onChange="{{ fDesc }}" placeholder="Ex.: Água mineral 500 ml" style="height:40px;padding:0 12px;border:1px solid {{ descBorder }};border-radius:8px;font-size:13.5px;font-weight:400"></input>
+            <sc-if value="{{ descErr }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px;color:var(--a1-err-fg2,#B23A31);font-weight:400">Informe a descrição do produto.</span></sc-if>
+          </label>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px">
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:12.5px;font-weight:550">Código de barras (EAN)
+              <div style="display:flex;align-items:center;gap:8px;height:40px;padding:0 10px 0 12px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:8px"><input value="{{ f.ean }}" onChange="{{ fEan }}" style="flex:1;min-width:0;border:0;outline:0;font-family:'Geist Mono',monospace;font-size:13px"></input><x-import component="Icon" from="./Icon.js" i="scan-barcode" size="16" color="var(--a1-text-4,#8A8D95)" hint-size="16px,16px"></x-import></div>
+            </label>
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:12.5px;font-weight:550">Categoria
+              <select value="{{ f.cat }}" onChange="{{ fCat }}" style="height:40px;padding:0 10px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:8px;font-size:13.5px;background:var(--a1-surface,#fff)">
+                <option>Combustíveis</option><option>Conveniência</option><option>Lubrificantes</option><option>Aditivos e acessórios</option><option>Serviços</option>
+              </select>
+            </label>
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:12.5px;font-weight:550">Unidade
+              <select value="{{ f.un }}" onChange="{{ fUn }}" style="height:40px;padding:0 10px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:8px;font-size:13.5px;background:var(--a1-surface,#fff)"><option>UN</option><option>L</option><option>KG</option><option>CX</option><option>SV</option></select>
+            </label>
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:12.5px;font-weight:550">Código interno
+              <input value="{{ f.code }}" disabled="{{ true }}" style="height:40px;padding:0 12px;border:1px solid var(--a1-border,#E6E5E0);border-radius:8px;font-family:'Geist Mono',monospace;font-size:13px;background:var(--a1-surface-2b,#F7F7F4);color:var(--a1-text-3,#7A7D85)"></input>
+            </label>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div style="font-size:12px;font-weight:600;color:var(--a1-text-3,#7A7D85);letter-spacing:.06em;text-transform:uppercase">Preços</div>
+          <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px">
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:12.5px;font-weight:550">Custo (R$)<input value="{{ f.cost }}" onChange="{{ fCost }}" inputMode="decimal" style="height:40px;padding:0 12px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:8px;font-size:13.5px;font-variant-numeric:tabular-nums"></input></label>
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:12.5px;font-weight:550">Venda (R$) *<input value="{{ f.price }}" onChange="{{ fPrice }}" inputMode="decimal" style="height:40px;padding:0 12px;border:1px solid {{ priceBorder }};border-radius:8px;font-size:13.5px;font-variant-numeric:tabular-nums"></input></label>
+            <div style="display:flex;flex-direction:column;gap:6px;font-size:12.5px;font-weight:550">Margem<div style="height:40px;padding:0 12px;border-radius:8px;background:{{ mBg }};color:{{ mFg }};display:flex;align-items:center;font-size:15px;font-weight:600;font-variant-numeric:tabular-nums">{{ liveMargin }}</div></div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div style="font-size:12px;font-weight:600;color:var(--a1-text-3,#7A7D85);letter-spacing:.06em;text-transform:uppercase">Fiscal</div>
+          <div style="display:flex;gap:8px;padding:10px 12px;border-radius:8px;background:var(--a1-warn-bg,#FBF1DF);color:var(--a1-warn-fg2,#7A4E0F);font-size:12.5px;line-height:1.45"><x-import component="Icon" from="./Icon.js" i="info" size="15" hint-size="15px,15px"></x-import><span>Regras tributárias definitivas serão definidas na especificação fiscal. Campos ilustrativos.</span></div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px">
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:12.5px;font-weight:550">NCM<input value="{{ f.ncm }}" onChange="{{ fNcm }}" style="height:40px;padding:0 12px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:8px;font-family:'Geist Mono',monospace;font-size:13px"></input></label>
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:12.5px;font-weight:550">CEST<input placeholder="—" style="height:40px;padding:0 12px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:8px;font-family:'Geist Mono',monospace;font-size:13px"></input></label>
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:12.5px;font-weight:550">CFOP<input value="5.102" style="height:40px;padding:0 12px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:8px;font-family:'Geist Mono',monospace;font-size:13px"></input></label>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div style="font-size:12px;font-weight:600;color:var(--a1-text-3,#7A7D85);letter-spacing:.06em;text-transform:uppercase">Estoque e status</div>
+          <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px">
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:12.5px;font-weight:550">Estoque mínimo<input value="{{ f.min }}" onChange="{{ fMin }}" style="height:40px;padding:0 12px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:8px;font-size:13.5px"></input></label>
+            <button onClick="{{ fToggleActive }}" style="align-self:end;height:40px;padding:0 12px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:8px;background:var(--a1-surface,#fff);display:flex;align-items:center;justify-content:space-between;font-size:13px;cursor:pointer">Produto ativo<span style="width:36px;height:20px;border-radius:999px;background:{{ swBg }};position:relative;display:block"><span style="position:absolute;top:2px;left:{{ swLeft }};width:16px;height:16px;border-radius:50%;background:var(--a1-surface,#fff);transition:left .15s"></span></span></button>
+          </div>
+        </div>
+      </div>
+      <div style="padding:14px 24px;border-top:1px solid var(--a1-divider,#EFEEEA);display:flex;gap:8px;justify-content:flex-end">
+        <button onClick="{{ close }}" style="height:40px;padding:0 16px;border:1px solid var(--a1-field-border,#DCDBD5);border-radius:9px;background:var(--a1-surface,#fff);font-size:13px;font-weight:550;cursor:pointer">Cancelar</button>
+        <button onClick="{{ save }}" style="height:40px;padding:0 18px;border:0;border-radius:9px;background:#2D5BD8;color:#fff;font-size:13px;font-weight:600;cursor:pointer" style-hover="background:#2450C4">Salvar produto</button>
+      </div>
+    </div>
+  </sc-if>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const CATS = {
+  'Combustíveis': ['fuel', 'var(--a1-warn-bg2,#FDF3E3)', 'var(--a1-warn-fg4,#9A6514)', 'L', '2710.12.59'],
+  'Conveniência': ['shopping-bag', 'var(--a1-info-bg,#EAF0FD)', 'var(--a1-accent-text,#2D5BD8)', 'UN', '2202.10.00'],
+  'Lubrificantes': ['droplets', 'var(--a1-purple-bg,#F1EEFB)', 'var(--a1-purple-fg,#5B45A8)', 'UN', '2710.19.32'],
+  'Aditivos e acessórios': ['wrench', 'var(--a1-muted,#F1F0EC)', 'var(--a1-text-2s,#4A4D55)', 'UN', '3811.21.40'],
+  'Serviços': ['car', 'var(--a1-ok-bg,#E6F4EC)', 'var(--a1-ok-fg,#1B6E4A)', 'SV', '—']
+};
+const RAW = [
+  ['Combustíveis', [['Gasolina comum', 5.62, 6.19, 18600], ['Gasolina aditivada', 5.78, 6.39, 8100], ['Etanol hidratado', 3.86, 4.29, 10650], ['Diesel S10', 5.51, 6.09, 5400], ['Diesel S500', 5.38, 5.94, 6600], ['ARLA 32 granel', 2.9, 4.2, 1800]]],
+  ['Conveniência', [['Água mineral 500 ml', .98, 3.5, 412], ['Refrigerante cola lata 350 ml', 2.45, 5.9, 288], ['Energético 473 ml', 5.2, 11.9, 96], ['Café expresso 80 ml', .9, 6.5, 0], ['Pão de queijo unidade', .85, 4.9, 140], ['Chocolate ao leite 90 g', 3.1, 7.9, 74], ['Salgadinho 96 g', 3.6, 8.5, 18], ['Isotônico 500 ml', 2.9, 6.9, 132], ['Sanduíche natural', 5.4, 14.9, 22], ['Gelo 5 kg', 4.1, 12, 36], ['Suco integral 300 ml', 3.2, 7.5, 64], ['Biscoito recheado 130 g', 1.9, 4.5, 9], ['Goma de mascar', .7, 2.5, 210], ['Cerveja long neck 330 ml', 3.9, 8.9, 240]]],
+  ['Lubrificantes', [['Óleo 5W30 sintético 1 L', 28.5, 54.9, 48], ['Óleo 15W40 mineral 1 L', 16.2, 32.9, 62], ['Fluido de freio DOT4 500 ml', 12.4, 26.9, 15], ['Aditivo para radiador 1 L', 9.8, 22.9, 4], ['Óleo 2T moto 500 ml', 8.6, 19.9, 27]]],
+  ['Aditivos e acessórios', [['Limpa para-brisa 500 ml', 4.2, 11.9, 33], ['Palheta limpador 20"', 18, 42.9, 12], ['Aromatizante automotivo', 3.8, 12.9, 58], ['Flanela microfibra', 2.6, 9.9, 41]]],
+  ['Serviços', [['Lavagem simples', 0, 40, null], ['Lavagem completa', 0, 75, null], ['Troca de óleo · mão de obra', 0, 35, null], ['Calibragem com nitrogênio', 0, 10, null]]]
+];
+let n = 0;
+const INITIAL = [];
+RAW.forEach(([cat, items]) => items.forEach(([desc, cost, price, stock]) => {
+  n++;
+  INITIAL.push({ id: n, code: String(1000 + n * 7).padStart(6, '0'), ean: cat === 'Serviços' || cat === 'Combustíveis' ? '—' : '789' + String(4512037 + n * 98317).slice(0, 7) + String(n % 10) + '0', desc, cat, un: CATS[cat][3], cost, price, stock, min: cat === 'Combustíveis' ? 4000 : 12, active: !(desc.startsWith('Café') || desc.startsWith('ARLA')), ncm: CATS[cat][4] });
+}));
+const brl = (v) => 'R$ ' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const num = (s) => parseFloat(String(s).replace(/\./g, '').replace(',', '.')) || 0;
+const COLS = [['code', 'Código', 'left'], ['desc', 'Produto', 'left'], ['cat', 'Categoria', 'left'], [null, 'Un', 'left'], ['cost', 'Custo', 'right'], ['price', 'Preço', 'right'], ['margin', 'Margem', 'right'], ['stock', 'Estoque', 'right'], [null, 'Status', 'left']];
+const PER = 10;
+
+class Component extends DCLogic {
+  state = { items: INITIAL, q: '', cat: 'Todos', onlyActive: false, sort: 'desc', dir: 1, page: 0, drawer: false, f: null, tried: false };
+  openForm(p) {
+    const f = p ? { ...p, cost: String(p.cost).replace('.', ','), price: String(p.price).replace('.', ','), min: String(p.min) }
+      : { id: null, code: String(1000 + (this.state.items.length + 1) * 7).padStart(6, '0'), desc: '', ean: '', cat: 'Conveniência', un: 'UN', cost: '', price: '', min: '12', active: true, ncm: '', stock: 0 };
+    this.setState({ drawer: true, f, tried: false });
+  }
+  renderVals() {
+    const s = this.state;
+    const notify = this.props.notify || (() => {});
+    const margin = (p) => p.price > 0 && p.cost > 0 ? (p.price - p.cost) / p.price * 100 : null;
+    const q = s.q.trim().toLowerCase();
+    let list = s.items.filter((p) => (s.cat === 'Todos' || p.cat === s.cat) && (!s.onlyActive || p.active) && (!q || p.desc.toLowerCase().includes(q) || p.code.includes(q) || p.ean.includes(q)));
+    const key = s.sort;
+    list = list.slice().sort((a, b) => {
+      const va = key === 'margin' ? (margin(a) ?? -1) : key === 'stock' ? (a.stock ?? -1) : a[key];
+      const vb = key === 'margin' ? (margin(b) ?? -1) : key === 'stock' ? (b.stock ?? -1) : b[key];
+      return (typeof va === 'string' ? va.localeCompare(vb, 'pt-BR') : va - vb) * s.dir;
+    });
+    const pagesN = Math.max(1, Math.ceil(list.length / PER));
+    const page = Math.min(s.page, pagesN - 1);
+    const slice = list.slice(page * PER, page * PER + PER);
+    const set = (k) => (e) => this.setState({ f: { ...s.f, [k]: e.target.value } });
+    const f = s.f || {};
+    const lm = s.f ? (num(f.price) > 0 && num(f.cost) > 0 ? (num(f.price) - num(f.cost)) / num(f.price) * 100 : null) : null;
+    const catNames = ['Todos'].concat(Object.keys(CATS));
+    return {
+      total: s.items.length, q: s.q, onlyActive: s.onlyActive,
+      setQ: (e) => this.setState({ q: e.target.value, page: 0 }), toggleActive: () => this.setState({ onlyActive: !s.onlyActive, page: 0 }),
+      cats: catNames.map((c) => { const on = s.cat === c; return { label: c, n: c === 'Todos' ? s.items.length : s.items.filter((p) => p.cat === c).length, bg: on ? 'var(--a1-strong,#15171C)' : 'var(--a1-surface,#fff)', fg: on ? '#fff' : 'var(--a1-text-2s,#4A4D55)', border: on ? 'var(--a1-text,#15171C)' : 'var(--a1-border-2,#E1E0DA)', pick: () => this.setState({ cat: c, page: 0 }) }; }),
+      cols: COLS.map(([k, label, align]) => ({ label, align, cursor: k ? 'pointer' : 'default', icon: k ? (s.sort === k ? (s.dir > 0 ? 'arrow-up' : 'arrow-down') : 'chevrons-up-down') : 'dot', iconColor: k && s.sort === k ? 'var(--a1-accent-text,#2D5BD8)' : k ? 'var(--a1-text-6,#B4B6BC)' : 'transparent', sort: () => k && this.setState({ sort: k, dir: s.sort === k ? -s.dir : 1 }) })),
+      rows: slice.map((p) => {
+        const m = margin(p); const low = p.stock !== null && p.stock < p.min; const [icon, catBg, catFg] = CATS[p.cat];
+        const status = !p.active ? 'Inativo' : low ? 'Estoque baixo' : 'Ativo';
+        return { ...p, icon, catBg, catFg, costL: p.cost ? brl(p.cost) : '—', priceL: brl(p.price), marginL: m === null ? '—' : m.toFixed(1).replace('.', ',') + '%', mColor: m !== null && m < 12 ? '#B7791F' : 'var(--a1-text-2s,#4A4D55)',
+          stockL: p.stock === null ? '—' : p.stock.toLocaleString('pt-BR') + ' ' + p.un, status,
+          stBg: status === 'Ativo' ? 'var(--a1-ok-bg,#E6F4EC)' : status === 'Inativo' ? 'var(--a1-muted,#F1F0EC)' : 'var(--a1-warn-bg,#FBF1DF)', stFg: status === 'Ativo' ? 'var(--a1-ok-fg,#1B6E4A)' : status === 'Inativo' ? 'var(--a1-text-2,#62656D)' : 'var(--a1-warn-fg,#8A5A12)', edit: () => this.openForm(p) };
+      }),
+      empty: list.length === 0, count: list.length, range: list.length ? (page * PER + 1) + '–' + Math.min(list.length, page * PER + PER) : '0',
+      pages: Array.from({ length: pagesN }, (_, i) => ({ n: i + 1, bg: i === page ? 'var(--a1-strong,#15171C)' : 'var(--a1-surface,#fff)', fg: i === page ? '#fff' : 'var(--a1-text,#15171C)', border: i === page ? 'var(--a1-text,#15171C)' : 'var(--a1-border-2,#E1E0DA)', go: () => this.setState({ page: i }) })),
+      prev: () => this.setState({ page: Math.max(0, page - 1) }), next: () => this.setState({ page: Math.min(pagesN - 1, page + 1) }),
+      prevOp: page === 0 ? 0.4 : 1, nextOp: page >= pagesN - 1 ? 0.4 : 1,
+      exportCsv: () => notify('Exportação de ' + list.length + ' produtos iniciada (CSV).', 'info'),
+      openNew: () => this.openForm(null), drawer: s.drawer, close: () => this.setState({ drawer: false }),
+      drawerTitle: f.id ? 'Editar produto' : 'Novo produto', f,
+      fDesc: set('desc'), fEan: set('ean'), fCat: set('cat'), fUn: set('un'), fCost: set('cost'), fPrice: set('price'), fNcm: set('ncm'), fMin: set('min'),
+      fToggleActive: () => this.setState({ f: { ...f, active: !f.active } }), swBg: f.active ? '#2D5BD8' : 'var(--a1-track-off,#D3D2CC)', swLeft: f.active ? '18px' : '2px',
+      descErr: s.tried && !String(f.desc || '').trim(), descBorder: s.tried && !String(f.desc || '').trim() ? 'var(--a1-err-border2,#E59A92)' : 'var(--a1-field-border,#DCDBD5)',
+      priceBorder: s.tried && !(num(f.price) > 0) ? 'var(--a1-err-border2,#E59A92)' : 'var(--a1-field-border,#DCDBD5)',
+      liveMargin: lm === null ? '—' : lm.toFixed(1).replace('.', ',') + '%', mBg: lm === null ? 'var(--a1-bg,#F5F5F2)' : lm < 12 ? 'var(--a1-warn-bg,#FBF1DF)' : 'var(--a1-ok-bg,#E6F4EC)', mFg: lm === null ? 'var(--a1-text-5,#9A9DA4)' : lm < 12 ? 'var(--a1-warn-fg,#8A5A12)' : 'var(--a1-ok-fg,#1B6E4A)',
+      save: () => {
+        if (!String(f.desc || '').trim() || !(num(f.price) > 0)) { this.setState({ tried: true }); notify('Revise os campos obrigatórios.', 'danger'); return; }
+        const rec = { ...f, cost: num(f.cost), price: num(f.price), min: parseInt(f.min) || 0, ean: f.ean || '—', stock: f.cat === 'Serviços' ? null : (f.stock || 0), ncm: f.ncm || '—' };
+        if (f.id) this.setState({ items: s.items.map((p) => p.id === f.id ? rec : p), drawer: false });
+        else this.setState({ items: [{ ...rec, id: Date.now() }].concat(s.items), drawer: false, sort: 'code', dir: -1, page: 0, cat: 'Todos', q: '' });
+        notify(f.id ? 'Produto atualizado: ' + f.desc : 'Produto cadastrado: ' + f.desc, 'success');
+      }
+    };
+  }
+}
+
+</script>
+</body>
+</html>
